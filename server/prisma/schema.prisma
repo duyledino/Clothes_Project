@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_LOCAL")
+}
+
+model User {
+  user_id           String          @id @default(uuid())
+  email             String          @unique
+  password          String
+  name              String?
+  address           String          @default("")
+  create_at         DateTime        @default(now())
+  update_at         DateTime        @updatedAt
+  status            Boolean         @default(true)
+  order_user_create Order[]         @relation("user_create")
+  order_user_ship   Order[]         @relation("user_ship")
+  carts             Cart?
+  chat_message      Chat_Message[]
+  fromChat          Chat_User[]     @relation("FromUser")
+  toChat            Chat_User[]     @relation("ToUser")
+  review            Review[]
+  stock_receipt     Stock_Receipt[]
+  role              Role            @relation(fields: [role_id], references: [role_id])
+  role_id           String
+}
+
+model Role {
+  role_id   String @id @default(uuid())
+  role_name String
+  users     User[]
+}
+
+model Product {
+  product_id           String                 @id @default(uuid())
+  product_name         String
+  price                BigInt
+  description          String
+  count                Int                    @default(0) // count purchasing total
+  create_at            DateTime               @default(now())
+  update_at            DateTime               @updatedAt
+  imageUrl             String[]
+  tryon                String
+  status               String                 @default("active") // suspend, active
+  order_detail         Order_Detail[]
+  reviews              Review[]
+  category             Category               @relation(fields: [category_id], references: [category_id])
+  product_size         Product_Size[]
+  category_id          String
+  product_color        Product_Color[]
+  cart_detail          Cart_Detail[]
+  inventories          Inventory[]
+  stock_receipt_detail Stock_Receipt_Detail[]
+}
+
+model Category {
+  category_id   String    @id @default(uuid())
+  category_name String
+  product       Product[]
+}
+
+model Size {
+  size_id              String                 @id @default(uuid())
+  size_name            String
+  product_size         Product_Size[]
+  order_detail         Order_Detail[]
+  cart_detail          Cart_Detail[]
+  inventories          Inventory[]
+  stock_receipt_detail Stock_Receipt_Detail[]
+}
+
+model Product_Size {
+  product_id String
+  size_id    String
+  product    Product? @relation(fields: [product_id], references: [product_id])
+  size       Size?    @relation(fields: [size_id], references: [size_id])
+
+  @@id([product_id, size_id])
+}
+
+//FIXME: fix the logic product's color will have different color 
+
+model Color {
+  color_id             String                 @id @default(uuid())
+  color_name           String
+  product_color        Product_Color[]
+  order_detail         Order_Detail[]
+  cart_detail          Cart_Detail[]
+  inventories          Inventory[]
+  stock_receipt_detail Stock_Receipt_Detail[]
+}
+
+model Product_Color {
+  product_id String
+  color_id   String
+  product    Product? @relation(fields: [product_id], references: [product_id])
+  color      Color?   @relation(fields: [color_id], references: [color_id])
+
+  @@id([product_id, color_id])
+}
+
+model Order {
+  order_id     String         @id @default(uuid())
+  user_id      String
+  shipper_id   String         @default("")
+  total        BigInt         @default(0)
+  create_at    DateTime       @default(now())
+  update_at    DateTime       @updatedAt
+  method       String         @default("COD")
+  payment      String         @default("pending")
+  status       String         @default("pending") // canceled,shipping, done
+  order_detail Order_Detail[]
+  user_create  User           @relation("user_create", fields: [user_id], references: [user_id])
+  user_ship    User           @relation("user_ship", fields: [shipper_id], references: [user_id])
+}
+
+model Order_Detail {
+  order_id   String
+  product_id String
+  size_id    String
+  color_id   String
+  quantity   Int     @default(0)
+  price      BigInt  @default(0)
+  order      Order   @relation(fields: [order_id], references: [order_id])
+  product    Product @relation(fields: [product_id], references: [product_id])
+  color      Color   @relation(fields: [color_id], references: [color_id])
+  size       Size    @relation(fields: [size_id], references: [size_id])
+
+  @@id([product_id, order_id, size_id, color_id])
+}
+
+model Cart {
+  cart_id        String        @id @default(uuid())
+  user_id        String        @unique
+  total_quantity Int           @default(0)
+  create_at      DateTime      @default(now())
+  update_at      DateTime      @updatedAt
+  user           User          @relation(fields: [user_id], references: [user_id])
+  cart_detail    Cart_Detail[]
+}
+
+model Cart_Detail {
+  cart_id    String
+  product_id String
+  size_id    String
+  color_id   String
+  quantity   Int
+  active     Boolean
+  create_at  DateTime @default(now())
+  update_at  DateTime @updatedAt
+  cart       Cart     @relation(fields: [cart_id], references: [cart_id])
+  product    Product  @relation(fields: [product_id], references: [product_id])
+  size       Size     @relation(fields: [size_id], references: [size_id])
+  color      Color    @relation(fields: [color_id], references: [color_id])
+
+  @@id([cart_id, color_id, product_id, size_id])
+}
+
+model Review {
+  product_id String
+  user_id    String
+  score      Int     @default(0)
+  content    String  @default("")
+  product    Product @relation(fields: [product_id], references: [product_id])
+  user       User    @relation(fields: [user_id], references: [user_id])
+
+  @@id([product_id, user_id])
+}
+
+model Chat_User {
+  chatId     String
+  userIdFrom String
+  userIdTo   String
+  Chat       Chat   @relation(fields: [chatId], references: [chatId])
+  fromUser   User   @relation("FromUser", fields: [userIdFrom], references: [user_id])
+  toUser     User   @relation("ToUser", fields: [userIdTo], references: [user_id])
+
+  @@id([chatId, userIdFrom, userIdTo])
+}
+
+model Chat {
+  chatId       String         @id @default(uuid())
+  chat_Message Chat_Message[]
+  chat_user    Chat_User[]
+}
+
+model Chat_Message {
+  messageId String @id @default(uuid())
+  chatId    String
+  userId    String
+  content   String
+  chat      Chat   @relation(fields: [chatId], references: [chatId])
+  user      User   @relation(fields: [userId], references: [user_id])
+}
+
+model Inventory {
+  inventory_id         String                 @unique @default(uuid())
+  product_id           String
+  size_id              String
+  color_id             String
+  quantity             Int
+  create_at            DateTime               @default(now())
+  update_at            DateTime               @updatedAt
+  product              Product                @relation(fields: [product_id], references: [product_id])
+  size                 Size                   @relation(fields: [size_id], references: [size_id])
+  color                Color                  @relation(fields: [color_id], references: [color_id])
+  stock_receipt_detail Stock_Receipt_Detail[]
+
+  @@id([inventory_id, product_id, color_id, size_id])
+}
+
+model Stock_Receipt {
+  receipt_id           String                 @id @default(uuid())
+  user_id              String
+  provider_id          String
+  users                User                   @relation(fields: [user_id], references: [user_id])
+  providers            Provider               @relation(fields: [provider_id], references: [provider_id])
+  stock_receipt_detail Stock_Receipt_Detail[]
+}
+
+model Stock_Receipt_Detail {
+  receipt_id   String
+  product_id   String
+  size_id      String
+  color_id     String
+  inventory_id String
+  quantity     Int
+  receipt      Stock_Receipt @relation(fields: [receipt_id], references: [receipt_id])
+  product      Product       @relation(fields: [product_id], references: [product_id])
+  size         Size          @relation(fields: [size_id], references: [size_id])
+  color        Color         @relation(fields: [color_id], references: [color_id])
+  inventory    Inventory     @relation(fields: [inventory_id], references: [inventory_id])
+
+  @@id([color_id, inventory_id, product_id, receipt_id, size_id])
+}
+
+model Provider {
+  provider_id   String          @id @default(uuid())
+  provider_name String
+  // Add timestamps if needed
+  create_at     DateTime        @default(now())
+  update_at     DateTime        @updatedAt
+  stock_receipt Stock_Receipt[]
+}
