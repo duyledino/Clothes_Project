@@ -17,7 +17,7 @@ const Header = () => {
   useEffect(() => {
     // console.log("localStore: ",localStore);
     // const user = Object.keys(localStore).length !== 0 ? JSON.parse(localStore.user) : null;
-    if (user) {
+    if (user && user.user!=null) {
       console.log("user: ",user);
       dispatch(fetchApiCart(user.user.user_id));
     }

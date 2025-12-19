@@ -16,6 +16,7 @@ export const orderService = {
 
   // PUT /order/updateOrder?id=... (Body: payment, status)
   updateOrder: async (order_id: string, data: { payment: string; status: string }) => {
+    console.log("order_id",order_id);
     const response = await myAxios.put(`/order/updateOrder?order_id=${order_id}`, data);
     return response.data;
   },
@@ -31,7 +32,7 @@ export const orderService = {
 
   // GET /order/getOrderById?id=...
   getOrderById: async (user_id: string) => {
-    const response = await myAxios.get(`/order/getOrderById?id=${user_id}`);
+    const response = await myAxios.get(`/order/getOrderById?user_id=${user_id}`);
     return response.data;
   },
 };

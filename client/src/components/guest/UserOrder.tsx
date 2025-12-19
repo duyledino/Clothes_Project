@@ -1,90 +1,104 @@
 import React from "react";
 import type { SetStateAction } from "react";
 import { Button } from "../ui/button";
-
-interface Detail {
-  productId: string;
-  count: number;
-  subtotal: number;
-  size: string;
-}
-
-type paymentAndStatus = {
-  // orderId
-  id: string | undefined;
-  //can be an empty string
-  payment: string | undefined;
-  //can be an empty string
-  status: string | undefined;
-};
+import type {
+  detail,
+  OrderUser,
+  paymentAndStatus,
+} from "@/type/types.frontend";
 
 interface UserOrderProps {
-  id: string;
-  userId: string;
-  total: number;
-  date: string;
-  status: string;
-  payment: string;
-  address: string;
-  details: Detail[];
+  OrderUser: OrderUser;
   setOpen: React.Dispatch<SetStateAction<boolean>>;
   setParam: React.Dispatch<SetStateAction<paymentAndStatus>>;
-  handlePay: (orderId: string, total: number) => void;
+  handlePay: (order_id: string, total: number) => void;
 }
 
 const UserOrder: React.FC<UserOrderProps> = ({
-  id,
-  userId,
-  total,
-  date,
-  status,
-  payment,
-  address,
-  details,
+  OrderUser,
   setOpen,
   setParam,
   handlePay,
 }) => {
+  console.log("OrderUser in OrderUser: ", OrderUser);
   return (
     <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 font-bold text-base">Order ID: {id}</h1>
+        <h1 className="text-gray-700 font-bold text-base">
+          Order ID: {OrderUser.order_id}
+        </h1>
       </div>
-      <p className="text-gray-700 text-base">User ID: {userId}</p>
-      <p className="text-gray-700 text-base font-bold">
-        Address:{" "}
-        {address === "" ? "Please enter address to be delivered" : address}
+      <p className="text-gray-700 text-base">
+        User name: {OrderUser.user_create.name}
       </p>
-      <p className="text-gray-700 text-base font-bold">Total: {total}</p>
-      <p className="text-gray-700 text-base">Date: {date}</p>
-      <p className="text-gray-700 text-base font-bold">Status: {status}</p>
-      <p className="text-gray-700 text-base font-bold">Payment: {payment}</p>
+      <p className="text-gray-700 text-base font-bold">
+        Address: {OrderUser.user_create.address}
+      </p>
+      <p className="text-gray-700 text-base font-bold">
+        Total: {OrderUser.total} VND
+      </p>
+      <p className="text-gray-700 text-base font-bold">
+        Tạo:{" "}
+        <span className="font-normal">
+          {OrderUser.create_at.toLocaleString().split("T")[0]}
+        </span>
+      </p>
+      <p className="text-gray-700 text-base font-bold">
+        Cập nhật:{" "}
+        <span className="font-normal">
+          {OrderUser.update_at.toLocaleString().split("T")[0]}
+        </span>
+      </p>
+      <p className="text-gray-700 text-base font-bold">
+        Status: {OrderUser.status}
+      </p>
+      <p className="text-gray-700 text-base font-bold">
+        Payment: {OrderUser.payment}
+      </p>
       <div>
         <p className="text-gray-700 text-base font-bold">Details:</p>
         <ul>
-          {details.map((detail, index) => (
+          {OrderUser.order_detail.map((detail, index) => (
             <li key={index} className="text-gray-700 text-base">
-              Product ID: {detail.productId}, Count: {detail.count},
-              {detail.size} , Subtotal: {detail.subtotal} VND
+              Product ID: {detail.product_id}, Count: {detail.count},
+              {detail.product_size?.size_id},{" "}
+              <span
+                style={{ backgroundColor: detail.product_color?.color_id }}
+                className="h-4 w-4 inline-block"
+              ></span>{" "}
+              , Subtotal: {detail.subtotal} VND
             </li>
           ))}
         </ul>
       </div>
+      <p className="text-gray-700 text-base font-bold">
+        Phương thức:{" "}
+        <span className="text-gray-700 font-normal">
+          {OrderUser.method !== "OP"
+            ? "Thanh toán khi nhận hàng"
+            : "Thanh toán online"}
+        </span>
+      </p>
       <div className="mt-3 flex sm:flex-row flex-col gap-3">
-        {status === "Cancel" || payment === "Cancel" ? (
+        {OrderUser.status === "canceled" ? (
           <Button
             disabled={true}
             variant={"ghost"}
             className="bg-red-300 md:w-fit w-full text-white hover:text-red-600 uppercase font-semibold py-6 px-8 rounded border-2 border-red-600"
           >
-            Cancel
+            Canceled
           </Button>
-        ) : status === "Delivered" || status === "Done" ? (
+        ) :  OrderUser.status === "done" ? (
           ""
         ) : (
           <Button
             onClick={() => {
-              setParam({ id, payment, status }), setOpen(true);
+              setParam({
+                order_id: OrderUser.order_id,
+                payment: OrderUser.payment,
+                status: OrderUser.status,
+              }),
+                setOpen(true);
             }}
             variant={"ghost"}
             className="bg-red-600 md:w-fit w-full text-white hover:bg-transparent hover:text-red-600 uppercase font-semibold py-6 px-8 rounded border-2 border-red-600 cursor-pointer"
@@ -92,18 +106,19 @@ const UserOrder: React.FC<UserOrderProps> = ({
             Cancel
           </Button>
         )}
-        {payment === "Done" || payment === "Cancel" || status === "Cancel" ? (
+        {((OrderUser.payment === "done" || OrderUser.status === "done") &&
+        OrderUser.method === "COD" ) || (OrderUser.status === "canceled")? (
           ""
         ) : (
           <Button
             // onClick={() => {
             //   setParam({ id, payment, status }), setOpen(true);
             // }}
-            onClick={() => handlePay(id, total)}
+            onClick={() => handlePay(OrderUser.order_id, OrderUser.total)}
             variant={"ghost"}
             className="bg-gray-900 md:w-fit w-full text-white hover:bg-transparent hover:text-gray-800 uppercase font-semibold py-6 px-8 rounded border-2 border-gray-900 cursor-pointer"
           >
-            Pay Now
+            Thanh toán
           </Button>
         )}
       </div>

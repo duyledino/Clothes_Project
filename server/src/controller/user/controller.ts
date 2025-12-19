@@ -15,7 +15,7 @@ const getAllUser = async (req: Request, res: Response) => {
 
 const getAUser = async (req: Request, res: Response) => {
   //get user id
-  const { id } = req.query as { id: string };
+  const { user_id } = req.query as { user_id: string };
   const exists = await prisma.user.findFirst({
     select: {
       email: true,
@@ -24,7 +24,7 @@ const getAUser = async (req: Request, res: Response) => {
       user_id: true,
     },
     where: {
-      user_id: id,
+      user_id: user_id,
     },
   });
   if (!exists) return res.status(400).json({ Message: "User not found" });
@@ -64,7 +64,6 @@ const createAUser = async (req: Request, res: Response) => {
   await prisma.cart.create({
     data: {
       user_id: user.user_id,
-      total_quantity: 0,
     },
   });
   return res.status(200).json({
@@ -199,9 +198,10 @@ const loginUser = async (req: Request, res: Response) => {
   });
   res.cookie("my_cookie", token, {
     httpOnly: true,
-    // sameSite: "strict",
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    // secure: false,
+    secure: false,
+    sameSite: "lax",
   });
   //Client will save token and admin (boolean) to localStorage
   console.log("login success");
@@ -217,7 +217,15 @@ const loginUser = async (req: Request, res: Response) => {
 
 const logoutUser = async (req: Request, res: Response) => {
   console.log("Logout success");
-  return res.clearCookie("my_cookie").status(200).json({ Message: "Logged out successfully" });
+  return res
+    .clearCookie("my_cookie", {
+      httpOnly: true,
+      path: "/",
+      secure: false,
+      sameSite: "lax",
+    })
+    .status(200)
+    .json({ Message: "Logged out successfully" });
 };
 
 export {

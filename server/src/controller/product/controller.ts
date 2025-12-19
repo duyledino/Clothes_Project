@@ -291,11 +291,7 @@ const findProduct = async (
       product_id: true,
       product_name: true,
       imageUrl: true,
-      description: true,
       price: true,
-      count: true,
-      product_size: true,
-      category: true,
     },
     where: {
       product_name: {
@@ -303,10 +299,12 @@ const findProduct = async (
       },
     },
   });
+  console.log("result: ",result);
   const fixBigIntProducts = result.map((item: any) => ({
     ...item,
     price: Number(item.price),
   }));
+  console.log(fixBigIntProducts);
   return res.status(200).json({ result: fixBigIntProducts });
 };
 

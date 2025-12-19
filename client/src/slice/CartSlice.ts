@@ -21,9 +21,10 @@ export const fetchApiCart = createAsyncThunk(
   "cart/getCart",
   async (user_id: string, { rejectWithValue }) => {
     try {
+      console.log("user_id in fetchApiCart:",user_id);
       const data = await cartService.getCart(user_id);
-      console.log("data.carts: ",data.carts);
-      return data.carts; 
+      console.log("data.carts: ", data.carts);
+      return data.carts;
     } catch (error: any) {
       console.error(error);
       const message = error.response?.data?.Message || "Failed to fetch cart";
@@ -58,24 +59,29 @@ export const fetchApiAddToCart = createAsyncThunk(
 );
 
 // 3. DELETE CART ITEM
-  // get product id
+// get product id
 export const fetchApiDeleteACart = createAsyncThunk(
   "cart/deleteItem",
   async (
     {
-      userId,
-      productId,
-      sizeId,
-      colorId,
-    }: { userId: string; productId: string; sizeId: string; colorId: string },
+      user_id,
+      product_id,
+      size_id,
+      color_id,
+    }: {
+      user_id: string;
+      product_id: string;
+      size_id: string;
+      color_id: string;
+    },
     { rejectWithValue }
   ) => {
     try {
       const data = await cartService.removeOneItemCart(
-        userId,
-        productId,
-        sizeId,
-        colorId
+        user_id,
+        product_id,
+        size_id,
+        color_id
       );
       toast.success(data.Message || "Item removed!");
       return data;

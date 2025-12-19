@@ -85,15 +85,9 @@ export interface ProductData_Cart {
 export interface detail {
   product_id: string;
   count: number;
-  subTotal: number;
-  size: string;
-}
-
-export interface OrderUserdetail {
-  product_id: string;
-  count: number;
   subtotal: number;
-  size: string;
+  product_size: Product_Size | null;
+  product_color: Product_Color | null;
 }
 
 export interface orderCreate {
@@ -126,28 +120,31 @@ export interface OrderData {
 }
 
 export interface userInOrderProfile {
-  user_id: string;
-  email: string;
   address: string;
   name: string;
 }
 
-export interface OrdersUser {
+export interface shipperInOrderProfile{
+  user_id:string,
+  name:string
+}
+
+export interface OrderUser {
   order_id: string;
-  user: userInOrderProfile;
+  user_create: userInOrderProfile;
+  user_ship: shipperInOrderProfile | null;
   total: number;
-  update: Date;
+  create_at: Date;
+  update_at: Date;
   payment: string;
   status: string;
-  details: OrderUserdetail[];
+  method: string;
+  order_detail: detail[];
 }
 
 export interface paymentAndStatus {
-  // orderId
   order_id: string;
-  //can be an empty string
   payment: string;
-  //can be an empty string
   status: string;
 };
 //end order type

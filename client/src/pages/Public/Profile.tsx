@@ -12,32 +12,27 @@ import { fetchUserById, resetUserState } from "@/slice/UserSlice";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { popStore, resetStore } from "@/slice/StoreSlice";
-type paymentAndStatus = {
-  // orderId
-  id: string | undefined;
-  //can be an empty string
-  payment: string | undefined;
-  //can be an empty string
-  status: string | undefined;
-};
+import type { paymentAndStatus } from "@/type/types.frontend";
+import { auth, logout } from "@/slice/AuthSlice";
 
 const Profile = () => {
   const [param, setParam] = useState<paymentAndStatus>({
-    id: undefined,
-    payment: undefined,
-    status: undefined,
+    order_id: "",
+    payment: "",
+    status: "",
   });
   const router = useNavigate();
+  const { user } = useAppSelector((state) => state.AuthSlice);
   const [process, setProcess] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [localStore, setLocalStore] = useState<string | null>(null);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const user = localStorage.getItem("user");
-      console.log("user: ", user);
-      setLocalStore(localStorage.getItem("user"));
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const user = localStorage.getItem("user");
+  //     console.log("user: ", user);
+  //     setLocalStore(localStorage.getItem("user"));
+  //   }
+  // }, []);
   const { MessageOrder, loadingOrder, errorOrder, OrdersUser } = useAppSelector(
     (state) => state.OrderSlice
   );
@@ -47,76 +42,78 @@ const Profile = () => {
   const { User, errorUser, loadingUser } = useAppSelector(
     (state) => state.UserSlice
   );
+  console.log("User in Profile: ", User);
+  console.log("OrdersUser in Profile: ", OrdersUser);
   const dispatch = useAppDispatch();
-  const handleChange = ({
-    id,
-    status,
-    payment,
-  }: {
-    id: string;
-    payment: string;
-    status: string;
-  }) => {
-    console.log("id, status, payment: ", id, status, payment);
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
+  const handleChange = ({ order_id, status, payment }: paymentAndStatus) => {
+    console.log("id, status, payment: ", order_id, status, payment);
+    if (!user || !user.user) {
+      toast.error("Hãy đăng nhập để thực hiện thao tác này");
+      router("/login");
       return;
     }
-    if (payment === undefined || id === undefined || status === undefined) {
-      toast.error("Cannot modify order now");
+    if (payment === "" || order_id === "" || status === "") {
+      toast.error("Không thể chỉnh sửa đơn hàng");
       return;
     }
-    const token = JSON.parse(localStore).token;
+    // const token = JSON.parse(localStore).token;
     dispatch(
       fetchUpdateOrder({
-        order: { id, payment: "Cancel", status: "Cancel" },
-        token,
+        order_id,
+        payment: "canceled",
+        status: "canceled",
       })
     );
   };
-  const handlePay = (orderId: string, total: number) => {
-    if (orderId === undefined || orderId === "" || total === undefined) {
-      toast.error("Cannot pay now");
+
+  const handleLogout = async () => {
+    console.log("logout now");
+    const { type } = await dispatch(logout());
+    if (type.search("reject") == -1) {
+      router("/");
+    }
+  };
+
+  const handlePay = (order_id: string, total: number) => {
+    if (order_id === "" || total === undefined) {
+      toast.error("Không thể thah toán.");
       return;
     }
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
-      return;
-    }
-    const { token, id } = JSON.parse(localStore);
-    dispatch(fetchApiPaymentURL({ id: orderId, token: token, total: total }));
+    // if (localStore === undefined || localStore === null) {
+    //   toast.error("No token");
+    //   return;
+    // }
+    dispatch(fetchApiPaymentURL({ order_id: order_id, total: total }));
   };
   useEffect(() => {
     if (errorOrder) {
       toast.error(errorOrder);
     }
     if (MessageOrder && !errorOrder) {
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const { token, id } = JSON.parse(localStore);
+      // if (localStore === undefined || localStore === null) {
+      //   toast.error("No token");
+      //   return;
+      // }
       setOpen(false);
-      dispatch(fetchGetOrdersById({ id, token }));
+      dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
       toast.success(MessageOrder);
     }
   }, [errorOrder, MessageOrder]);
   useEffect(() => {
-    if (localStore === undefined || localStore === null) {
-      return;
-    }
-    const { token, id } = JSON.parse(localStore);
-    dispatch(fetchGetOrdersById({ id, token }));
+    // if (localStore === undefined || localStore === null) {
+    //   return;
+    // }
+    dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
     const storageChange = () => {
       const result = localStorage.getItem("payment_result");
       if (result !== null || result !== undefined) {
         setProcess(false);
-        dispatch(fetchGetOrdersById({ id, token }));
+        dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
         toast.info(JSON.parse(result as string));
         localStorage.removeItem("payment_result");
       }
     };
-    dispatch(fetchUserById({ id: id, token }));
+    dispatch(fetchUserById({ user_id: user?.user.user_id! }));
     window.addEventListener("storage", storageChange);
     return () => window.removeEventListener("storage", storageChange);
   }, [localStore]);
@@ -130,7 +127,6 @@ const Profile = () => {
     }
   }, [paymentError, PaymentURL]);
   console.log("OrderUser: ", OrdersUser);
-  console.log("User: ", User);
   return (
     <>
       {process && <Loading />}
@@ -138,26 +134,22 @@ const Profile = () => {
       {loadingUser && <Loading />}
       <Modal
         handleClick={handleChange}
-        content="This action cannot be changed anymore"
+        content="Hành động này không thể quay lại!"
         open={open}
         setOpen={setOpen}
         params={param}
       />
 
-      {localStore ? (
+      {user && user?.user ? (
         <div className="container mx-auto">
           <div className="w-full pt-14 md:px-0 px-4">
-            {localStore &&
-            JSON.parse(localStore).id !== "" &&
-            !JSON.parse(localStore).admin ? (
+            {user &&
+            user.user.user_id !== "" &&
+            user.user.role === "regular" ? (
               <div className="w-full flex justify-end">
                 <Button
-                  onClick={() => {
-                    dispatch(resetStore());
-                    dispatch(resetUserState());
-                    router("/");
-                    toast.success("Logout successfully");
-                  }}
+                  type="button"
+                  onClick={handleLogout}
                   className="bg-gray-900 w-fit rounded-full text-white hover:bg-transparent hover:text-gray-800 uppercase font-semibold py-6 px-8 border-2 border-gray-900 cursor-pointer"
                 >
                   Logout
@@ -169,14 +161,14 @@ const Profile = () => {
             {User === null ? (
               <UserInfo
                 address=""
-                id="123"
+                user_id="123"
                 email="test@example.com"
                 name="Test User"
               />
             ) : (
               <UserInfo
                 address={User.address}
-                id={User.id}
+                user_id={User.user_id}
                 email={User.email}
                 name={User.name}
               />
@@ -188,18 +180,23 @@ const Profile = () => {
             ) : (
               OrdersUser.map((item) => (
                 <UserOrder
-                  key={item.id}
-                  address={item.user.address}
+                  key={item.order_id}
                   handlePay={handlePay}
                   setParam={setParam}
                   setOpen={setOpen}
-                  id={item.id}
-                  userId={item.user.id}
-                  total={item.total}
-                  date={item.update.toLocaleString().split("T")[0]}
-                  status={item.status}
-                  payment={item.payment}
-                  details={item.details}
+                  OrderUser={{
+                    method: item.method,
+                    create_at: item.create_at,
+                    update_at: item.update_at,
+                    order_id: item.order_id,
+                    user_create: item.user_create,
+                    user_ship: item.user_ship,
+                    order_detail: item.order_detail,
+                    payment: item.payment,
+                    status: item.status,
+                    total: item.total,
+                  }}
+                  // date={item.update.toLocaleString().split("T")[0]}
                 />
               ))
             )}
