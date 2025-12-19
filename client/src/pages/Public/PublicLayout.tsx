@@ -14,23 +14,9 @@ const PublicLayout = () => {
   }, [location.pathname]);
   return (
     <div>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      <Providers>
-        <Header />
-        <Outlet />
-        {isInclude ? <Footer /> : ""}
-      </Providers>
+      <Header />
+      <Outlet />
+      {isInclude ? <Footer /> : ""}
     </div>
   );
 };

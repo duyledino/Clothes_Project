@@ -1,5 +1,5 @@
 import { orderService } from "@/service/order.service";
-import type { detail, OrderData, OrdersUser, paymentAndStatus } from "@/type/types.frontend";
+import type { detail, OrderData, OrderUser, paymentAndStatus } from "@/type/types.frontend";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ const initialState: {
   MessageOrder: string | null;
   Orders: OrderData[];
   totalPages: number | null;
-  OrdersUser: OrdersUser[];
+  OrdersUser: OrderUser[];
 } = {
   errorOrder: null,
   loadingOrder: false,
@@ -71,6 +71,7 @@ export const fetchUpdateOrder = createAsyncThunk(
       console.log("error: ", error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -92,6 +93,7 @@ export const fetchCreateOrder = createAsyncThunk(
       console.log("error: ", error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -104,11 +106,12 @@ export const fetchGetOrdersById = createAsyncThunk(
     try {
       const response = await orderService.getOrderById(user_id);
       console.log("get order by id: ", response.orders);
-      return response;
+      return response.orders;
     } catch (error: any) {
       console.log("error: ", error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );

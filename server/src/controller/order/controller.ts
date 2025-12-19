@@ -1,14 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
+import type { details } from "../../types/types.backend.js";
 
-//move all type to type.ts 
-interface details {
-  product_id: string;
-  count: number;
-  price: number;
-  size_id: string;
-  color_id: string;
-}
+//move all type to type.ts
 
 const prisma = new PrismaClient();
 
@@ -70,16 +64,18 @@ const createAOrder = async (req: Request, res: Response) => {
   console.log("userId, details: ", user_id, details);
   if (!details || details.length === 0)
     return res.status(400).json({ Message: "Failed to create order" });
-  const total = details.reduce((pre, curr) => pre + curr.price, 0);
+  const total = details.reduce((pre, curr) => pre + curr.subtotal, 0);
+  console.log("total: ", total);
   const existsUser = await prisma.user.findFirst({
     where: {
       user_id: user_id,
     },
   });
   if (!existsUser || existsUser.address === "")
-    return res
-      .status(400)
-      .json({ Message: "Failed to Purchase (Hãy hoàn thành profile của bạn)" });
+    return res.status(400).json({
+      Message:
+        "Failed to Purchase (Hãy hoàn thành profile của bạn: thiếu địa chỉ)",
+    });
   if (!Array.isArray(details) || details.length <= 0)
     return res.status(400).json({ Message: "Failed to Purchase" });
   const orderCreated = await prisma.order.create({
@@ -92,9 +88,10 @@ const createAOrder = async (req: Request, res: Response) => {
     order_id: orderCreated.order_id,
     product_id: item.product_id,
     quantity: item.count,
-    price: item.price,
-    size_id: item.size_id,
-    color_id: item.color_id,
+    subtotal: item.subtotal,
+    price: item.subtotal / item.count,
+    size_id: item.product_size.size_id,
+    color_id: item.product_color.color_id,
   }));
   await prisma.order_Detail.createMany({
     data: detail,
@@ -113,9 +110,10 @@ const createAOrder = async (req: Request, res: Response) => {
       active: true,
     },
   });
-  return res
-    .status(200)
-    .json({ Message: "Create order successfully", orderId: orderCreated.order_id });
+  return res.status(200).json({
+    Message: "Create order successfully",
+    order_id: orderCreated.order_id,
+  });
 };
 
 // {
@@ -129,7 +127,18 @@ const updateAOrder = async (req: Request, res: Response) => {
   // get order id and payment: string, status: string
   let { payment, status } = req.body as { payment: string; status: string };
   const { order_id } = req.query as { order_id: string };
-  payment = payment === "" ? "pending" : payment; // done
+  //NOTE:
+  // user choose COD => payment: pending, status: pending
+  // user choose online payment => payment: done, status: pending
+  // admin update order status (COD), shipper is shippping the order 
+  // => payment: pending, status: shipping
+  // admin update order status (OP), shipper is shippping the order 
+  // => payment: done, status: shipping 
+  // admin update order status (OP), shipper is shippping the order 
+  // => payment: done, status: shipping
+  // admin / shipper finish their shipment=> update order status (COD,OP), shipper is shippping the order 
+  // => payment: done, status: done
+  payment = payment === "" ? "pending" : payment; // done, canceled
   status = status === "" ? "pending" : status; //pending, canceled , shipping, done
   const exist = await prisma.order.findFirst({
     where: {
@@ -138,14 +147,15 @@ const updateAOrder = async (req: Request, res: Response) => {
   });
   console.log("order_id: ", order_id);
   console.log("exists: ", exist);
-  if (!exist) return res.status(400).json({ Message: "Failed to upate order" });
+  if (!exist)
+    return res.status(400).json({ Message: "Đơn hàng không tồn tại" });
   await prisma.order.update({
     data: {
       payment,
       status,
     },
     where: {
-      order_id:order_id,
+      order_id: order_id,
     },
   });
   return res.status(200).json({ Message: "Update order successfully" });
@@ -178,10 +188,9 @@ const getOrdersById = async (req: Request, res: Response) => {
   const orders = await prisma.order.findMany({
     select: {
       order_id: true,
+      method: true,
       user_create: {
         select: {
-          user_id: true,
-          email: true,
           name: true,
           address: true,
         },
@@ -191,38 +200,62 @@ const getOrdersById = async (req: Request, res: Response) => {
           quantity: true,
           product_id: true,
           price: true,
-          size: true,
-          color:true
+          size: {
+            select: {
+              size_id: true
+            }
+          },
+          color: {
+            select:{
+              color_id: true
+            }
+          },
         },
       },
-      user_ship:{
-        select:{
-          user_id:true,
-          name: true
-        }
+      user_ship: {
+        select: {
+          user_id: true,
+          name: true,
+        },
       },
       total: true,
       status: true,
       payment: true,
-      create_at:true,
+      create_at: true,
       update_at: true,
     },
     where: {
       user_id: user_id,
     },
   });
+  // console.log("order.order_detail: ",orders[1]?.order_detail)
   const fixBigIntDetail = orders.map((item) => ({
     ...item,
-    details: item.order_detail.map((child) => ({
+    total: Number(item.total),
+    order_detail: item.order_detail.map((child) => ({
       ...child,
+      price: Number(child.price),
       subtotal: Number(Number(child.price) * child.quantity),
     })),
   }));
-  const fixBigInt = fixBigIntDetail.map((item) => ({
-    ...item,
-    total: Number(item.total),
+  const finalOrders = fixBigIntDetail.map((item) => ({
+    ...item,order_detail: item.order_detail.map((child)=>({
+      product_id:child.product_id,
+      price: child.price,
+      quantity: child.size,
+      product_size: child.size,
+      product_color: child.color,
+      subtotal: child.subtotal
+    }))
   }));
-  return res.status(200).json({ orders: fixBigInt });
+  console.log(
+    "fixBigIntDetail: ",
+    fixBigIntDetail,
+    "order detail[0]",
+    fixBigIntDetail[0]?.order_detail
+  );
+
+  return res.status(200).json({ orders: finalOrders });
 };
 
 export { createAOrder, updateAOrder, getAllOrder, getTotalPage, getOrdersById };

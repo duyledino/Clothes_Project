@@ -9,24 +9,20 @@ import {
   refeshAddToCart,
 } from "@/slice/CartSlice";
 import Loading from "../ui/Loading";
-type Product = {
-  id: string;
-  price: number;
-  imageUrl: string[];
-  title: string;
-  size: string;
-};
-type cartItem = {
-  count: number;
-  subtotal: number;
-  product: Product;
-  active: boolean;
-  size: string;
-};
+import type {
+  cartItem,
+  Product,
+  Product_Color,
+  Product_Size,
+  ProductData_Cart,
+} from "@/type/types.frontend";
+
+// NOTE:  const {user,loading} = useAppSelector(state=>state.AuthSlice);  is checked in ProtectRouteUser so here I will force it to accept the variable
 
 const ClientCart = ({ carts }: { carts: cartItem[] }) => {
   // const { carts } = useAppSelector((state) => state.CartSlice);
   // console.log("carts in page cart: ", carts);
+  const { user } = useAppSelector((state) => state.AuthSlice);
   const [localStore, setLocalStore] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -37,15 +33,16 @@ const ClientCart = ({ carts }: { carts: cartItem[] }) => {
   const { Message, error, loading } = useAppSelector(
     (state) => state.CartSlice
   );
-  const handleChange = (
+  const handleChange = async (
     value: string | null,
-    productId: string,
+    product_id: string,
     image: string[],
-    title: string,
+    product_name: string,
     price: number,
     quantity: number,
     active: boolean,
-    size: string
+    product_size: Product_Size | null,
+    product_color: Product_Color | null
   ) => {
     console.log("change");
     console.log("active in client cart: ", active);
@@ -53,45 +50,50 @@ const ClientCart = ({ carts }: { carts: cartItem[] }) => {
       toast.error("No token");
       return;
     }
-    const { token, id } = JSON.parse(localStore);
-    const userId: string = id;
-    const Product: Product = {
-      id: productId,
+    // const { token, id } = JSON.parse(localStore);
+    const user_id: string = user?.user.user_id!;
+    const Product: ProductData_Cart = {
+      product_id: product_id,
       imageUrl: image,
       price: price,
-      title: title,
-      size: size,
+      product_name: product_name,
+      product_size: product_size,
+      product_color: product_color
     };
-    dispatch(
+    const {type} = await dispatch(
       fetchApiAddToCart({
         cartItem: {
           product: Product,
-          count: Number(value),
+          quantity: Number(value),
           subtotal: price * quantity,
           active: active,
-          size: size,
+          product_size: product_size,
+          product_color: product_color,
         },
-        id: userId,
-        token: token,
+        user_id: user_id,
       })
     );
+    if(type.search("reject")==-1){
+      console.log("fetch api cart again: ");
+      dispatch(fetchApiCart(user?.user.user_id!));
+    }
   };
-  useEffect(() => {
-    if (Message && !error) {
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const { token, id } = JSON.parse(localStore);
-      console.log("token, id: ", token, id);
-      toast.success(Message);
-      dispatch(refeshAddToCart());
-      dispatch(fetchApiCart({ id: id, token: token }));
-    }
-    if (error) {
-      toast.error(error);
-    }
-  }, [Message, error, localStore]);
+  // useEffect(() => {
+  //   if (Message && !error) {
+  //     if (localStore === undefined || localStore === null) {
+  //       toast.error("No token");
+  //       return;
+  //     }
+  //     const { token, id } = JSON.parse(localStore);
+  //     console.log("token, id: ", token, id);
+  //     toast.success(Message);
+  //     dispatch(refeshAddToCart());
+  //     dispatch(fetchApiCart(user?.user.user_id!));
+  //   }
+  //   if (error) {
+  //     toast.error(error);
+  //   }
+  // }, [Message, error, localStore]);
   // const cartItems = [
   //   {
   //     id: 1,
@@ -110,20 +112,24 @@ const ClientCart = ({ carts }: { carts: cartItem[] }) => {
   //     image: img2, // Replace with actual image path
   //   },
   // ];
-  const handleDelete = (productId: string, size: string) => {
+  const handleDelete = async (product_id: string, size_id: string,color_id:string) => {
     if (localStore === undefined || localStore === null) {
       toast.error("No token");
       return;
     }
-    const { token, id } = JSON.parse(localStore);
-    dispatch(
+    // const { token, id } = JSON.parse(localStore);
+    const { type } = await dispatch(
       fetchApiDeleteACart({
-        userId: id,
-        productId: productId,
-        size: size,
-        token: token,
+        user_id: user!.user.user_id!,
+        product_id: product_id,
+        size_id: size_id,
+        color_id: color_id 
       })
     );
+    if(type.search("reject")==-1){
+      console.log("fetch api cart again: ");
+      dispatch(fetchApiCart(user?.user.user_id!));
+    }
   };
   console.log("carts in page cart: ", carts);
   return (
@@ -132,15 +138,14 @@ const ClientCart = ({ carts }: { carts: cartItem[] }) => {
       <h2 className="text-2xl font-semibold mb-5">YOUR CART</h2>
       {carts.map((item) => (
         <CartIem
-          active={item.active}
-          key={`${item.product.id}${item.size}`}
-          localStore={localStore}
-          productId={item.product.id}
-          name={item.product.title}
-          price={item.product.price}
-          size={item.size}
-          quantity={item.count}
-          image={item.product.imageUrl}
+        cartItem={{
+          active: item.active,
+          product: item.product,
+          product_color: item.product_color,
+          product_size: item.product_size,
+          quantity: item.quantity,
+          subtotal: item.subtotal
+        }}
           handleChange={handleChange}
           handleDelete={handleDelete}
         />

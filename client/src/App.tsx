@@ -26,6 +26,7 @@ import { useDispatch } from "react-redux";
 import { useAppDispatch, useAppSelector } from "./hooks/hooks";
 import { auth } from "./slice/AuthSlice";
 import { getStore, resetStore } from "./slice/StoreSlice";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const location = useLocation();
@@ -49,6 +50,18 @@ function App() {
   console.log(user);
   return (
     <>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<PublicLayout />}>

@@ -1,26 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, type Dispatch, type SetStateAction } from "react";
 import { Button } from "../ui/button";
 import Skeleton from "./Skeleton";
-
-type Product = {
-  id: string;
-  price: number;
-  imageUrl: string[];
-  title: string;
-};
-type cartItem = {
-  count: number;
-  subtotal: number;
-  product: Product;
-  active: boolean;
-};
+import type { cartItem } from "@/type/types.frontend";
+import {
+  Select,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectContent,
+  SelectGroup,
+  SelectValue,
+} from "../ui/select";
 
 const CartTotal = ({
   carts,
   handleClick,
+  setMethod,
 }: {
   carts: cartItem[];
   handleClick: () => void;
+  setMethod: Dispatch<SetStateAction<string | null>>;
 }) => {
   if (carts === undefined || carts.length === 0) {
     return (
@@ -61,6 +60,20 @@ const CartTotal = ({
   return (
     <div className="mt-10">
       <h2 className="text-2xl font-semibold mb-5">CART TOTALS</h2>
+      <div className="flex justify-end py-2 border-b border-gray-200">
+        <Select onValueChange={e=>setMethod(e)}>
+          <SelectTrigger size="default" className="w-max p-5 text-xl">
+            <SelectValue placeholder="Chọn phương thức thanh toán" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Phương thức</SelectLabel>
+              <SelectItem value="OP">Thanh toán online</SelectItem>
+              <SelectItem value="COD">Thanh toán khi nhận hàng</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex justify-between py-2 border-b border-gray-200">
         <span className="text-gray-700">Subtotal</span>
         <span className="font-semibold">${subtotal.toLocaleString()}</span>

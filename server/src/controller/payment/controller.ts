@@ -4,10 +4,24 @@ import dayjs from "dayjs";
 import { v4 as uuid } from "uuid";
 import QueryString from "qs";
 import crypto from "node:crypto";
+import cryptojs from "crypto-js";
+import { PrismaClient } from "@prisma/client";
 
-const createPaymentUrl = (req: Request, res: Response) => {
+const prisma = new PrismaClient();
+const createPaymentUrl = async (req: Request, res: Response) => {
   //get orderId and total of order
   const { order_id, total } = req.body as { order_id: string; total: number };
+  const order = await prisma.order.findFirst({
+    select: {
+      user_id: true,
+    },
+    where: {
+      order_id: order_id,
+    },
+  });
+  if (!order) {
+    return res.status(404).json({ Message: "Đơn hàng không tồn tại" });
+  }
   console.log("id,total: ", order_id, total);
   try {
     console.log(
@@ -32,11 +46,19 @@ const createPaymentUrl = (req: Request, res: Response) => {
     vnp_Params["vnp_CurrCode"] = currCode;
     // planId is testing
     const planId = uuid();
+    const order_id_encrypt = cryptojs.AES.encrypt(
+      order_id,
+      order.user_id
+    ).toString();
+    console.log("cryptojs.AES.encrypt(order_id,order.user_id).toString(): ",cryptojs.AES.encrypt(order_id,order.user_id).toString());
     vnp_Params["vnp_TxnRef"] = `${planId}`;
     vnp_Params["vnp_OrderInfo"] = `Thanh toán đơn hàng ${planId}`;
     vnp_Params["vnp_OrderType"] = "other";
     vnp_Params["vnp_Amount"] = Math.round(total * 100).toString();
-    vnp_Params["vnp_ReturnUrl"] = `${process.env.vnp_ReturnUrl}?id=${order_id}`;
+    //must encode before set cipher text as queryString  !!
+    vnp_Params[
+      "vnp_ReturnUrl"
+    ] = `${process.env.vnp_ReturnUrl}?order_id=${encodeURIComponent(order_id_encrypt)}`;
     vnp_Params["vnp_IpAddr"] = ipAddr as string;
     vnp_Params["vnp_CreateDate"] = createDate;
     vnp_Params["vnp_BankCode"] = "NCB"; // cannot use QRCODE because of testing only

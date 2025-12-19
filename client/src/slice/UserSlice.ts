@@ -19,11 +19,6 @@ const initialState: {
   User: null,
 };
 
-const baseUrl =
-  import.meta.env.VITE_NODE_ENV === "development"
-    ? import.meta.env.VITE_SERVER_API
-    : "/api";
-
 export const fetchUpdateUser = createAsyncThunk(
   "updateUser/put",
   async (
@@ -53,6 +48,7 @@ export const fetchUpdateUser = createAsyncThunk(
       console.log(error);
       const message = error.response?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -72,6 +68,8 @@ export const fetchUserById = createAsyncThunk(
       console.log(error);
       const message = error.response?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
+
     }
   }
 );

@@ -44,7 +44,7 @@ export const signup = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const data = await authService.signup(email, name,password);
+      const data = await authService.signup(email, name, password);
       toast.success(data.Message);
       return data;
     } catch (error: any) {
@@ -56,10 +56,12 @@ export const signup = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk(
-  "auth/signup",
-  async ({}, { rejectWithValue }) => {
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
     try {
+      // console.log("logout in auth/logout");
       const data = await authService.logout();
+      console.log("data in logout: ", data.Message);
       toast.success(data.Message);
       return data;
     } catch (error: any) {
@@ -87,7 +89,7 @@ const slice = createSlice({
         // @ts-ignore
         state.user = action.payload;
         console.log(action.payload);
-        localStorage.setItem("user",JSON.stringify(action.payload));
+        localStorage.setItem("user", JSON.stringify(action.payload));
         state.loading = false;
       })
       .addCase(login.rejected, (state) => {
@@ -101,11 +103,20 @@ const slice = createSlice({
       })
       .addCase(signup.rejected, (state) => {
         state.loading = false;
+      })
+      .addCase(logout.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        localStorage.removeItem("user");
+        state.loading = false;
+      })
+      .addCase(logout.rejected, (state) => {
+        state.loading = false;
       });
   },
 });
 
 export default slice.reducer;
-export const {
-    auth
-} = slice.actions;
+export const { auth } = slice.actions;

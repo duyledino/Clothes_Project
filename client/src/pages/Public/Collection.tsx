@@ -1,4 +1,3 @@
-;
 import Collections from "@/components/guest/Collections";
 import Filter from "@/components/guest/Filter";
 import Search from "@/components/guest/Search";
@@ -32,6 +31,8 @@ const Collection = () => {
   const [page, setPage] = useState<number>(1);
   console.log("page in page: ", page);
   console.log("Product: ", SearchProduct);
+  console.log("categories: ",categories);
+  console.log("query: ",query);
   useEffect(() => {
     if (error) {
       toast.error(error);

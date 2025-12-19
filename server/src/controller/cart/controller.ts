@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 const getCart = async (req: Request, res: Response) => {
   // get user id
   const { user_id } = req.query as { user_id: string };
+  console.log("user_in in getCart: ", user_id);
   const exists = await prisma.user.findFirst({
     where: {
       user_id: user_id,
@@ -16,9 +17,9 @@ const getCart = async (req: Request, res: Response) => {
     select: {
       cart_id: true,
     },
-    where:{
-      user_id: user_id
-    }
+    where: {
+      user_id: user_id,
+    },
   });
   const carts = await prisma.cart_Detail.findMany({
     select: {
@@ -44,21 +45,21 @@ const getCart = async (req: Request, res: Response) => {
     const subtotal = item.quantity * price;
 
     return {
-      product: { 
-        ...item.product, 
-        price: price 
+      product: {
+        ...item.product,
+        price: price,
       },
 
-      product_size: item.size, 
+      product_size: item.size,
       product_color: item.color,
 
       active: item.active,
       quantity: item.quantity,
-      
-      subtotal: subtotal 
+
+      subtotal: subtotal,
     };
   });
-  console.log("fixBigIntCart: ",finalCart);
+  console.log("fixBigIntCart: ", finalCart);
   return res.status(200).json({ carts: finalCart });
 };
 const addToCart = async (req: Request, res: Response) => {
@@ -81,16 +82,20 @@ const addToCart = async (req: Request, res: Response) => {
   });
   if (!exists) return res.status(404).json({ Message: "User not found" });
   // get exists cart
+  console.log("user_id, exits: ", user_id, exists);
   const cart = await prisma.cart.findFirst({
+    where: {
+      user_id: user_id,
+    },
     select: {
       cart_id: true,
     },
   });
-  console.log("cart: ",cart);
+  console.log("cart: ", cart);
   console.log("add to cart: ", cartItem);
 
-  if(!cart){
-    return res.status(400).json({Message: "User lỗi (chưa có cart)"});
+  if (!cart) {
+    return res.status(400).json({ Message: "User lỗi (chưa có cart)" });
   }
   const existsItem = await prisma.cart_Detail.findFirst({
     where: {
@@ -100,6 +105,7 @@ const addToCart = async (req: Request, res: Response) => {
       color_id: cartItem.product_color.color_id,
     },
   });
+  console.log("existsItem: ", cartItem);
   if (!existsItem) {
     await prisma.cart_Detail.create({
       data: {
@@ -108,7 +114,7 @@ const addToCart = async (req: Request, res: Response) => {
         product_id: cartItem.product.product_id,
         active: cartItem.active,
         size_id: cartItem.product.product_size.size_id,
-        color_id: cartItem.product.product_color.color_id
+        color_id: cartItem.product.product_color.color_id,
       },
     });
   } else {
@@ -127,6 +133,14 @@ const addToCart = async (req: Request, res: Response) => {
       },
     });
   }
+  await prisma.cart.update({
+    data: {
+      update_at: new Date(),
+    },
+    where: {
+      user_id: user_id,
+    },
+  });
   return res.status(200).json({ Message: "update cart successfully" });
 };
 // this route will clear all item in cart
@@ -144,9 +158,22 @@ const clearCart = async (req: Request, res: Response) => {
       cart_id: true,
     },
   });
+  if (!cart) {
+    return res
+      .status(500)
+      .json({ Message: "User không có Cart (Liên hệ admin)" });
+  }
   await prisma.cart_Detail.deleteMany({
     where: {
       cart_id: cart?.cart_id!,
+    },
+  });
+  await prisma.cart.update({
+    data: {
+      update_at: new Date(),
+    },
+    where: {
+      user_id: user_id,
     },
   });
   return res.status(200).json({ Message: "Cart is cleared" });
@@ -154,12 +181,13 @@ const clearCart = async (req: Request, res: Response) => {
 // this route will remove an item in cart
 const removeAnItem = async (req: Request, res: Response) => {
   // get user_id, get product_id, size_id and color_id
-  const { user_id, product_id, size_id,color_id } = req.query as {
-    user_id: string,
-    product_id: string,
-    size_id: string,
-    color_id:string
+  const { user_id, product_id, size_id, color_id } = req.query as {
+    user_id: string;
+    product_id: string;
+    size_id: string;
+    color_id: string;
   };
+  console.log("color_id: ", color_id);
   const exists = await prisma.user.findFirst({
     where: {
       user_id: user_id,
@@ -170,15 +198,34 @@ const removeAnItem = async (req: Request, res: Response) => {
     select: {
       cart_id: true,
     },
+    where: {
+      user_id: user_id,
+    },
   });
+  console.log(
+    "user_id,product_id,color_id,size_id,cart: ",
+    user_id,
+    product_id,
+    color_id,
+    size_id,
+    cart
+  );
   await prisma.cart_Detail.delete({
     where: {
       cart_id_color_id_product_id_size_id: {
         cart_id: cart?.cart_id!,
-        color_id: color_id,
-        size_id:size_id,
-        product_id: product_id
+        color_id: color_id.toString(),
+        size_id: size_id,
+        product_id: product_id,
       },
+    },
+  });
+  await prisma.cart.update({
+    data: {
+      update_at: new Date(),
+    },
+    where: {
+      user_id: user_id,
     },
   });
   return res.status(200).json({ Message: "Item is removed" });

@@ -26,8 +26,8 @@ const AddToCart = ({
   console.log("carts: ", carts);
   const dispatch = useAppDispatch();
   const handleAddToCart = async () => {
-    if (product.product_size === null) {
-      toast.error("Product size is missing");
+    if (product.product_size === null || product.product_color === null) {
+      toast.error("Vui lòng chọn size và màu");
       return;
     }
     const item = carts.find(
@@ -84,6 +84,7 @@ const AddToCart = ({
       fetchApiAddToCart({ cartItem: objectItem, user_id: user?.user.user_id! })
     );
     if (type.search("reject") == -1) {
+      console.log("user?user: ",user?.user.user_id);
       dispatch(refeshAddToCart());
       dispatch(fetchApiCart(user?.user.user_id!));
     }

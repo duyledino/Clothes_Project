@@ -1,30 +1,23 @@
-;
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
-import { updateUserSchema, updatePassword } from "@/schema/auth";
+import { updateUserSchema, updatePasswordSchema } from "@/schema/auth";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { fetchUpdateUser, fetchUserById, resetUserState } from "@/slice/UserSlice";
 import Loading from "../ui/Loading";
+import type { user } from "@/type/types.frontend";
 
-interface UserInfoProps {
-  id: string;
-  email: string;
-  name: string;
-  address: string;
-}
-
-const UserInfo = ({ id, email, name, address }: UserInfoProps) => {
+const UserInfo = ({ user_id, email, name, address }: user) => {
   const dispatch = useAppDispatch();
   const { Message, errorUser, loadingUser } = useAppSelector(
     (state) => state.UserSlice
   );
-  const [newName, setName] = useState("");
+  const [newName, setName] = useState(name);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [newAddress, setAddress] = useState("");
+  const [newAddress, setAddress] = useState(address);
   useEffect(()=>{
     setName(name);
     setAddress(address)
@@ -54,24 +47,17 @@ const UserInfo = ({ id, email, name, address }: UserInfoProps) => {
       address: newAddress,
       name: newName,
     });
-    const checkPass = updatePassword.safeParse({
+    const checkPass = updatePasswordSchema.safeParse({
       password,
       confirmPassword,
     });
     if (check.success || checkPass.success) {
-      const localStore = localStorage.getItem("user");
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const token = JSON.parse(localStore).token;
       dispatch(
         fetchUpdateUser({
-          adderss: newAddress,
-          id: userId,
+          address: newAddress,
+          user_id: user_id,
           password: password,
           name: newName,
-          token,
         })
       );
     } else {
@@ -98,17 +84,9 @@ const UserInfo = ({ id, email, name, address }: UserInfoProps) => {
       toast.error(errorUser);
     }
     if (Message && !errorUser) {
-      const localStore = localStorage.getItem("user");
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const { token, id } = JSON.parse(localStore);
-      toast.success(Message);
-      dispatch(fetchUserById({ id, token }));
+      // toast.success(Message);
+      dispatch(fetchUserById({ user_id: user_id }));
       dispatch(resetUserState());
-      setName("");
-      setAddress("");
       setPassword("");
       setConfirmPassword("");
     }
@@ -127,7 +105,7 @@ const UserInfo = ({ id, email, name, address }: UserInfoProps) => {
           <Input
             type="text"
             id="id"
-            value={id}
+            value={user_id}
             readOnly
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
@@ -211,7 +189,7 @@ const UserInfo = ({ id, email, name, address }: UserInfoProps) => {
         <div className="flex w-full justify-end">
           <Button
             onClick={() =>
-              handleUpdateUser(id, password, confirmPassword, newName, email)
+              handleUpdateUser(user_id, password, confirmPassword, newName, email)
             }
             className=" bg-gray-900 md:w-fit w-full text-white hover:bg-transparent hover:text-gray-800 uppercase font-semibold py-6 px-8 rounded border-2 border-gray-900 cursor-pointer"
           >
