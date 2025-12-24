@@ -9,24 +9,13 @@ import Pagination from "@/components/guest/Pagination";
 import Loading from "@/components/ui/Loading";
 import { toast } from "react-toastify";
 
-type ProductData = {
-  id: string;
-  title: string;
-  price: number;
-  description: string;
-  imageUrl: string[];
-  tryon: string;
-  category: string;
-  subcategory: string;
-  size: string[];
-};
-
 const Collection = () => {
   const { show } = useAppSelector((state) => state.SearchBar);
   const { SearchProduct, loading, error } = useAppSelector(
     (state) => state.ProductSlice
   );
-  const [categories, setCategories] = useState<string[]>([]);
+  const {loadingCategory,categories} = useAppSelector(state=>state.CategorySlice);
+  const [currentCategories, setCurrentCategories] = useState<string[]>([]);
   const [query, setQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   console.log("page in page: ", page);
@@ -54,11 +43,11 @@ const Collection = () => {
         </motion.div>
         <div className="w-full flex md:flex-row flex-col gap-6 pt-14 md:px-0 px-3">
           <Filter
-            setCategories={setCategories}
+            setCurrentCategories={setCurrentCategories}
           />
           <Collections
             SearchProduct={SearchProduct}
-            categories={categories}
+            currentCategories={currentCategories}
             query={query}
             page={page}
             setPage={setPage}
@@ -68,7 +57,7 @@ const Collection = () => {
         {SearchProduct.length === 0 && (
           <Pagination
           pageName="product"
-            categories={categories}
+            currentCategories={currentCategories}
             page={page}
             setPage={setPage}
           />

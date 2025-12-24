@@ -1,4 +1,3 @@
-;
 import React, { useEffect, useState } from "react";
 import { products } from "@/assets/frontend_assets/assets";
 import { Button } from "@/components/ui/button";
@@ -24,52 +23,23 @@ const Products = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     console.log("Products Admin: ", ProductsAdmin);
-    const localStore = localStorage.getItem("user");
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
-      return;
-    }
-    const token = JSON.parse(localStore).token;
-    dispatch(fetchProductFromApiAdmin({ token: token, page }));
+    dispatch(fetchProductFromApiAdmin({ page }));
   }, [page]);
-  // toast 1st
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-    if (Message && !error) {
-      toast.success(Message);
-      //dirty code
-      const localStore = localStorage.getItem("user");
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const token = JSON.parse(localStore).token;
-      dispatch(fetchProductFromApiAdmin({ token: token, page }));
-    }
-  }, [Message, error]);
-  const handleClickDel = (id: string) => {
+  const handleClickDel = async (id: string) => {
     const ids: string[] = [];
     ids.push(id);
-    const localStore = localStorage.getItem("user");
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
-      return;
+    const {type} = await dispatch(fetchDeleteProduct({ ids: ids }));
+    if(type.search("reject")==-1){
+      dispatch(fetchProductFromApiAdmin({page}));
     }
-    const token = JSON.parse(localStore).token;
-    dispatch(fetchDeleteProduct({ ids: ids, token: token }));
   };
-  const handleClickRevise = (id: string) => {
+  const handleClickRevise = async(id: string) => {
     const ids: string[] = [];
     ids.push(id);
-    const localStore = localStorage.getItem("user");
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
-      return;
+    const {type} = await dispatch(fetchReviseProduct({ ids: ids }));
+    if(type.search("reject")==-1){
+      dispatch(fetchProductFromApiAdmin({page}));
     }
-    const token = JSON.parse(localStore).token;
-    dispatch(fetchReviseProduct({ ids: ids, token: token }));
   };
   console.log("products: ", ProductsAdmin);
   return (
@@ -87,9 +57,9 @@ const Products = () => {
           </li>
           {ProductsAdmin.map((item, index) => (
             <li
-              key={item.id}
+              key={item.product_id}
               className={`p-2 list-none grid md:grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 grid-cols-2 md:place-items-center md:gap-0 gap-2 ${
-                item.isDelete === "deleted" ? "bg-red-200" : ""
+                item.status === "suspend" ? "bg-red-200" : ""
               }`}
             >
               <img
@@ -100,30 +70,31 @@ const Products = () => {
                 className="w-16 h-auto"
               />
               <p className="text-gray-500 md:text-sm text-[12px] md:text-center">
-                {item.title}
+                {item.product_name}
               </p>
               <div className="text-gray-500 md:text-sm text-[12px]">
-                <p>{item.size.join(", ")}</p>
+                <p>{item.product_size.map(item=>item.size_id).join(",")}</p>
               </div>
+
               <p className="text-gray-500 md:text-sm text-[12px]">
-                {item.category}
+                {item.category.category_name}
               </p>
               <p className="text-gray-500 md:text-sm text-[12px]">
-                {item.price}
+                {item.price.toLocaleString("vi-VN") + " VND"}
               </p>
               <p className="text-gray-500 md:text-sm text-[12px]">
                 {item.count}
               </p>
               <Button
                 onClick={() =>
-                  item.isDelete === 'deleted'
-                    ? handleClickRevise(item.id)
-                    : handleClickDel(item.id)
+                  item.status === "suspend"
+                    ? handleClickRevise(item.product_id)
+                    : handleClickDel(item.product_id)
                 }
                 variant={"ghost"}
                 className="bg-gray-100 text-gray-600 hover:text-red-600 focus:outline-none md:col-span-1 col-span-2 cursor-pointer md:w-fit w-full"
               >
-                {item.isDelete === "deleted" ? (
+                {item.status === "suspend" ? (
                   <RotateCcw className="w-6 h-6" />
                 ) : (
                   <Trash className="w-6 h-6" />
@@ -135,10 +106,9 @@ const Products = () => {
         {/* cause infinite render because treat [] as reference not content so prevCategory !== Category */}
         <Pagination
           pageName="product"
-          categories={null}
+          currentCategories={null}
           page={page}
           setPage={setPage}
-          subcategory={null}
         />
       </div>
     </>

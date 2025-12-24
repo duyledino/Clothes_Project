@@ -11,74 +11,25 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { fetchUpdateOrder, resetState } from "@/slice/OrderSlice";
 import { getStore } from "@/slice/StoreSlice";
 import { toast } from "react-toastify";
-
-type user = {
-  id: string;
-  email: string;
-  name: string;
-};
-type product = {
-  title: string;
-};
-type detailAdmin = {
-  size: string;
-  count: number;
-  product: product;
-};
-
-type OrderData = {
-  id: string;
-  user: user;
-  total: number;
-  update: Date;
-  payment: string;
-  status: string;
-  detail: detailAdmin[];
-};
+import type { OrderData } from "@/type/types.frontend";
+import { logout } from "@/slice/AuthSlice";
 //
-const OrderItem = ({
-  id,
-  user,
-  total,
-  update,
-  payment,
-  status,
-  detail,
-}: OrderData) => {
+const OrderItem = ({ order_data }: { order_data: OrderData }) => {
   const dispatch = useAppDispatch();
-  const localStore = useAppSelector((state) => state.StoreSlice.localStore);
-  const orderStatuses = [
-    "Order Placed",
-    "Packing",
-    "Shipped",
-    "Out for delivery",
-    "Delivered",
-  ];
-  console.log(
-    `user, 
-  total,
-  update,
-  payment,
-  status,
-  detail: `,
-    user,
-    total,
-    update,
-    payment,
-    status,
-    detail
-  );
+  // create table for these statuses
+  const orderStatuses = ["pending", "canceled", "shipping", "done"];
+  const paymentStatuses = ["pending", "done"];
+  const { user } = useAppSelector((state) => state.AuthSlice);
+  console.log(`order_data: `, order_data);
   const handleChange = (value: string) => {
-    dispatch(getStore("user"));
-    if (Object.keys(localStore).length !== 0) {
+    if (user && user.user && user.user.role == "admin") {
       dispatch(
         fetchUpdateOrder({
-          order: { id: id, payment: payment, status: value },
-          token: JSON.parse(localStore.user).token,
+          order_id: order_data.order_id,
+          payment: order_data.payment,
+          status: value,
         })
       );
-    } else {
-      toast.error("No token");
     }
   };
   return (
@@ -92,56 +43,101 @@ const OrderItem = ({
         <div>
           <h2 className="md:text-sm text-[12px] font-medium text-gray-700 ">
             <div className="flex flex-col">
-              {detail !== undefined
-                ? detail.map((item) => (
+              {order_data.order_detail !== undefined
+                ? order_data.order_detail.map((item) => (
                     <p>
-                      {item.product.title} x {item.count} {item.size}
+                      {item.product_name} x {item.quantity} x{" "}
+                      {item.product_size?.size_id} x{" "}
+                      <span
+                        style={{
+                          backgroundColor: `${item.product_color?.color_id}`,
+                        }}
+                        className="inline-block w-3 h-3"
+                      ></span>
                     </p>
                   ))
                 : `Boy Round Neck Pure Cotton T-shirt x 1 L`}
             </div>
           </h2>
-          <p className="md:text-sm text-[12px] text-gray-500">
-            {user.email || `Rajvil Choudhary`}
+          <p className="md:text-sm text-[12px] text-gray-500 font-bold">
+            Tên:{" "}
+            <span className="font-normal">{order_data.user_create.name}</span>
           </p>
-          <p className="md:text-sm text-[12px] text-gray-500">
-            Agra Gate Road, Ajmer, Rajasthan, India, 305001
+          <p className="md:text-sm text-[12px] text-gray-500 font-bold">
+            Email:{" "}
+            <span className="font-normal">{order_data.user_create.email}</span>
+          </p>
+          <p className="md:text-sm text-[12px] text-gray-500 font-bold">
+            Giao đến:{" "}
+            <span className="font-normal">
+              {order_data.user_create.address}
+            </span>
           </p>
         </div>
         <div className="grid grid-cols-1 gap-2">
           <div>
             <p className="md:text-sm text-[12px] text-gray-500">
-              Items :{" "}
-              {detail !== undefined
-                ? detail.reduce((prev, curr) => prev + curr.count, 0)
+              SL :{" "}
+              {order_data.order_detail !== undefined &&
+              order_data.order_detail.length > 0
+                ? order_data.order_detail.reduce(
+                    (prev, curr) => prev + curr.quantity,
+                    0
+                  )
                 : 0}
             </p>
-            <p className="md:text-sm text-[12px] text-gray-500">Method: COD</p>
-            <p className="md:text-sm text-[12px] text-gray-500">
-              Payment : {payment}
+            <p className="md:text-sm text-[12px] text-gray-500 font-bold">
+              Method: COD
+            </p>
+            <p className="md:text-sm text-[12px] text-gray-500 font-bold">
+              Payment : {order_data.payment}
             </p>
             <p className="md:text-sm text-[12px] text-gray-500">
-              Date : {update.toLocaleString().split("T")[0]}
+              Tạo :{" "}
+              {
+                order_data.create_at
+                  .toLocaleString("vi-VN", {
+                    timeZone: "Asia/Ho_Chi_Minh",
+                  })
+                  .split("T")[0]
+              }
+            </p>
+            <p className="md:text-sm text-[12px] text-gray-500">
+              Cập nhật : {order_data.update_at.toLocaleString().split("T")[0]}
             </p>
           </div>
         </div>
         <div className="flex md:flex-row flex-col md:items-center items-start justify-between gap-4">
           <div className="md:text-sm text-[12px] font-medium text-gray-700">
-            {total.toLocaleString()} VND
+            {order_data.total.toLocaleString("vi-VN")} VND
           </div>
           <div className="">
-            <Select defaultValue={status} onValueChange={handleChange}>
-              <SelectTrigger className="md:w-[180px] w-[140px] md:text-sm text-[12px]">
-                <SelectValue placeholder={status} />
-              </SelectTrigger>
-              <SelectContent>
-                {orderStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {order_data.payment == "done" && order_data.status == "done" ? (
+              <Select defaultValue={order_data.status} disabled>
+                <SelectTrigger className="md:w-[180px] w-[140px] md:text-sm text-[12px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={`${order_data.status}`}>{order_data.status}</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                defaultValue={order_data.status}
+                onValueChange={handleChange}
+              >
+                <SelectTrigger className="md:w-[180px] w-[140px] md:text-sm text-[12px]">
+                  <SelectValue placeholder={order_data.status} />
+                </SelectTrigger>
+                <SelectContent>
+                  {orderStatuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
       </div>

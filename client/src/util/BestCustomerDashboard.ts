@@ -1,9 +1,4 @@
-type BestCustomer = {
-  id: string;
-  name: string;
-  email: string;
-  total: number;
-};
+import type { BestCustomer } from "@/type/types.frontend";
 
 const standardBestCustomer = (users: BestCustomer[]) => {
   return users;

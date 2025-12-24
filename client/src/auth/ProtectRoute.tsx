@@ -1,6 +1,7 @@
 import Loading from "@/components/ui/Loading";
 import { myAxios } from "@/config/axios";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { reset } from "@/slice/AuthSlice";
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,6 +9,7 @@ import { toast } from "react-toastify";
 const ProtectRouteUser = ({}) => {
   const [status, setStatus] = useState<"loading" | "allow" | "deny">("loading");
   const location = useLocation();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -20,6 +22,7 @@ const ProtectRouteUser = ({}) => {
       } catch (error) {
         console.error(error);
         localStorage.removeItem("user");
+        dispatch(reset());
         toast.error("Hãy đăng nhập để thực hiện thao tác này");
         setStatus("deny");
       }

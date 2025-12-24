@@ -1,4 +1,3 @@
-;
 import React, { useEffect } from "react";
 import { DoughnutChart } from "./DoughnutChart";
 import { LineChart } from "./LineChart";
@@ -30,7 +29,9 @@ function Dashboard() {
       toast.error(error);
     }
   }, [error]);
-  console.log("revenue", revenue)
+  console.log("revenue", revenue);
+  console.log("bestCustomer: ",bestCustomer);
+  console.log("Bestseller: ",bestSeller);
   return (
     <>
       {loading ? <Loading /> : ""}

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
 import type { details } from "../../types/types.backend.js";
+import { chdir } from "node:process";
 
 //move all type to type.ts
 
@@ -15,6 +16,7 @@ const getAllOrder = async (req: Request, res: Response) => {
           user_id: true,
           email: true,
           name: true,
+          address: true
         },
       },
       order_detail: {
@@ -36,13 +38,23 @@ const getAllOrder = async (req: Request, res: Response) => {
       payment: true,
       create_at: true,
       update_at: true,
+      method: true,
     },
     take: Number(page) * 8,
   });
   const fixBigInt = orders.map((item) => ({
     ...item,
+    order_detail: item.order_detail.map((child) => ({
+      product_name: child.product.product_name,
+      product_size: child.size,
+      product_color: child.color,
+      quantity: child.quantity,
+      price: Number(child.price),
+    })),
     total: Number(item.total),
   }));
+  console.log("fixBigInt: ", fixBigInt);
+  console.log("fixBigInt: ", fixBigInt[0]?.order_detail);
   return res.status(200).json({ orders: fixBigInt });
 };
 // client will send array of detail then server will create each detail in array then create a order
@@ -130,13 +142,13 @@ const updateAOrder = async (req: Request, res: Response) => {
   //NOTE:
   // user choose COD => payment: pending, status: pending
   // user choose online payment => payment: done, status: pending
-  // admin update order status (COD), shipper is shippping the order 
+  // admin update order status (COD), shipper is shippping the order
   // => payment: pending, status: shipping
-  // admin update order status (OP), shipper is shippping the order 
-  // => payment: done, status: shipping 
-  // admin update order status (OP), shipper is shippping the order 
+  // admin update order status (OP), shipper is shippping the order
   // => payment: done, status: shipping
-  // admin / shipper finish their shipment=> update order status (COD,OP), shipper is shippping the order 
+  // admin update order status (OP), shipper is shippping the order
+  // => payment: done, status: shipping
+  // admin / shipper finish their shipment=> update order status (COD,OP), shipper is shippping the order
   // => payment: done, status: done
   payment = payment === "" ? "pending" : payment; // done, canceled
   status = status === "" ? "pending" : status; //pending, canceled , shipping, done
@@ -199,21 +211,27 @@ const getOrdersById = async (req: Request, res: Response) => {
         select: {
           quantity: true,
           product_id: true,
+          product: {
+            select: {
+              product_name: true,
+            },
+          },
           price: true,
           size: {
             select: {
-              size_id: true
-            }
+              size_id: true,
+            },
           },
           color: {
-            select:{
-              color_id: true
-            }
+            select: {
+              color_id: true,
+            },
           },
         },
       },
       user_ship: {
         select: {
+          email: true,
           user_id: true,
           name: true,
         },
@@ -239,14 +257,16 @@ const getOrdersById = async (req: Request, res: Response) => {
     })),
   }));
   const finalOrders = fixBigIntDetail.map((item) => ({
-    ...item,order_detail: item.order_detail.map((child)=>({
-      product_id:child.product_id,
+    ...item,
+    order_detail: item.order_detail.map((child) => ({
+      product_id: child.product_id,
+      product_name: child.product.product_name,
       price: child.price,
-      quantity: child.size,
+      quantity: child.quantity,
       product_size: child.size,
       product_color: child.color,
-      subtotal: child.subtotal
-    }))
+      subtotal: child.subtotal,
+    })),
   }));
   console.log(
     "fixBigIntDetail: ",

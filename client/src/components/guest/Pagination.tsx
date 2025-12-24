@@ -10,11 +10,11 @@ import { fetchTotalOrderPage } from "@/slice/OrderSlice";
 
 export default function Pagination({
   page,
-  categories,
+  currentCategories,
   setPage,
   pageName,
 }: {
-  categories: string[] | null;
+  currentCategories: string[] | null;
   page: number;
   setPage: React.Dispatch<SetStateAction<number>>;
   pageName: string;
@@ -54,20 +54,15 @@ export default function Pagination({
     return pages;
   };
   useEffect(() => {
-    console.log("category,subcategory: ", categories);
-    // const localStore = localStorage.getItem("user");
-    // if (localStore === undefined || localStore === null) {
-    //   toast.error("No token");
-    //   return;
-    // }
-    if (categories === null) {
+    console.log("category,subcategory: ", currentCategories);
+    if (currentCategories === null) {
       dispatch(fetchTotalPage({ categories: []}));
       return;
     }
     if (pageName === "product")
-      dispatch(fetchTotalPage({ categories }));
+      dispatch(fetchTotalPage({ categories: currentCategories }));
     else if (pageName === "order") dispatch(fetchTotalOrderPage());
-  }, [page, categories]); // trigger infinite here
+  }, [page, currentCategories]); // trigger infinite here
 
   const handlePrevious = () => {
     setPage((prev) => {

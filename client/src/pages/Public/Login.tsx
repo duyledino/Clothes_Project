@@ -85,7 +85,7 @@ const Login = () => {
     <>
       {loading || loadingChat ? <Loading /> : ""}
       <div className="flex min-h-screen bg-white">
-        <div className="container mx-auto p-8 my-16 max-w-md">
+        <div className="container flex flex-col justify-center mx-auto p-8 my-16 max-w-md">
           <h2 className="text-3xl font-semibold text-gray-900 mb-8">
             Login to Account
           </h2>

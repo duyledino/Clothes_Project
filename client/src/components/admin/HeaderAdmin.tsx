@@ -19,7 +19,7 @@ const HeaderAdmin = () => {
   }, []);
   console.log("localStore admin:", localStore);
   return (
-    <header className="w-full h-24 bg-white/55 shadow-[0_1px_2px_rgba(0,0,0,0.5)] md:p-0 px-2">
+    <header className="w-full h-24 bg-white/55 shadow-[0_1px_2px_rgba(0,0,0,0.5)] md:p-0 px-2 relative z-50">
       <div className="container m-auto h-full flex items-center justify-between">
         <Link to={"/Admin"}>
           <img

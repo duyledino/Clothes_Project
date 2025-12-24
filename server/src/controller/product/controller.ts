@@ -45,7 +45,7 @@ const getAllProducts = async (req: Request, res: Response) => {
       },
       AND: [
         Category.length > 0
-          ? { category: { category_name: { in: Category } } }
+          ? { category: { category_id: { in: Category } } }
           : {},
       ],
     },
@@ -264,8 +264,7 @@ const deleteProduct = async (req: Request, res: Response) => {
 const reviseProduct = async (req: Request, res: Response) => {
   const { ids } = req.body;
   console.log("id delete array: ", ids);
-  console.log("id delete array: ", typeof ids);
-  if (!Array.isArray(ids)) {
+  if (ids == null || ids == undefined || ids.length == 0) {
     return res.status(400).json({ Message: "Failed to delete products" });
   }
   await prisma.product.updateMany({

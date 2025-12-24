@@ -47,6 +47,7 @@ export const fetchBestSellerProductFromApi = createAsyncThunk(
       console.error("error in bestSeller slice:");
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -62,6 +63,7 @@ export const fetchLatestFromApi = createAsyncThunk(
       console.error("error in lastestProducts slice:");
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -89,6 +91,7 @@ export const fetchProductFromApi = createAsyncThunk(
       console.error(error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -109,6 +112,7 @@ export const fetchProductFromApiAdmin = createAsyncThunk(
       console.error("error: ", error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -134,9 +138,10 @@ export const fetchCreateAProduct = createAsyncThunk(
       toast.success(response.Message || "Thêm sản phẩm thành công")
       return response.Message;
     } catch (error: any) {
-      console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      console.error("error: ",error);
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -150,8 +155,9 @@ export const fetchGetProductById = createAsyncThunk(
       return response.product;
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      rejectWithValue(message);
     }
   }
 );
@@ -168,7 +174,7 @@ export const fetchTotalPage = createAsyncThunk(
       return response.total;
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
     }
   }
@@ -184,7 +190,7 @@ export const fetchApiSearchProduct = createAsyncThunk(
       return response.result;
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
     }
   }
@@ -199,8 +205,9 @@ export const fetchDeleteProduct = createAsyncThunk(
       return response.Message;
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -211,11 +218,13 @@ export const fetchReviseProduct = createAsyncThunk(
     try {
       const response = await productService.reviseProducts(ids);
       console.log("revise product: ", response.data);
-      return response.data.Message;
+      toast.success(response.Message||"Khôi phục sản phẩm thành công");
+      return response.Message;
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );

@@ -31,9 +31,9 @@ export const fetchApiAllOrder = createAsyncThunk(
   "fetchAllOrder/get",
   async ({page}:{ page: number }, { rejectWithValue }) => {
     try {
-      const response = orderService.getAllOrders(page);
+      const response = await orderService.getAllOrders(page);
       console.log("resposne: ", response);
-      return response;
+      return response.orders;
     } catch (error: any) {
       console.error("error: ", error);
       const message = error.response?.data?.Message || "Something went wrong";

@@ -9,13 +9,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-
-type BestCustomer = {
-  id: string;
-  name: string;
-  email: string;
-  total: number;
-};
+import type { BestCustomer } from "@/type/types.frontend";
 
 type BarChartArr = {
   bestCustomer: BestCustomer[];

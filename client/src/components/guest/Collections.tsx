@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import type { SetStateAction } from "react";
-import { products } from "@/assets/frontend_assets/assets";
 import Card from "./Card";
 import SortBy from "./SortBy";
 import { Link } from "react-router-dom";
@@ -12,7 +11,7 @@ import {
   fetchProductFromApi,
   resetSearchProduct,
 } from "@/slice/ProductSlice";
-import type { ProductData } from "@/type/types.frontend";
+import type { CategoryOrigin, ProductData } from "@/type/types.frontend";
 
 
 // type product = {
@@ -29,7 +28,7 @@ import type { ProductData } from "@/type/types.frontend";
 // };
 
 type cateAndType = {
-  categories: string[];
+  currentCategories: string[];
   query: string;
   page: number;
   setPage: React.Dispatch<SetStateAction<number>>;
@@ -38,7 +37,7 @@ type cateAndType = {
 
 const Collections = ({
   page,
-  categories,
+  currentCategories,
   query,
   setPage,
   SearchProduct,
@@ -73,18 +72,18 @@ const Collections = ({
   //   });
   // }, [sort, categories, type]);
   // trigger when one of these change [sort, categories, subcategory]
-  console.log("sort,categories,subcategory: ", sort, categories,SearchProduct);
+  console.log("sort,categories,subcategory: ", sort, currentCategories,SearchProduct);
   useEffect(() => {
     setPage(1);
     console.log("fetch page: ", page); // not trigger when page change
     dispatch(
       fetchProductFromApi({
         page: 1,
-        category: categories,
+        category: currentCategories,
         sort: sort,
       })
     );
-  }, [sort, categories]);
+  }, [sort, currentCategories]);
   useEffect(() => {
     if (query === "") {
       dispatch(resetSearchProduct());
@@ -94,10 +93,11 @@ const Collections = ({
   }, [query]);
   useEffect(() => {
     console.log("page in useEffect: ", page);
+    dispatch
     dispatch(
       fetchProductFromApi({
         page,
-        category: categories,
+        category: currentCategories,
         sort: sort,
       })
     );

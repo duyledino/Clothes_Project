@@ -11,10 +11,14 @@ import ReviewReducer from "@/slice/ReviewSlice";
 import ChatReducer from "@/slice/ChatSlice";
 import StoreReducer from "@/slice/StoreSlice";
 import AuthReducer from "@/slice/AuthSlice";
+import SizeReducer from "@/slice/SizeSlice";
+import ColorReducer from "@/slice/ColorSlice";
+import RoleReducer from "@/slice/RoleSlice";
+import CategoryReducer from "@/slice/CategorySlice";
 
 export const store = configureStore({
   reducer: {
-    AuthSlice:AuthReducer,
+    AuthSlice: AuthReducer,
     StoreSlice: StoreReducer,
     SearchBar: SearchBarReducer,
     ProductSlice: ProductReducer,
@@ -26,6 +30,10 @@ export const store = configureStore({
     TryonSlice: TryonReducer,
     ReviewSlice: ReviewReducer,
     ChatSlice: ChatReducer,
+    SizeSlice: SizeReducer,
+    ColorSlice: ColorReducer,
+    RoleSlice: RoleReducer,
+    CategorySlice: CategoryReducer,
   },
 });
 

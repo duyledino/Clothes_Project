@@ -4,28 +4,21 @@ import { Input } from "../ui/input";
 import { ChevronRight } from "lucide-react";
 import { Label } from "../ui/label";
 import Loading from "../ui/Loading";
+import type { CategoryOrigin } from "@/type/types.frontend";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { fetchGetAllCategory } from "@/slice/CategorySlice";
 
 type setCateAndType = {
-  setCategories: Dispatch<SetStateAction<string[]>>;
+  setCurrentCategories: Dispatch<SetStateAction<string[]>>;
 };
 
-const categoryData = [
-  { id: "Men", name: "Men" },
-  { id: "Women", name: "Women" },
-  { id: "Kids", name: "Kids" },
-];
-
-const typeData = [
-  { id: "Topwear", name: "Topwear" },
-  { id: "Bottomwear", name: "Bottomwear" },
-  { id: "Winterwear", name: "Winterwear" },
-];
-
-const Filter = ({ setCategories }: setCateAndType) => {
-  const [category, setCategory] = useState<{ id: string; name: string }[]>([]);
-  const [type, setType] = useState<{ id: string; name: string }[]>([]);
+const Filter = ({ setCurrentCategories }: setCateAndType) => {
   const [show, setShow] = useState<boolean | undefined>(true);
   const [width, setWidth] = useState<number | undefined>(0);
+  const dispatch = useAppDispatch();
+  const { loadingCategory, categories } = useAppSelector(
+    (state) => state.CategorySlice
+  );
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleWith = () => setWidth(window.innerWidth);
@@ -34,22 +27,19 @@ const Filter = ({ setCategories }: setCateAndType) => {
     }
   }, []);
   useEffect(() => {
-    console.log("categoryData,typeData: ", categoryData, typeData);
-    setCategory((prev) => (prev = categoryData));
-    setType((prev) => (prev = typeData));
+    dispatch(fetchGetAllCategory());
   }, []);
   const cateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.value);
-    setCategories((prev) => {
+    setCurrentCategories((prev) => {
       if (prev.find((item) => item === e.target.value))
         return prev.filter((item) => item !== e.target.value);
       else return [...prev, e.target.value];
     });
   };
-  console.log("category,type: ", category, type);
   return (
     <>
-      {!category || !type ? <Loading /> : ""}
+      {loadingCategory ? <Loading /> : ""}
       <div className="md:w-72 w-full flex flex-col gap-3">
         <div
           className={`flex w-fit md:cursor-default cursor-pointer`}
@@ -79,23 +69,26 @@ const Filter = ({ setCategories }: setCateAndType) => {
             <h1 className="uppercase text-foreground font-bold text-[14px]">
               categories
             </h1>
-            {category !== null && category !== undefined
-              ? category!.map((item, index) => (
+            {categories !== null &&
+            categories !== undefined &&
+            categories.length > 0
+              ? categories!.map((item, index) => (
                   <div className="flex gap-1.5 items-center" key={index}>
                     <Input
                       onChange={cateChange}
-                      id={item.id}
+                      id={item.category_id}
                       type="checkbox"
                       className="w-fit"
-                      value={item.id}
-                      key={item.id}
+                      value={item.category_id}
+                      key={item.category_id}
                     />
-                    <Label htmlFor={item.id}>{item.name}</Label>
+                    <Label htmlFor={item.category_id}>
+                      {item.category_name}
+                    </Label>
                   </div>
                 ))
               : ""}
           </div>
-
         </div>
       </div>
     </>

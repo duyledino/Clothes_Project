@@ -60,9 +60,7 @@ const Nav = () => {
                 </Link>
               </li>
             )}
-          {localStore["user"] &&
-            JSON.parse(localStore["user"]!).id !== "" &&
-            JSON.parse(localStore["user"]!).admin && (
+          {user && user.user && user.user.role === "admin" && (
               <li>
                 <Link
                   to="/Admin"

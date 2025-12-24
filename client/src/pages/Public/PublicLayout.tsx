@@ -9,12 +9,19 @@ const PublicLayout = () => {
   const [isInclude, setIsInclude] = useState(false);
   const location = useLocation();
   useEffect(() => {
-    if (location.pathname.includes("/Admin")) setIsInclude(false);
+    if (
+      location.pathname.includes("/Admin") ||
+      location.pathname.includes("/Login") ||
+      location.pathname.includes("/login") ||
+      location.pathname.includes("/Signup") ||
+      location.pathname.includes("/signup")
+    )
+      setIsInclude(false);
     else setIsInclude(true);
   }, [location.pathname]);
   return (
     <div>
-      <Header />
+      {isInclude ? <Header /> : ""}
       <Outlet />
       {isInclude ? <Footer /> : ""}
     </div>

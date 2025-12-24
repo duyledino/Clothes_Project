@@ -1,13 +1,9 @@
 import React from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import type { BestSeller } from "@/type/types.frontend";
 
-type BestSeller = {
-  id: string;
-  price: number;
-  count: number;
-  title: string;
-};
+
 
 type DoughnutChartArr = {
   bestSeller: BestSeller[];
@@ -17,7 +13,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export function DoughnutChart({ bestSeller }: DoughnutChartArr) {
   const data = {
-    labels: bestSeller.map(item=>item.title),
+    labels: bestSeller.map(item=>item.product_name),
     datasets: [
       {
         label: "# of Votes",

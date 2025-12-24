@@ -17,31 +17,43 @@ import { X } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import type {
+  ColorOrigin,
+  SizeOrigin,
+  CategoryOrigin,
+} from "@/type/types.frontend";
+import { fetchGetAllSize } from "@/slice/SizeSlice";
+import { fetchGetAllColor } from "@/slice/ColorSlice";
+import { fetchGetACategory, fetchGetAllCategory } from "@/slice/CategorySlice";
 
 type ImageURL = {
   url: string;
   file: File;
 };
 
-const sizes: string[] = ["S", "M", "L", "XL", "XXL"];
+// const sizes: string[] = ["S", "M", "L", "XL", "XXL"];
 
 function AddPage() {
   const dispatch = useAppDispatch();
   const { error, loading, Message } = useAppSelector(
     (state) => state.ProductSlice
   );
+  const { sizes } = useAppSelector((state) => state.SizeSlice);
+  const { colors } = useAppSelector((state) => state.ColorSlice);
+  const { categories } = useAppSelector((state) => state.CategorySlice);
   // tryon url
   const [tryon, setTryon] = useState<ImageURL | null>(null);
-  const [size, setSize] = useState<string[]>([]);
-  const [category, setCategory] = useState<string>("");
-  const [subCategory, setSubCategory] = useState<string>("");
+  const [currentSize, setCurrentSize] = useState<SizeOrigin[]>([]);
+  const [currentColor, setCurrentColor] = useState<ColorOrigin[]>([]);
+  const [currentCategory, setCurrentCategory] =
+    useState<CategoryOrigin | null>();
   const [images, setImages] = useState<ImageURL[]>([]);
   const [price, setPrice] = useState<number>(0);
   //save file upload
   const [files, setFiles] = useState<File[]>([]);
   const [productName, setProductName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const handleClick = () => {
+  const handleClick = async () => {
     if (price === undefined) {
       toast.error("Price can not leave");
       return;
@@ -50,36 +62,50 @@ function AddPage() {
       toast.error("Try on image is missing");
       return;
     }
-    console.log("category,subCategory: ", category, subCategory);
+    console.log("category: ",currentCategory);
     const check = createProductSchema.safeParse({
-      category: category,
-      subcategory: subCategory,
       images: files,
       productName: productName,
       description: description,
       price: price,
-      size: size,
+      size: currentSize,
+      color: currentColor,
+      category: currentCategory,
     });
     if (!check.success) {
       const firstIssue = check.error.issues[0];
       toast.error(firstIssue.message);
     } else {
-      const localStore = localStorage.getItem("user");
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const token = JSON.parse(localStore).token;
       const formData = new FormData();
       files.forEach((item) => formData.append("photos", item));
-      formData.append("title", productName);
+      formData.append("product_name", productName);
       formData.append("description", description);
       formData.append("price", price?.toString());
-      formData.append("category", category);
-      formData.append("subcategory", subCategory);
-      formData.append("size", JSON.stringify(size));
+      formData.append("category", currentCategory!.category_id);
+      formData.append(
+        "size",
+        currentSize.map((item) => item.size_id).join(",")
+      );
+      formData.append(
+        "color",
+        currentColor.map((item) => item.color_id).join(",")
+      );
       formData.append("photos", tryon.file);
-      dispatch(fetchCreateAProduct({ productCreate: formData, token }));
+      const { type } = await dispatch(
+        fetchCreateAProduct({ productCreate: formData })
+      );
+      if (type.search("reject") == -1) {
+        setFiles([]);
+        setImages([]);
+        setCurrentSize([]);
+        setCurrentColor([]);
+        setPrice(0);
+        setProductName("");
+        setDescription("");
+        setCurrentCategory(null);
+        setTryon(null);
+        dispatch(resetStateProduct());
+      }
     }
   };
   const handleChangeImages = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,31 +142,6 @@ function AddPage() {
   //     setFiles((prev) => (prev = images.map((item) => item.file)));
   //   }
   // }, [images]);
-  useEffect(() => {
-    if (!error && Message) {
-      console.log(Message);
-      setFiles([]);
-      setImages([]);
-      setSize([]);
-      setPrice(0);
-      setProductName("");
-      setDescription("");
-      setCategory("");
-      setSubCategory("");
-      setTryon(null);
-      dispatch(resetStateProduct());
-      toast.success(Message);
-    }
-    if (error) {
-      toast.error(error);
-      dispatch(resetStateProduct());
-    }
-  }, [Message, error]);
-  console.log(Message);
-  useEffect(() => {
-    console.log("files: ", files);
-    console.log("image: ", images);
-  }, [files]);
   const handleDelete = (url: string) => {
     const needDel = images.find((item) => item.url === url);
     if (url === "" || needDel === null) {
@@ -157,10 +158,29 @@ function AddPage() {
     }
     setTryon(null);
   };
+
+  useEffect(() => {
+    dispatch(fetchGetAllSize());
+    dispatch(fetchGetAllColor());
+    dispatch(fetchGetAllCategory());
+  }, []);
+
+  console.log(
+    "currentColor,currentSize,currentCategory: ",
+    currentColor,
+    currentSize,
+    currentCategory
+  );
+
+  useEffect(() => {
+    console.log("files: ", files);
+    console.log("image: ", images);
+  }, [files]);
+
   return (
     <>
       {loading && <Loading />}
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-3">
         <div className="mb-3">
           <h1 className="mb-3 text-gray-900 text-[14px] font-semibold">
             Upload Image
@@ -176,7 +196,11 @@ function AddPage() {
                   <div
                     className={`relative md:w-24 md:h-24 w-20 h-20 hover:ring transition-all`}
                   >
-                    <Label htmlFor={`image${index}`} key={index} className="h-full w-full">
+                    <Label
+                      htmlFor={`image${index}`}
+                      key={index}
+                      className="h-full w-full"
+                    >
                       <img
                         src={item.url}
                         alt="upload"
@@ -200,8 +224,7 @@ function AddPage() {
                   <img
                     src={assets.upload_area}
                     alt="upload"
-                    // width={width === undefined ? undefined : width >= 768 ? 96 : 80} // or whatever fits your layout
-                    className=""
+                    className="w-full h-full"                    
                   />
                   <Input
                     type="file"
@@ -220,7 +243,7 @@ function AddPage() {
         </div>
         <div className="mb-3">
           <Label className="text-gray-900 mb-3">
-            Try on Image (Store virtual try on)
+            Try on Image (Hình sản phẩm cho thử đồ ảo)
           </Label>
           <div
             className={`relative md:w-24 md:h-24 w-20 h-20 hover:ring transition-all`}
@@ -231,7 +254,7 @@ function AddPage() {
                   src={tryon.url}
                   alt="upload"
                   // width={width === undefined ? undefined : width >= 768 ? 96 : 80} // or whatever fits your layout
-                  className=""
+                  className="w-full h-full"
                 />
                 <div
                   onClick={() => handleDeleteTryon(tryon.url)}
@@ -246,7 +269,6 @@ function AddPage() {
                   src={assets.upload_area}
                   alt="upload"
                   // width={width === undefined ? undefined : width >= 768 ? 96 : 80} // or whatever fits your layout
-                  className=""
                 />
                 <Input
                   type="file"
@@ -262,7 +284,7 @@ function AddPage() {
         </div>
         <div className="mb-3">
           <Label htmlFor="productName" className="text-gray-900">
-            Product name
+            Tên sản phẩm
           </Label>
           <Input
             value={productName}
@@ -276,7 +298,7 @@ function AddPage() {
 
         <div className="mb-3">
           <Label htmlFor="productDescription" className="text-gray-900">
-            Product description
+            Mô tả
           </Label>
           <textarea
             value={description}
@@ -290,47 +312,32 @@ function AddPage() {
         <div className="mb-3 flex md:flex-row flex-col gap-4">
           <div>
             <Label htmlFor="productCategory" className="text-gray-900">
-              Product category
+              Loại sản phẩm
             </Label>
             <Select
               onValueChange={(e) => {
-                setCategory(e);
+                setCurrentCategory(categories.find((i) => i.category_id === e));
               }}
-              value={category}
             >
               <SelectTrigger className="mt-1 w-[180px]">
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder="Phân loại" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="men">Men</SelectItem>
-                <SelectItem value="women">Women</SelectItem>
-                <SelectItem value="kids">Kids</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="productSubCategory" className="text-gray-900">
-              Sub category
-            </Label>
-            <Select
-              onValueChange={(e) => setSubCategory(e)}
-              value={subCategory}
-            >
-              <SelectTrigger className="mt-1 w-[180px]">
-                <SelectValue placeholder="Subcategory" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="topwear">Topwear</SelectItem>
-                <SelectItem value="bottomwear">Bottomwear</SelectItem>
-                <SelectItem value="shoes">Winterwear</SelectItem>
+                {categories.map((item) => (
+                  <SelectItem
+                    key={item.category_id}
+                    value={`${item.category_id}`}
+                  >
+                    {item.category_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label htmlFor="productPrice" className="text-gray-900">
-              Product Price
+              Giá
             </Label>
             <Input
               onChange={(e) => {
@@ -348,26 +355,62 @@ function AddPage() {
         </div>
 
         <div className="mb-3">
-          <Label className="text-gray-900">Product Sizes</Label>
-          <div className="flex gap-2 mt-1">
+          <Label className="text-gray-900">Size</Label>
+          <div className="flex flex-wrap gap-2 mt-1">
             {sizes.map((item, index) => (
               <button
                 className={`${
-                  size.find((i) => i === item) !== undefined
+                  currentSize.find((i) => i.size_id === item.size_id) !==
+                  undefined
                     ? "bg-gray-900 text-gray-200"
                     : "bg-gray-200 text-gray-900"
                 } w-10 h-10 cursor-pointer`}
-                key={index}
+                key={item.size_id}
                 onClick={() => {
-                  setSize((prev) => {
-                    if (prev.find((i) => i === item) !== undefined)
-                      return prev.filter((i) => i !== item);
+                  setCurrentSize((prev) => {
+                    if (
+                      prev.find((i) => i.size_id === item.size_id) !== undefined
+                    )
+                      return prev.filter((i) => i.size_id !== item.size_id);
                     return [...prev, item];
                   });
                 }}
               >
-                {item}
+                {item.size_name}
               </button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-3 ">
+          <Label className="text-gray-900">Màu sắc</Label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {colors.map((item, index) => (
+              <div key={item.color_id} className="relative">
+                <div
+                  className={`absolute 
+                    ${
+                      currentColor.find((i) => i.color_id === item.color_id) !==
+                      undefined
+                        ? "block"
+                        : "hidden"
+                    }
+                    left-0 -bottom-0.5 w-full h-1 bg-black`}
+                ></div>
+                <button
+                  style={{ backgroundColor: item.color_id }}
+                  className={`w-10 h-10 cursor-pointer`}
+                  onClick={() => {
+                    setCurrentColor((prev) => {
+                      if (
+                        prev.find((i) => i.color_id === item.color_id) !==
+                        undefined
+                      )
+                        return prev.filter((i) => i.color_id !== item.color_id);
+                      return [...prev, item];
+                    });
+                  }}
+                ></button>
+              </div>
             ))}
           </div>
         </div>

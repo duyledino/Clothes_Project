@@ -1,14 +1,13 @@
-import type{ Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import type { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 const getAllCategory = async (req: Request, res: Response) => {
   const categories = await prisma.category.findMany();
-  
+
   return res.status(200).json({
-    success: true,
-    data: categories,
+    categories: categories,
   });
 };
 
@@ -16,7 +15,7 @@ const createACategory = async (req: Request, res: Response) => {
   const { category_name } = req.body as { category_name: string };
 
   if (!category_name) {
-    throw new Error('Category name is required');
+    throw new Error("Category name is required");
   }
 
   const newCategory = await prisma.category.create({
@@ -26,9 +25,8 @@ const createACategory = async (req: Request, res: Response) => {
   });
 
   return res.status(201).json({
-    success: true,
-    message: 'Category created successfully',
-    data: newCategory,
+    Message: "Category created successfully",
+    newCategory: newCategory,
   });
 };
 
@@ -36,41 +34,41 @@ const getACategory = async (req: Request, res: Response) => {
   const { category_id } = req.query as { category_id: string };
 
   if (!category_id) {
-    throw new Error('Category ID is required');
+    throw new Error("Category ID is required");
   }
 
-  const category = await prisma.category.findUnique({
+  const category = await prisma.category.findFirst({
     where: {
       category_id: category_id,
     },
   });
 
   if (!category) {
-    res.status(404);
-    throw new Error('Category not found');
+    return res.status(404).json({ Message: "Không tìm thấy role" });
   }
 
   return res.status(200).json({
-    success: true,
-    data: category,
+    category: category,
   });
 };
 
 const updateACategory = async (req: Request, res: Response) => {
-  const { category_id, category_name } = req.body as { category_id: string, category_name: string };
+  const { category_id, category_name } = req.body as {
+    category_id: string;
+    category_name: string;
+  };
 
   if (!category_id || !category_name) {
-    throw new Error('Category ID and Name are required');
+    throw new Error("Category ID and Name are required");
   }
 
   // Check existence (optional, but good for clear errors)
-  const existing = await prisma.category.findUnique({
+  const existing = await prisma.category.findFirst({
     where: { category_id },
   });
 
   if (!existing) {
-    res.status(404);
-    throw new Error('Category not found');
+    return res.status(404).json({ Message: "Không tìm thấy role" });
   }
 
   const updatedCategory = await prisma.category.update({
@@ -83,15 +81,9 @@ const updateACategory = async (req: Request, res: Response) => {
   });
 
   return res.status(200).json({
-    success: true,
-    message: 'Category updated successfully',
-    data: updatedCategory,
+    Message: "Category updated successfully",
+    updatedCategory: updatedCategory,
   });
 };
 
-export {
-  getAllCategory,
-  createACategory,
-  getACategory,
-  updateACategory
-};
+export { getAllCategory, createACategory, getACategory, updateACategory };

@@ -1,12 +1,14 @@
 import Loading from "@/components/ui/Loading";
 import { myAxios } from "@/config/axios";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { reset } from "@/slice/AuthSlice";
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const ProtectRouteAdmin = () => {
   const [status, setStatus] = useState<"loading" | "allow" | "deny">("loading");
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const checkAdmin = async () => {
       try {
@@ -19,6 +21,8 @@ const ProtectRouteAdmin = () => {
       } catch (error) {
         console.error(error);
         localStorage.removeItem("user");
+        dispatch(reset());
+
         toast.error("Không đủ quyền truy cập");
         setStatus("deny");
       }

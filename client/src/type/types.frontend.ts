@@ -9,14 +9,14 @@ export interface AuthUser {
 
 // product type
 
-export interface Product_Size{
-  product_id:string,
-  size_id:string
+export interface Product_Size {
+  product_id: string;
+  size_id: string;
 }
 
-export interface Product_Color{
-  product_id:string,
-  color_id:string
+export interface Product_Color {
+  product_id: string;
+  color_id: string;
 }
 
 export interface Product {
@@ -33,7 +33,7 @@ export interface ProductLanding {
   price: number;
   description: string;
   imageUrl: string[];
-};
+}
 export interface ProductData {
   product_id: string;
   product_name: string;
@@ -43,26 +43,26 @@ export interface ProductData {
   tryon: string;
   category: string;
   product_size: Product_Size[];
-  product_color:Product_Color[];
-};
+  product_color: Product_Color[];
+}
 export interface ProductDataAmin {
-  id: string;
+  product_id: string;
   product_name: string;
   price: number;
   imageUrl: string[];
-  size: string[];
-  category: string;
+  category: CategoryOrigin;
+  product_size: Product_Size[];
+  product_color: Product_Color[];
   count: number;
-  isDelete: string;
-};
+  status: string;
+}
 
 //end product type
 
-
 // cart type
 export interface cartItem {
-  product_size: Product_Size|null;
-  product_color: Product_Color|null;
+  product_size: Product_Size | null;
+  product_color: Product_Color | null;
   quantity: number;
   subtotal: number;
   product: ProductData_Cart;
@@ -76,15 +76,15 @@ export interface ProductData_Cart {
   imageUrl: string[];
   product_size: Product_Size | null;
   product_color: Product_Color | null;
-};
+}
 
 //end cart type
-
 
 //order type
 export interface detail {
   product_id: string;
-  count: number;
+  product_name: string;
+  quantity: number;
   subtotal: number;
   product_size: Product_Size | null;
   product_color: Product_Color | null;
@@ -100,33 +100,28 @@ export interface user_order {
   name: string;
 }
 
-export interface product {
-  product_name: string;
-}
-export interface detailAdmin {
-  size: string;
-  count: number;
-  product: product;
-}
-
 export interface OrderData {
   order_id: string;
-  user: user_order;
   total: number;
-  update: Date;
+  create_at: Date;
+  update_at: Date;
   payment: string;
   status: string;
-  details: detailAdmin[];
+  method: string;
+  user_create: userInOrderProfile;
+  user_ship: shipperInOrderProfile | null;
+  order_detail: detail[];
 }
 
 export interface userInOrderProfile {
+  email:string;
   address: string;
   name: string;
 }
 
-export interface shipperInOrderProfile{
-  user_id:string,
-  name:string
+export interface shipperInOrderProfile {
+  user_id: string;
+  name: string;
 }
 
 export interface OrderUser {
@@ -146,7 +141,7 @@ export interface paymentAndStatus {
   order_id: string;
   payment: string;
   status: string;
-};
+}
 //end order type
 
 // user type
@@ -154,21 +149,20 @@ export interface paymentAndStatus {
 export interface userData {
   Message: string;
   email: string;
-  role:string;
+  role: string;
   user_id: string;
-};
+}
 
 export interface user {
   user_id: string;
   email: string;
   name: string;
   address: string;
-};
+}
 
 // end user type
 
-
-
+// Admin
 
 // review type
 
@@ -182,14 +176,14 @@ export interface Review {
     email: string;
     name: string;
   };
-};
+}
 
 // Define the initial state
 export interface ReviewState {
   Reviews: Review[];
   loadingReview: boolean;
   errorReview: string | null;
-};
+}
 
 export interface Product_Review {
   product_id: string | undefined;
@@ -201,10 +195,9 @@ export interface Product_Review {
   product_color: Product_Color[] | undefined;
   tryon: string | undefined;
   Reviews: Review[];
-};
+}
 
 // end review type
-
 
 // track type
 
@@ -212,20 +205,62 @@ export interface Revenue {
   month: number;
   year: number;
   total: number;
-};
+}
 
 export interface BestSeller {
   product_id: string;
   price: number;
   count: number;
-  title: string;
-};
+  product_name: string;
+}
 
 export interface BestCustomer {
   user_id: string;
   name: string;
   email: string;
   total: number;
-};
+}
+
+export interface monthAndRevenue {
+  month: string;
+  year: number;
+  total: number;
+}
 
 // end track type
+
+// size type
+
+export interface SizeOrigin {
+  size_id: string;
+  size_name: string;
+}
+
+// end size type
+
+// color type
+
+export interface ColorOrigin {
+  color_id: string;
+  color_name: string;
+}
+
+// end color type
+
+// role type
+
+export interface RoleOrigin {
+  role_id: string;
+  role_name: string;
+}
+
+// end role type
+
+// category type
+
+export interface CategoryOrigin {
+  category_id: string;
+  category_name: string;
+}
+
+// end category type

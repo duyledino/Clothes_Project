@@ -25,11 +25,11 @@ const UserOrder: React.FC<UserOrderProps> = ({
     <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <div className="flex justify-between items-center">
         <h1 className="text-gray-700 font-bold text-base">
-          Order ID: {OrderUser.order_id}
+          Order ID: <span className="font-normal">{OrderUser.order_id}</span>
         </h1>
       </div>
-      <p className="text-gray-700 text-base">
-        User name: {OrderUser.user_create.name}
+      <p className="text-gray-700 text-base font-bold">
+        User name: <span className="font-normal">{OrderUser.user_create.name}</span>
       </p>
       <p className="text-gray-700 text-base font-bold">
         Address: {OrderUser.user_create.address}
@@ -59,14 +59,25 @@ const UserOrder: React.FC<UserOrderProps> = ({
         <p className="text-gray-700 text-base font-bold">Details:</p>
         <ul>
           {OrderUser.order_detail.map((detail, index) => (
-            <li key={index} className="text-gray-700 text-base">
-              Product ID: {detail.product_id}, Count: {detail.count},
-              {detail.product_size?.size_id},{" "}
+            <li
+              key={`${OrderUser.order_id}-${OrderUser.order_detail[
+                index
+              ].product_id.substring(0, 4)}-${
+                OrderUser.order_detail[index].product_size?.size_id
+              }-${OrderUser.order_detail[
+                index
+              ].product_color?.color_id.substring(0, 4)}`}
+              className="text-gray-700 text-base font-bold list-disc"
+            >
+              <span className="font-normal">
+                Tên SP: {detail.product_name}, SL: {detail.quantity},
+                {detail.product_size?.size_id},{" "}
+              </span>
               <span
                 style={{ backgroundColor: detail.product_color?.color_id }}
                 className="h-4 w-4 inline-block"
               ></span>{" "}
-              , Subtotal: {detail.subtotal} VND
+              <span className="font-normal">, Subtotal: {detail.subtotal} VND</span>
             </li>
           ))}
         </ul>
@@ -88,7 +99,7 @@ const UserOrder: React.FC<UserOrderProps> = ({
           >
             Canceled
           </Button>
-        ) :  OrderUser.status === "done" ? (
+        ) : OrderUser.status === "done" ? (
           ""
         ) : (
           <Button
@@ -107,7 +118,8 @@ const UserOrder: React.FC<UserOrderProps> = ({
           </Button>
         )}
         {((OrderUser.payment === "done" || OrderUser.status === "done") &&
-        OrderUser.method === "COD" ) || (OrderUser.status === "canceled")? (
+          OrderUser.method === "COD") ||
+        OrderUser.status === "canceled" ? (
           ""
         ) : (
           <Button

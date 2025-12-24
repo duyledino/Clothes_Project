@@ -10,12 +10,9 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import type { monthAndRevenue } from "@/type/types.frontend";
 
-type monthAndRevenue = {
-  month: string;
-  year: number;
-  total: number;
-};
+
 type LineChartArr = {
   revenue: monthAndRevenue[];
 };
