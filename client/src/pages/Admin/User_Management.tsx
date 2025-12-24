@@ -1,5 +1,18 @@
 "use client";
 import React, { useMemo, useState } from "react";
+// Import Lucide icons
+import { 
+  Plus, 
+  Search, 
+  MoreVertical, 
+  RotateCcw, 
+  Ban, 
+  Mouse, 
+  Cable, 
+  Pencil, 
+  Home,
+  type LucideIcon 
+} from "lucide-react";
 
 type Role = "Admin" | "Manager" | "Customer";
 type Status = "Active" | "Inactive";
@@ -22,8 +35,7 @@ const USERS: User[] = [
     role: "Manager",
     status: "Active",
     phone: "+1 555-0123",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBHii5ssi095mV3wNbrSzZNKgqsYsz1xeoEYHpqb84UQreT08VuGlbGR8IAXMl7spL3smIGtI57ATflxSXGc-eHaUwgfLr-Xq2xithwJJIlPlf3mygY1FdygFnX17T0RcT7Vg-6oUgvuMpYnIvxWabRfQPXeQdf2JDMKbjPF5b4Qi4lK8jrS6h29z0sTf2ToLR4I5xzXJTZev_7mWJlrAaw5yD5O0sJn7ihAajmHezUVj8ASzhpl9tOvIryAEMOqh5DJdPZ_9UuUw",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBHii5ssi095mV3wNbrSzZNKgqsYsz1xeoEYHpqb84UQreT08VuGlbGR8IAXMl7spL3smIGtI57ATflxSXGc-eHaUwgfLr-Xq2xithwJJIlPlf3mygY1FdygFnX17T0RcT7Vg-6oUgvuMpYnIvxWabRfQPXeQdf2JDMKbjPF5b4Qi4lK8jrS6h29z0sTf2ToLR4I5xzXJTZev_7mWJlrAaw5yD5O0sJn7ihAajmHezUVj8ASzhpl9tOvIryAEMOqh5DJdPZ_9UuUw",
   },
   {
     id: 1024,
@@ -32,8 +44,7 @@ const USERS: User[] = [
     role: "Customer",
     status: "Active",
     phone: "+1 555-0144",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDiZjNKV75lGLPAMK_OW4vWiZwcbQi_lG_PFI3ps775ioCtOd-UF79Q2qzZymSThRQbmM50dfrU5E-r1VRVJwIBvNkImypgFjxHz4JwcDs48Xj3mk_vJZw3TK1EDPUOU0kljR__flF9uLse-e32EinrcSHLEU9U2gs9bjya7NpOB5UKS23WH13BKFIlPMx-3vFQo7M7GeH7w5w6UsR-CTCS8SMspsFWBzm_E26rQXv1zSL9SB39xCz3cuCNdnlubQ4C2UadRcvI1g",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDiZjNKV75lGLPAMK_OW4vWiZwcbQi_lG_PFI3ps775ioCtOd-UF79Q2qzZymSThRQbmM50dfrU5E-r1VRVJwIBvNkImypgFjxHz4JwcDs48Xj3mk_vJZw3TK1EDPUOU0kljR__flF9uLse-e32EinrcSHLEU9U2gs9bjya7NpOB5UKS23WH13BKFIlPMx-3vFQo7M7GeH7w5w6UsR-CTCS8SMspsFWBzm_E26rQXv1zSL9SB39xCz3cuCNdnlubQ4C2UadRcvI1g",
   },
   {
     id: 1025,
@@ -42,8 +53,7 @@ const USERS: User[] = [
     role: "Admin",
     status: "Inactive",
     phone: "+1 555-0999",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCYQDj68k3yXoFnJ9PulRMwid-t6fk0kctEXVBu0ydoWLhCBBg-OwNg0IXfC9zNT9wkIoV8VWFzteFoJuQdpQlreMIkcFa-tL-Ok4aEPgcw4ReEFyNNVPdigDLO7aGXrPwF4u4QDiH-x83eA-3-zp4avPiySv5JhKz0fgwq6w5uJjvNOuM6kZECzMtpgf0XPM9qsUOBHhXQjwdBgur4nZEuqgkst3PubYEjjgRR7l795jJ7OGDAVQD-1V2fmDMlrB4SM3UrSfVz0Q",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCYQDj68k3yXoFnJ9PulRMwid-t6fk0kctEXVBu0ydoWLhCBBg-OwNg0IXfC9zNT9wkIoV8VWFzteFoJuQdpQlreMIkcFa-tL-Ok4aEPgcw4ReEFyNNVPdigDLO7aGXrPwF4u4QDiH-x83eA-3-zp4avPiySv5JhKz0fgwq6w5uJjvNOuM6kZECzMtpgf0XPM9qsUOBHhXQjwdBgur4nZEuqgkst3PubYEjjgRR7l795jJ7OGDAVQD-1V2fmDMlrB4SM3UrSfVz0Q",
   },
   {
     id: 1026,
@@ -52,8 +62,7 @@ const USERS: User[] = [
     role: "Manager",
     status: "Active",
     phone: "+1 555-7777",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAcwx5TLaMf7dx5lJlVlyDbduh-JPvBtnQx5_vxCEQ3NgIJwfgx-Jg5r7Yaub-S4zJIUKyZK77zbXO7nI4Ged8nRW8htgEvKXjQOwd68fRnk-hejbloNLI2NPHUeF_kD-XO6UgdXkaqS6rY6-sAOpJBzXDj01aLobw4OdVgoSIgz-T_inwjnExm_R3U62cX2CNXd8eXPkGaG9Y4EjD01RjQg4C0J_pV07IdgVepncnFJFrsw7nF8XsLiUTOtwRibjuDhonkUG5ktg",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAcwx5TLaMf7dx5lJlVlyDbduh-JPvBtnQx5_vxCEQ3NgIJwfgx-Jg5r7Yaub-S4zJIUKyZK77zbXO7nI4Ged8nRW8htgEvKXjQOwd68fRnk-hejbloNLI2NPHUeF_kD-XO6UgdXkaqS6rY6-sAOpJBzXDj01aLobw4OdVgoSIgz-T_inwjnExm_R3U62cX2CNXd8eXPkGaG9Y4EjD01RjQg4C0J_pV07IdgVepncnFJFrsw7nF8XsLiUTOtwRibjuDhonkUG5ktg",
   },
   {
     id: 1027,
@@ -62,8 +71,7 @@ const USERS: User[] = [
     role: "Customer",
     status: "Active",
     phone: "+1 555-2222",
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDTgmaJ_O3YQWbgNpdrDFkqbWtbjeSJbTAc-rTH1Z9rc9cl6f4GMqldI3WQa2ZEjj1m0xfy0O0-v7NhPB3Dto5oCZumwga0FqVVg7Cu8kfHxjyWaGVcOhmj4_tFSbqa_IsrI_MHMJV7uRZtaYtMNFS7RNW95d9_aFCQy5X4MU2rv3JrIbIocMt6lfxUdt_HLuTYzqGF7zPJQDP-YvFO609oC_Mft-tEd2-2oC31D-LC_U3NpmLM5XXRLloKR_MD9D-GdBPnVV7GVw",
+    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDTgmaJ_O3YQWbgNpdrDFkqbWtbjeSJbTAc-rTH1Z9rc9cl6f4GMqldI3WQa2ZEjj1m0xfy0O0-v7NhPB3Dto5oCZumwga0FqVVg7Cu8kfHxjyWaGVcOhmj4_tFSbqa_IsrI_MHMJV7uRZtaYtMNFS7RNW95d9_aFCQy5X4MU2rv3JrIbIocMt6lfxUdt_HLuTYzqGF7zPJQDP-YvFO609oC_Mft-tEd2-2oC31D-LC_U3NpmLM5XXRLloKR_MD9D-GdBPnVV7GVw",
   },
 ];
 
@@ -115,7 +123,7 @@ export default function Users() {
               </p>
             </div>
             <button className="bg-[#135bec] hover:bg-[#135bec]/90 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors shadow-sm">
-              <span className="material-symbols-outlined text-[20px]">add</span>
+              <Plus size={20} strokeWidth={2.5} />
               Add New User
             </button>
           </div>
@@ -124,7 +132,7 @@ export default function Users() {
             {/* Search */}
             <div className="relative w-full max-w-md">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                <span className="material-symbols-outlined text-[20px]">search</span>
+                <Search size={18} />
               </div>
               <input
                 value={query}
@@ -255,17 +263,17 @@ export default function Users() {
                   </div>
                 </div>
                 <button className="text-slate-400 hover:text-slate-600">
-                  <span className="material-symbols-outlined">more_vert</span>
+                  <MoreVertical size={20} />
                 </button>
               </div>
 
               <div className="flex gap-2">
                 <button className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">lock_reset</span>
+                  <RotateCcw size={16} />
                   Reset Pass
                 </button>
                 <button className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">block</span>
+                  <Ban size={16} />
                   Ban User
                 </button>
               </div>
@@ -340,8 +348,8 @@ export default function Users() {
                 </h4>
 
                 <div className="space-y-3">
-                  <CartItem icon="mouse" title="Wireless Optical Mouse" meta="Qty: 2 • $24.00 ea" total="$48.00" />
-                  <CartItem icon="cable" title="HDMI Cable 6ft" meta="Qty: 1 • $12.50 ea" total="$12.50" />
+                  <CartItem icon={Mouse} title="Wireless Optical Mouse" meta="Qty: 2 • $24.00 ea" total="$48.00" />
+                  <CartItem icon={Cable} title="HDMI Cable 6ft" meta="Qty: 1 • $12.50 ea" total="$12.50" />
                 </div>
               </section>
 
@@ -355,11 +363,11 @@ export default function Users() {
                 <div className="p-4 rounded-lg border border-slate-200 bg-white relative group">
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="text-slate-400 hover:text-[#135bec]">
-                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                      <Pencil size={16} />
                     </button>
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-slate-400 text-[18px]">home</span>
+                    <Home size={16} className="text-slate-400" />
                     <span className="text-xs font-bold text-[#135bec] uppercase tracking-wide">
                       Default Shipping
                     </span>
@@ -441,12 +449,12 @@ function OrderCard({
 }
 
 function CartItem({
-  icon,
+  icon: Icon,
   title,
   meta,
   total,
 }: {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   meta: string;
   total: string;
@@ -454,7 +462,7 @@ function CartItem({
   return (
     <div className="flex gap-3">
       <div className="size-12 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-        <span className="material-symbols-outlined text-slate-400">{icon}</span>
+        <Icon size={20} className="text-slate-400" />
       </div>
       <div className="flex-1">
         <p className="text-sm font-medium text-slate-900 leading-tight">{title}</p>

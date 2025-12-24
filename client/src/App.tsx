@@ -27,6 +27,9 @@ import { useAppDispatch, useAppSelector } from "./hooks/hooks";
 import { auth } from "./slice/AuthSlice";
 import { getStore, resetStore } from "./slice/StoreSlice";
 import { ToastContainer } from "react-toastify";
+import Users from "./pages/Admin/User_Management";
+import OrderDetail from "./pages/Admin/OrderDetail";
+import Inventory from "./pages/Admin/Inventory";
 
 function App() {
   const location = useLocation();
@@ -88,9 +91,12 @@ function App() {
           <Route path="/Admin" element={<AdminLayout />}>
             <Route index element={<Admin />} />
             <Route path="Add" element={<AddPage />} />
+            <Route path="Inventory" element={<Inventory />} />
             <Route path="Chat" element={<ChatAdminPage />} />
             <Route path="Orders" element={<OrderPage />} />
+            <Route path="Orders/:order_id" element={<OrderDetail />} />
             <Route path="Products" element={<Products />} />
+            <Route path="User" element={<Users />} />
           </Route>
         </Route>
       </Routes>

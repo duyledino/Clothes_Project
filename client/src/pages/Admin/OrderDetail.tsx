@@ -1,5 +1,20 @@
 "use client";
 import React, { useMemo } from "react";
+// Import Lucide icons
+import { 
+  Package, 
+  Search, 
+  Bell, 
+  ChevronRight, 
+  CheckCircle, 
+  Printer, 
+  Receipt, 
+  Pencil, 
+  Mail, 
+  Phone, 
+  CreditCard,
+  type LucideIcon 
+} from "lucide-react";
 
 type OrderStatus = "Shipped" | "Pending" | "Cancelled";
 
@@ -14,7 +29,6 @@ type OrderItem = {
 };
 
 export default function OrderDetail() {
-  // ===== dữ liệu tĩnh (sau này thay bằng API) =====
   const order = {
     code: "ORD-2023-001",
     status: "Shipped" as OrderStatus,
@@ -24,8 +38,7 @@ export default function OrderDetail() {
       since: "Customer since 2021",
       email: "jane@example.com",
       phone: "+1 (555) 000-1234",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCZbMd7uL89kQqV_sH-T1kCnh8JiSpKl2hLZPcRIo35MbcG-ZykE-Ly5u1nHQGtKyTdalLb61m1VU6UrEw_T9XRpbPay2Gt50g14rDM84Zb8pKuzq5ftTLxb9s9Lc0JTIb_uoEjtskNAAgIXe33-Zt9Dmp2sMSVyWa1_fNZn4MZarhdnuH6a5YDxCVn-U9kGb3BE_xHtmjjktamKtCo-y5xXbaoqPPduQB3RNhG1_1UHPDCUJnjWkHOXgWhzKxf0zfFdWirXvX_yQ",
+      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCZbMd7uL89kQqV_sH-T1kCnh8JiSpKl2hLZPcRIo35MbcG-ZykE-Ly5u1nHQGtKyTdalLb61m1VU6UrEw_T9XRpbPay2Gt50g14rDM84Zb8pKuzq5ftTLxb9s9Lc0JTIb_uoEjtskNAAgIXe33-Zt9Dmp2sMSVyWa1_fNZn4MZarhdnuH6a5YDxCVn-U9kGb3BE_xHtmjjktamKtCo-y5xXbaoqPPduQB3RNhG1_1UHPDCUJnjWkHOXgWhzKxf0zfFdWirXvX_yQ",
     },
     shippingAddress: `Jane Doe
 123 Market Street, Suite 400
@@ -65,8 +78,7 @@ United States`,
       color: "Graphite",
       price: 45,
       qty: 2,
-      thumb:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDgCL5OFQEHVm3gcbPHbfM0hSPD-NGDolk-771U6qiL-sZezTssVhhKTwkEztXXMrAbV4qKFRw6eue0yny7Qhx7ZneHo3wPE-hHljzO7wGh0ax_6M5I5k2jkeCR7GYFTM7AwMq2c1QxhEBx6BsVsrkOtcqI5TuHlqCud1zNeSP8Ucgy3BywTCdQRHYFQAqp6jZawJNOj71dONRPvaf_FqNrUkOVBDg6q4XY2BT-8R3DfusX4oL2h7kULuj03OqWGPBhhHOWN9ncnw",
+      thumb: "https://lh3.googleusercontent.com/aida-public/AB6AXuDgCL5OFQEHVm3gcbPHbfM0hSPD-NGDolk-771U6qiL-sZezTssVhhKTwkEztXXMrAbV4qKFRw6eue0yny7Qhx7ZneHo3wPE-hHljzO7wGh0ax_6M5I5k2jkeCR7GYFTM7AwMq2c1QxhEBx6BsVsrkOtcqI5TuHlqCud1zNeSP8Ucgy3BywTCdQRHYFQAqp6jZawJNOj71dONRPvaf_FqNrUkOVBDg6q4XY2BT-8R3DfusX4oL2h7kULuj03OqWGPBhhHOWN9ncnw",
     },
     {
       productId: "KB-991-RGB",
@@ -75,8 +87,7 @@ United States`,
       color: "Black RGB",
       price: 120,
       qty: 1,
-      thumb:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAKD4lLs9bUAOvMvoMkCPu2jrFM5q2t8lCDXAg7NL6yd1GIeUc-tmIXvkL0BQ4Rq5ZAgzp61R-9vQjfBXEbwP1SQw2NLW2e_lES5vm_CCw-95BOMsRicD0Kwh2uF0VUgEq9qBLGyM2AQngysWfOdtt7IgJv7IXSju2v7xbHgZyRNPFJcizzkd0RGAscwHUvgDgwddCq_0XsP-AWKvX-_KHRIvGGDAHXZB6_9cbzgIqmU49EOhYhxyEMhCkI-VcPZ3KQi9BSHypD8g",
+      thumb: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKD4lLs9bUAOvMvoMkCPu2jrFM5q2t8lCDXAg7NL6yd1GIeUc-tmIXvkL0BQ4Rq5ZAgzp61R-9vQjfBXEbwP1SQw2NLW2e_lES5vm_CCw-95BOMsRicD0Kwh2uF0VUgEq9qBLGyM2AQngysWfOdtt7IgJv7IXSju2v7xbHgZyRNPFJcizzkd0RGAscwHUvgDgwddCq_0XsP-AWKvX-_KHRIvGGDAHXZB6_9cbzgIqmU49EOhYhxyEMhCkI-VcPZ3KQi9BSHypD8g",
     },
     {
       productId: "CB-002-2M",
@@ -85,8 +96,7 @@ United States`,
       color: "Black",
       price: 15,
       qty: 3,
-      thumb:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCuHNuNW3QP5UbYMA1A-yvuUwBJxue5Fiz268ex5540kyIPYO2idi2-7Z8Wt2EL7WPFEjIfZ2c970jAe4VSFS7lQ9s5zFn_6Cltk9nlMi6215UIZhyBo5IYIJkC3nQQHF5KOX761sbpOfRPwB3NuPvVeiZp__LvIqan7lEoTL2i-j0za7cZoJKPQVOqHopu0Bu5q6OiMOx59IiRH8vDRZtG8moy1GdG-70p8SKgVX7dFCgiDrp0Ve_ht8EhhtQ6GJ9__wp1MFOCxg",
+      thumb: "https://lh3.googleusercontent.com/aida-public/AB6AXuCuHNuNW3QP5UbYMA1A-yvuUwBJxue5Fiz268ex5540kyIPYO2idi2-7Z8Wt2EL7WPFEjIfZ2c970jAe4VSFS7lQ9s5zFn_6Cltk9nlMi6215UIZhyBo5IYIJkC3nQQHF5KOX761sbpOfRPwB3NuPvVeiZp__LvIqan7lEoTL2i-j0za7cZoJKPQVOqHopu0Bu5q6OiMOx59IiRH8vDRZtG8moy1GdG-70p8SKgVX7dFCgiDrp0Ve_ht8EhhtQ6GJ9__wp1MFOCxg",
     },
   ];
 
@@ -104,18 +114,18 @@ United States`,
 
   return (
     <div className="min-h-screen bg-[#f6f6f8] text-[#111318]">
-      {/* Header (tĩnh) */}
+      {/* Header */}
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-3 shadow-sm">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-4">
             <div className="flex size-8 items-center justify-center rounded bg-[#135bec]/10 text-[#135bec]">
-              <span className="material-symbols-outlined">inventory_2</span>
+              <Package size={18} />
             </div>
             <h2 className="text-lg font-bold tracking-tight">Inventory Manager</h2>
           </div>
 
           <div className="hidden md:flex min-w-[320px] items-center rounded-lg bg-[#f6f6f8] px-3 py-2">
-            <span className="material-symbols-outlined text-[#616f89]">search</span>
+            <Search size={18} className="text-[#616f89]" />
             <input
               className="w-full border-none bg-transparent px-2 text-sm outline-none placeholder:text-[#616f89]"
               placeholder="Search orders, products..."
@@ -125,15 +135,12 @@ United States`,
 
         <div className="flex items-center gap-4">
           <button className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-[#f6f6f8] text-[#616f89]">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border border-white" />
+            <Bell size={20} />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-50 border border-white" />
           </button>
           <div
             className="h-10 w-10 rounded-full bg-cover bg-center ring-2 ring-white"
-            style={{
-              backgroundImage:
-                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbCsUKFUXORIehQfCE0cqiZVDZ9afh_hMeA72ErvdCminl-hidv6ZeD8Zjn92qJZoPA2tPm9Z1YT2g2JctrSlXMyOoTF1rVaqPk0PrNLITaf1QeTXhM-lmixdG9grbHvxxS00pP9FY-B-V3cZhvwWG6pGF_6fN2qP24TtN6nKhE4WD8JntYN6ca3WChfkn94JcEED8IHbiJfN0QRWj1aZqGYS6_43UFYecZTx23x-GOCGhYLcu5-9Y33PS3psmDbmRlUbNEzpk7w')",
-            }}
+            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbCsUKFUXORIehQfCE0cqiZVDZ9afh_hMeA72ErvdCminl-hidv6ZeD8Zjn92qJZoPA2tPm9Z1YT2g2JctrSlXMyOoTF1rVaqPk0PrNLITaf1QeTXhM-lmixdG9grbHvxxS00pP9FY-B-V3cZhvwWG6pGF_6fN2qP24TtN6nKhE4WD8JntYN6ca3WChfkn94JcEED8IHbiJfN0QRWj1aZqGYS6_43UFYecZTx23x-GOCGhYLcu5-9Y33PS3psmDbmRlUbNEzpk7w')" }}
           />
         </div>
       </header>
@@ -144,9 +151,9 @@ United States`,
           {/* Breadcrumb */}
           <nav className="flex items-center text-sm font-medium text-[#616f89]">
             <span className="hover:text-[#135bec] cursor-pointer">Home</span>
-            <span className="material-symbols-outlined text-sm mx-2">chevron_right</span>
+            <ChevronRight size={14} className="mx-2" />
             <span className="hover:text-[#135bec] cursor-pointer">Orders</span>
-            <span className="material-symbols-outlined text-sm mx-2">chevron_right</span>
+            <ChevronRight size={14} className="mx-2" />
             <span className="text-[#111318]">Order #{order.code}</span>
           </nav>
 
@@ -155,8 +162,8 @@ United States`,
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-black tracking-tight">Order #{order.code}</h1>
-                <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold border ${statusBadge}`}>
-                  <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${statusBadge}`}>
+                  <CheckCircle size={14} />
                   {order.status}
                 </span>
               </div>
@@ -166,20 +173,19 @@ United States`,
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <BtnGhost icon="print" text="Print Order" />
-              <BtnGhost icon="receipt_long" text="Generate Invoice" />
+              <BtnGhost icon={Printer} text="Print Order" />
+              <BtnGhost icon={Receipt} text="Generate Invoice" />
               <button className="flex items-center justify-center gap-2 rounded-lg bg-[#135bec] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-colors">
-                <span className="material-symbols-outlined text-[20px]">edit</span>
+                <Pencil size={18} />
                 Update Status
               </button>
             </div>
           </div>
 
-          {/* Grid */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Left */}
+            {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Order Items */}
+              {/* Order Items Table */}
               <div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-sm">
                 <div className="border-b border-[#e5e7eb] px-6 py-4 flex justify-between items-center">
                   <h3 className="text-lg font-bold">Order Items</h3>
@@ -199,7 +205,6 @@ United States`,
                         <th className="px-6 py-3 font-medium text-right">Total</th>
                       </tr>
                     </thead>
-
                     <tbody className="divide-y divide-[#e5e7eb]">
                       {items.map((it) => (
                         <tr key={it.productId} className="hover:bg-[#f6f6f8]/50 transition-colors">
@@ -224,7 +229,6 @@ United States`,
                   </table>
                 </div>
 
-                {/* Summary */}
                 <div className="flex flex-col items-end border-t border-[#e5e7eb] bg-[#f6f6f8]/30 px-6 py-6">
                   <div className="w-full max-w-xs space-y-3">
                     <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
@@ -238,7 +242,7 @@ United States`,
                 </div>
               </div>
 
-              {/* Order History */}
+              {/* Order History Timeline */}
               <div className="rounded-xl border border-[#e5e7eb] bg-white shadow-sm p-6">
                 <h3 className="mb-4 text-lg font-bold">Order History</h3>
                 <div className="relative pl-4 border-l border-[#e5e7eb] space-y-6">
@@ -247,11 +251,7 @@ United States`,
                       <div
                         className={[
                           "absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full ring-4 ring-white",
-                          h.dot === "green"
-                            ? "bg-green-500"
-                            : h.dot === "primary"
-                            ? "bg-[#135bec]"
-                            : "bg-gray-300",
+                          h.dot === "green" ? "bg-green-500" : h.dot === "primary" ? "bg-[#135bec]" : "bg-gray-300",
                         ].join(" ")}
                       />
                       <p className="text-sm font-bold">{h.title}</p>
@@ -262,7 +262,7 @@ United States`,
               </div>
             </div>
 
-            {/* Right */}
+            {/* Right Column */}
             <div className="space-y-6">
               {/* Customer */}
               <Card title="Customer Details">
@@ -280,13 +280,13 @@ United States`,
 
                   <div className="space-y-3 pt-2">
                     <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#616f89] text-[20px]">mail</span>
+                      <Mail size={18} className="text-[#616f89]" />
                       <a className="text-sm font-medium text-[#135bec] hover:underline" href={`mailto:${order.customer.email}`}>
                         {order.customer.email}
                       </a>
                     </div>
                     <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#616f89] text-[20px]">call</span>
+                      <Phone size={18} className="text-[#616f89]" />
                       <p className="text-sm">{order.customer.phone}</p>
                     </div>
                   </div>
@@ -301,15 +301,11 @@ United States`,
                 </div>
                 <div className="p-6 space-y-6">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#616f89] mb-2">
-                      Shipping Address
-                    </p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#616f89] mb-2">Shipping Address</p>
                     <p className="text-sm leading-relaxed whitespace-pre-line">{order.shippingAddress}</p>
                   </div>
                   <div className="border-t border-[#e5e7eb] pt-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#616f89] mb-2">
-                      Billing Address
-                    </p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#616f89] mb-2">Billing Address</p>
                     <p className="text-sm leading-relaxed">Same as shipping address</p>
                   </div>
                 </div>
@@ -321,7 +317,7 @@ United States`,
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-12 items-center justify-center rounded bg-gray-100 border border-[#e5e7eb]">
-                        <span className="material-symbols-outlined text-gray-500">credit_card</span>
+                        <CreditCard size={18} className="text-gray-500" />
                       </div>
                       <div>
                         <p className="text-sm font-bold">{order.payment.brand}</p>
@@ -332,13 +328,10 @@ United States`,
                       {order.payment.status}
                     </span>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div>
                       <p className="text-xs text-[#616f89]">Transaction ID</p>
-                      <p className="text-sm font-medium truncate" title={`#${order.payment.txnId}`}>
-                        #{order.payment.txnId}
-                      </p>
+                      <p className="text-sm font-medium truncate" title={`#${order.payment.txnId}`}>#{order.payment.txnId}</p>
                     </div>
                     <div>
                       <p className="text-xs text-[#616f89]">Payment Date</p>
@@ -355,10 +348,11 @@ United States`,
   );
 }
 
-function BtnGhost({ icon, text }: { icon: string; text: string }) {
+// Refactored helper components
+function BtnGhost({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   return (
     <button className="flex items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm font-bold shadow-sm hover:bg-[#f6f6f8] transition-colors">
-      <span className="material-symbols-outlined text-[20px]">{icon}</span>
+      <Icon size={18} />
       {text}
     </button>
   );

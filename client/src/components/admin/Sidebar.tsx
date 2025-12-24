@@ -1,10 +1,12 @@
-;
+
 import {
   Barcode,
   ChartNoAxesCombined,
   CirclePlus,
   MessageCircleMore,
   PackageSearch,
+  User,
+  Warehouse,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import React from "react";
@@ -13,6 +15,11 @@ const nav = [
     link: "/Admin",
     name: "Dashboard",
     logo: (className: string) => <ChartNoAxesCombined className={className} />,
+  },
+  {
+    link: "/Inventory",
+    name: "Kho",
+    logo: (className: string) => <Warehouse  className={className} />,
   },
   {
     link: "/Admin/Add",
@@ -33,6 +40,11 @@ const nav = [
     link: "/Admin/Chat",
     name: "Chat",
     logo: (className: string) => <MessageCircleMore  className={className} />,
+  },
+  {
+    link: "/Admin/User",
+    name: "User",
+    logo: (className: string) => <User className={className} />,
   },
   
 ];

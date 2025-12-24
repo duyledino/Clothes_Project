@@ -22,7 +22,9 @@ const OrderPage = () => {
         <ul className="flex flex-col gap-3">
           {Orders.length > 0
             ? Orders.map((item) => (
-                <OrderItem order_data={item} key={item.order_id} />
+                <a href={`Orders/${item.order_id}`}>
+                  <OrderItem order_data={item} key={item.order_id} />
+                </a>
               ))
             : ""}
         </ul>
