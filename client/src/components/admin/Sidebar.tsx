@@ -34,6 +34,7 @@ const nav = [
     name: "Chat",
     logo: (className: string) => <MessageCircleMore  className={className} />,
   },
+  
 ];
 
 const Sidebar = () => {
