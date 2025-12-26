@@ -5,12 +5,179 @@ import type { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
+const loginUser = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  // gmail, password will validate on client;
+  const exists = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+    include: {
+      role: true,
+    },
+  });
+  console.log("email,password", email, password, exists);
+  if (!exists)
+    return res.status(400).json({ Message: "Wrong email or password" });
+  const verify = await compare(password, exists.password);
+  console.log(verify);
+  if (!verify)
+    return res.status(400).json({ Message: "Wrong email or password" });
+  const token = createToken({
+    user_id: exists.user_id,
+    email,
+    name: exists.name ?? "",
+    role: exists.role.role_name,
+  });
+  res.cookie("my_cookie", token, {
+    httpOnly: true,
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: false,
+    sameSite: "lax",
+  });
+  //Client will save token and admin (boolean) to localStorage
+  console.log("login success");
+  return res.status(200).json({
+    Message: "Login successfully",
+    user: {
+      role: exists.role.role_name,
+      email: exists.email,
+      user_id: exists.user_id,
+    },
+  });
+};
+
+const logoutUser = async (req: Request, res: Response) => {
+  console.log("Logout success");
+  return res
+    .clearCookie("my_cookie", {
+      httpOnly: true,
+      path: "/",
+      secure: false,
+      sameSite: "lax",
+    })
+    .status(200)
+    .json({ Message: "Logged out successfully" });
+};
+
 const getAllUser = async (req: Request, res: Response) => {
-  const { page } = req.query as { page: string };
+  const { page, role_id } = req.query as { page: string; role_id: string };
+  console.log("page,role_id: ", page, role_id);
   const users = await prisma.user.findMany({
+    select: {
+      address: true,
+      user_id: true,
+      email: true,
+      name: true,
+      role: true,
+      status: true,
+    },
+    where: {
+      role_id: role_id === "" ? {} : role_id,
+    },
     take: Number(page) * 10,
   });
   return res.status(200).json({ users: users });
+};
+
+const getAUser_Admin = async (req: Request, res: Response) => {
+  //get user id
+  const { user_id } = req.query as { user_id: string };
+  const exists = await prisma.user.findFirst({
+    select: {
+      user_id: true,
+    },
+    where: {
+      user_id: user_id,
+    },
+  });
+
+  if (!exists) return res.status(400).json({ Message: "User not found" });
+  const user = await prisma.user.findFirst({
+    select: {
+      email: true,
+      name: true,
+      address: true,
+      user_id: true,
+      role: true,
+      status: true,
+      order_user_create: {
+        select: {
+          order_id: true,
+          create_at: true,
+          method: true,
+          payment: true,
+          status: true,
+          total: true,
+          update_at: true,
+          user_create: {
+            select: {
+              email: true,
+              name: true,
+            },
+          },
+          user_ship: {
+            select: {
+              user_id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      carts: {
+        select: {
+          cart_detail: {
+            select: {
+              product: {
+                select: {
+                  product_id: true,
+                  product_name: true,
+                  price: true,
+                  imageUrl: true,
+                  product_size: true,
+                  product_color: true,
+                },
+              },
+              quantity: true,
+              active: true,
+            },
+          },
+        },
+      },
+    },
+    where: {
+      user_id: user_id,
+    },
+  });
+  const format_user = {
+    user_id: user?.user_id,
+    email: user?.email,
+    address: user?.address,
+    name: user?.name,
+    status: user?.status,
+    role: user?.role,
+    carts: user?.carts?.cart_detail.map((item) => ({
+      quantity: item.quantity,
+      subtotal: item.quantity * Number(item.product.price),
+      active: item.active,
+      product: item.product,
+    })),
+    orders: user?.order_user_create.map((item) => ({
+      order_id: item.order_id,
+      total: Number(item.total),
+      create_at: item.create_at,
+      status: item.status,
+      payment: item.payment,
+      method: item.method,
+      update_at: item.update_at,
+      user_create: item.user_create,
+      user_ship: item.user_ship,
+    })),
+  };
+  console.log("format_user: ", format_user);
+  return res.status(200).json({ user: format_user });
 };
 
 const getAUser = async (req: Request, res: Response) => {
@@ -171,61 +338,29 @@ const banUser = async (req: Request, res: Response) => {
   return res.status(200).json({ Message: "Delete successfully" });
 };
 
-const loginUser = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  // gmail, password will validate on client;
-  const exists = await prisma.user.findFirst({
+const getAllUserIsShipperByRoleName = async (req: Request, res: Response) => {
+  const { role_name } = req.query as { role_name: string };
+  const exists = await prisma.role.findFirst({
     where: {
-      email,
-    },
-    include: {
-      role: true,
+      role_name: role_name,
     },
   });
-  console.log("email,password", email, password, exists);
-  if (!exists)
-    return res.status(400).json({ Message: "Wrong email or password" });
-  const verify = await compare(password, exists.password);
-  console.log(verify);
-  if (!verify)
-    return res.status(400).json({ Message: "Wrong email or password" });
-  const token = createToken({
-    user_id: exists.user_id,
-    email,
-    name: exists.name ?? "",
-    role: exists.role.role_name,
-  });
-  res.cookie("my_cookie", token, {
-    httpOnly: true,
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: false,
-    sameSite: "lax",
-  });
-  //Client will save token and admin (boolean) to localStorage
-  console.log("login success");
-  return res.status(200).json({
-    Message: "Login successfully",
-    user: {
-      role: exists.role.role_name,
-      email: exists.email,
-      user_id: exists.user_id,
+  if (!exists) {
+    return res.status(404).json({ Message: "Không tồn tại role này" });
+  }
+  const users = await prisma.user.findMany({
+    select: {
+      user_id: true,
+      name: true,
+    },
+    where: {
+      role: {
+        role_name: role_name,
+      },
     },
   });
-};
-
-const logoutUser = async (req: Request, res: Response) => {
-  console.log("Logout success");
-  return res
-    .clearCookie("my_cookie", {
-      httpOnly: true,
-      path: "/",
-      secure: false,
-      sameSite: "lax",
-    })
-    .status(200)
-    .json({ Message: "Logged out successfully" });
+  console.log("shipper: ",users);
+  return res.status(200).json({ users: users });
 };
 
 export {
@@ -237,4 +372,6 @@ export {
   getAUser,
   logoutUser,
   updateUser,
+  getAUser_Admin,
+  getAllUserIsShipperByRoleName
 };

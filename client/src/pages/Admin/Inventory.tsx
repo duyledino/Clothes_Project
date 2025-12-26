@@ -1,81 +1,151 @@
 "use client";
-import React from "react";
+import Pagination from "@/components/general/Pagination";
+import Loading from "@/components/ui/Loading";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { fetchGetAllInventory } from "@/slice/InventorySlice";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const DATA = [
-  { inv: "INV-8832", prod: "PRD-901", name: "Áo thun nam", qty: 128, created: "2023-10-21", updated: "2 hours ago" },
-  { inv: "INV-8833", prod: "PRD-442", name: "Quần jean nữ", qty: 5, created: "2023-09-12", updated: "1 day ago" },
-  { inv: "INV-8835", prod: "PRD-998", name: "Áo khoác", qty: 0, created: "2023-08-15", updated: "Yesterday" },
-];
+// 
 
-function getStatus(qty: number) {
-  if (qty === 0) return { text: "Out of Stock", cls: "bg-red-100 text-red-800" };
-  if (qty <= 10) return { text: "Low Stock", cls: "bg-yellow-100 text-yellow-800" };
+function getStatus(quantity: number, min_quantity: number) {
+  if (quantity === 0)
+    return { text: "Out of Stock", cls: "bg-red-100 text-red-800" };
+  if (quantity <= min_quantity)
+    return { text: "Low Stock", cls: "bg-yellow-100 text-yellow-800" };
   return { text: "In Stock", cls: "bg-green-100 text-green-800" };
 }
 
 export default function Inventory() {
+  const [page, setPage] = useState<number>(1);
+  const router = useNavigate();
+  const dispatch = useAppDispatch();
+  const { loadingInventory, total_page, Inventories } = useAppSelector(
+    (state) => state.InventorySlice
+  );
+  useEffect(() => {
+    dispatch(fetchGetAllInventory(page));
+  }, []);
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Inventory</h1>
-        <button className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
-          Add Product
-        </button>
+    <>
+      {loadingInventory && <Loading />}
+      <div className="p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-xl font-bold">Inventory</h1>
+          <button
+            onClick={() => {
+              router("AddStockReceipt");
+            }}
+            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            Thêm phiếu nhập
+          </button>
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <Th>Hình ảnh</Th>
+                <Th>Product</Th>
+                <Th>IDs (Inv / Prod)</Th>
+                <Th>Status</Th>
+                <Th>Quantity</Th>
+                <Th>Dates</Th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200">
+              {Inventories.map((item) => {
+                const st = getStatus(item.quantity, item.min_quantity);
+                return (
+                  <tr
+                    key={
+                      item.inventory_id +
+                      item.product_id +
+                      item.color_id +
+                      item.size_id
+                    }
+                    className="hover:bg-gray-50"
+                  >
+                    <td className="p-4 flex justify-center items-center">
+                      <img
+                        src={`${item.product.imageUrl}`}
+                        className="w-11 h-auto font-medium"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium">
+                        {item.product.product_name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {item.product.category.category_name}, {item.size_id},{" "}
+                        <span
+                          className="inline-block w-3 h-3"
+                          style={{backgroundColor: `${item.color_id}`}}
+                        ></span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 text-sm">
+                      <div>
+                        Inv:{" "}
+                        <span className="font-mono">{item.inventory_id}</span>
+                      </div>
+                      <div className="text-gray-500">
+                        Prod:{" "}
+                        <span className="font-mono">{item.product_id}</span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2 text-xs font-semibold ${st.cls}`}
+                      >
+                        {st.text}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-sm">
+                      <b>{item.quantity}</b> units
+                    </td>
+
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div>
+                        Created:{" "}
+                        {item.create_at
+                          .toLocaleString("vi-VN", {
+                            timeZone: "Asia/Ho_Chi_Minh",
+                          })
+                          .replace("T", " ")
+                          .replace("Z", "")}
+                      </div>
+                      <div className="text-xs">
+                        Updated:{" "}
+                        {item.update_at
+                          .toLocaleString("vi-VN", {
+                            timeZone: "Asia/Ho_Chi_Minh",
+                          })
+                          .replace("T", " ")
+                          .replace("Z", "")}
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 text-right">
+                      <button className="text-blue-500 hover:text-blue-600">
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <Pagination page={page} setPage={setPage} total_page={total_page}/>
       </div>
-
-      <div className="overflow-hidden rounded-lg bg-white shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <Th>Product</Th>
-              <Th>IDs (Inv / Prod)</Th>
-              <Th>Status</Th>
-              <Th>Quantity</Th>
-              <Th>Dates</Th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-200">
-            {DATA.map((x) => {
-              const st = getStatus(x.qty);
-              return (
-                <tr key={x.inv + x.prod} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="font-medium">{x.name}</div>
-                    <div className="text-sm text-gray-500">Clothes</div>
-                  </td>
-
-                  <td className="px-6 py-4 text-sm">
-                    <div>Inv: <span className="font-mono">{x.inv}</span></div>
-                    <div className="text-gray-500">Prod: <span className="font-mono">{x.prod}</span></div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex rounded-full px-2 text-xs font-semibold ${st.cls}`}>
-                      {st.text}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 text-sm">
-                    <b>{x.qty}</b> units
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    <div>Created: {x.created}</div>
-                    <div className="text-xs">Updated: {x.updated}</div>
-                  </td>
-
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-blue-500 hover:text-blue-600">Edit</button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </>
   );
 }
 

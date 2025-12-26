@@ -3,7 +3,9 @@ import {
   banUser,
   createAUser,
   getAllUser,
+  getAllUserIsShipperByRoleName,
   getAUser,
+  getAUser_Admin,
   loginUser,
   logoutUser,
   updateUser,
@@ -18,11 +20,22 @@ import {
 const router = express.Router();
 
 const route = (app: Application) => {
-  router.get("/allUsers", asyncHandler(getAllUser));
+  router.get(
+    "/getAllUser",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    asyncHandler(getAllUser)
+  );
   router.get(
     "/getAUser",
     asyncHandler(authenticateUser),
     asyncHandler(getAUser)
+  );
+  router.get(
+    "/getAUser_Admin",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    asyncHandler(getAUser_Admin)
   );
   router.post("/createAUser", asyncHandler(createAUser));
   router.post(
@@ -44,6 +57,12 @@ const route = (app: Application) => {
     asyncHandler(banUser)
   );
   router.post("/login", asyncHandler(loginUser));
+  router.get(
+    "/getAllUserIsShipperByRoleName",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    asyncHandler(getAllUserIsShipperByRoleName)
+  );
   return app.use("/api/v1/user", router);
 };
 

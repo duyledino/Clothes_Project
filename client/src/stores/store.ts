@@ -15,6 +15,8 @@ import SizeReducer from "@/slice/SizeSlice";
 import ColorReducer from "@/slice/ColorSlice";
 import RoleReducer from "@/slice/RoleSlice";
 import CategoryReducer from "@/slice/CategorySlice";
+import ProviderReducer from "@/slice/ProviderSlice";
+import InventoryReducer from "@/slice/InventorySlice";
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +36,8 @@ export const store = configureStore({
     ColorSlice: ColorReducer,
     RoleSlice: RoleReducer,
     CategorySlice: CategoryReducer,
+    ProviderSlice: ProviderReducer,
+    InventorySlice: InventoryReducer,
   },
 });
 

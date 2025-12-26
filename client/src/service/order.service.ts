@@ -15,9 +15,15 @@ export const orderService = {
   },
 
   // PUT /order/updateOrder?id=... (Body: payment, status)
-  updateOrder: async (order_id: string, data: { payment: string; status: string }) => {
-    console.log("order_id",order_id);
-    const response = await myAxios.put(`/order/updateOrder?order_id=${order_id}`, data);
+  updateOrder: async (
+    order_id: string,
+    data: { payment: string; status: string; shipper_id: string|null }
+  ) => {
+    console.log("order_id", order_id);
+    const response = await myAxios.put(
+      `/order/updateOrder?order_id=${order_id}`,
+      data
+    );
     return response.data;
   },
 
@@ -30,9 +36,17 @@ export const orderService = {
     return response.data;
   },
 
-  // GET /order/getOrderById?id=...
-  getOrderById: async (user_id: string) => {
-    const response = await myAxios.get(`/order/getOrderById?user_id=${user_id}`);
+  // GET /order/getOrderByUserId?user_id=...
+  getOrderByUserId: async (user_id: string) => {
+    const response = await myAxios.get(
+      `/order/getOrderById?user_id=${user_id}`
+    );
+    return response.data;
+  },
+  getOrderByOrderId: async (order_id: string) => {
+    const response = await myAxios.get(
+      `/order/getOrderByOrderId?order_id=${order_id}`
+    );
     return response.data;
   },
 };

@@ -3,7 +3,7 @@ import UserInfo from "@/components/guest/UserInfo";
 import UserOrder from "@/components/guest/UserOrder";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "react-toastify";
-import { fetchGetOrdersById, fetchUpdateOrder } from "@/slice/OrderSlice";
+import { fetchGetOrdersByUserId, fetchUpdateOrder } from "@/slice/OrderSlice";
 import Loading from "@/components/ui/Loading";
 import Modal from "@/components/guest/Modal";
 import { fetchApiPaymentURL } from "@/slice/PaymentSlice";
@@ -95,7 +95,7 @@ const Profile = () => {
       //   return;
       // }
       setOpen(false);
-      dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
+      dispatch(fetchGetOrdersByUserId({ user_id: user?.user.user_id! }));
       toast.success(MessageOrder);
     }
   }, [errorOrder, MessageOrder]);
@@ -103,12 +103,12 @@ const Profile = () => {
     // if (localStore === undefined || localStore === null) {
     //   return;
     // }
-    dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
+    dispatch(fetchGetOrdersByUserId({ user_id: user?.user.user_id! }));
     const storageChange = () => {
       const result = localStorage.getItem("payment_result");
       if (result !== null || result !== undefined) {
         setProcess(false);
-        dispatch(fetchGetOrdersById({ user_id: user?.user.user_id! }));
+        dispatch(fetchGetOrdersByUserId({ user_id: user?.user.user_id! }));
         toast.info(JSON.parse(result as string));
         localStorage.removeItem("payment_result");
       }
@@ -185,6 +185,7 @@ const Profile = () => {
                   setParam={setParam}
                   setOpen={setOpen}
                   OrderUser={{
+                    delivered_date: item.delivered_date,
                     method: item.method,
                     create_at: item.create_at,
                     update_at: item.update_at,

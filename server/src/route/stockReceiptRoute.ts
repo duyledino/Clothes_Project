@@ -4,7 +4,7 @@ import {
   authenticateAdmin,
   authenticateUser,
 } from "../middleware/authentication.js";
-import { getAllStockReceipt,createAStockReceipt,getPrepareBeforeAdd } from "../controller/stock/controller.js";
+import { getAllStockReceipt,createStockReceipt,getPrepareBeforeAdd } from "../controller/stock/controller.js";
 
 const router = express.Router();
 
@@ -15,9 +15,9 @@ const initRoute = (app: Express) => {
     asyncHandler(authenticateAdmin),
     asyncHandler(getAllStockReceipt)
   );
-  router.post("/createAStockReceipt",asyncHandler(authenticateUser),asyncHandler(authenticateAdmin),asyncHandler(createAStockReceipt));
+  router.post("/createStockReceipt",asyncHandler(authenticateUser),asyncHandler(authenticateAdmin),asyncHandler(createStockReceipt));
   router.get("/getPrepareBeforeAdd",asyncHandler(authenticateUser),asyncHandler(authenticateAdmin),asyncHandler(getPrepareBeforeAdd));
-  return app.use("api/v1/stockReceipt", router);
+  return app.use("/api/v1/stockReceipt", router);
 };
 
 export default initRoute;

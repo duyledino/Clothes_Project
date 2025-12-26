@@ -95,6 +95,34 @@ const getAllProductsAdmin = async (req: Request, res: Response) => {
   return res.status(200).json({ products: fixBigIntProducts });
 };
 
+const getAllProductsAdminStock = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string);
+  console.log("page ", page);
+  const products = await prisma.product.findMany({
+    select: {
+      product_id: true,
+      product_name: true,
+      imageUrl: true,
+      price: true,
+      product_size: true,
+      product_color: true,
+      category: true,
+      count: true,
+      status: true,
+    },
+    skip: 8 * (page - 1),
+    take: 8,
+    orderBy: {
+      price: "desc",
+    },
+  });
+  const fixBigIntProducts = products.map((item: any) => ({
+    ...item,
+    price: Number(item.price),
+  }));
+  return res.status(200).json({ products: fixBigIntProducts });
+};
+
 const getLastestProduct = async (req: Request, res: Response) => {
   const lastest = await prisma.product.findMany({
     select: {

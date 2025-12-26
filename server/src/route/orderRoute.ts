@@ -1,5 +1,5 @@
 import express, { type Application } from 'express'
-import {createAOrder,getAllOrder,getOrdersById,getTotalPage,updateAOrder} from '../controller/order/controller.js'
+import {createAOrder,getAllOrder,getOrderByOrderId,getOrderByUserId,getTotalPage,updateAOrder} from '../controller/order/controller.js'
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { authenticateUser,authenticateAdmin } from '../middleware/authentication.js';
 
@@ -10,7 +10,8 @@ const route = (app:Application)=>{
     router.post("/createAOrder",asyncHandler(createAOrder));
     router.put("/updateOrder",asyncHandler(updateAOrder)); // this route aims to update payment status and order status
     router.get("/getTotalPage",asyncHandler(getTotalPage));
-    router.get("/getOrderById",asyncHandler(authenticateUser),asyncHandler(getOrdersById));
+    router.get("/getOrderByUserId",asyncHandler(authenticateUser),asyncHandler(getOrderByUserId));
+    router.get("/getOrderByOrderId",asyncHandler(authenticateUser),asyncHandler(getOrderByOrderId));
     return app.use("/api/v1/order",router);
 }
 

@@ -45,22 +45,12 @@ export interface ProductData {
   product_size: Product_Size[];
   product_color: Product_Color[];
 }
-export interface ProductDataAmin {
-  product_id: string;
-  product_name: string;
-  price: number;
-  imageUrl: string[];
-  category: CategoryOrigin;
-  product_size: Product_Size[];
-  product_color: Product_Color[];
-  count: number;
-  status: string;
-}
 
 //end product type
 
 // cart type
 export interface cartItem {
+  // Trùng thuộc tính (cắt bớt)
   product_size: Product_Size | null;
   product_color: Product_Color | null;
   quantity: number;
@@ -108,13 +98,14 @@ export interface OrderData {
   payment: string;
   status: string;
   method: string;
+  delivered_date: Date;
   user_create: userInOrderProfile;
   user_ship: shipperInOrderProfile | null;
   order_detail: detail[];
 }
 
 export interface userInOrderProfile {
-  email:string;
+  email: string;
   address: string;
   name: string;
 }
@@ -131,6 +122,7 @@ export interface OrderUser {
   total: number;
   create_at: Date;
   update_at: Date;
+  delivered_date: Date;
   payment: string;
   status: string;
   method: string;
@@ -264,3 +256,129 @@ export interface CategoryOrigin {
 }
 
 // end category type
+
+// admin type
+
+export interface orderUserInAdminPanel {
+  order_id: string;
+  total: number;
+  create_at: Date;
+  update_at: Date;
+  payment: string;
+  status: string;
+  method: string;
+  user_create: userInOrderProfile;
+  user_ship: shipperInOrderProfile | null;
+}
+
+export interface userInAdminPanel {
+  user_id: string;
+  email: string;
+  name: string;
+  address: string;
+  role: RoleOrigin;
+  status: boolean;
+}
+
+export interface userDetailInAdminPanel {
+  user_id: string;
+  email: string;
+  name: string;
+  address: string;
+  role: RoleOrigin;
+  carts: cartItem[];
+  orders: orderUserInAdminPanel[];
+}
+
+export interface ProductDataAmin {
+  product_id: string;
+  product_name: string;
+  price: number;
+  imageUrl: string[];
+  category: CategoryOrigin;
+  product_size: Product_Size[];
+  product_color: Product_Color[];
+  count: number;
+  status: string;
+}
+
+export interface OrderDetailInAdmin {
+  product_id: string;
+  imageUrl: string;
+  product_name: string;
+  quantity: number;
+  subtotal: number;
+  product_size: Product_Size | null;
+  product_color: Product_Color | null;
+}
+
+export interface OrderUserInAdmin {
+  order_id: string;
+  user_create: userInOrderProfile;
+  user_ship: shipperInOrderProfile | null;
+  total: number;
+  create_at: Date;
+  update_at: Date;
+  delivered_date: Date;
+  payment: string;
+  status: string;
+  method: string;
+  order_detail: OrderDetailInAdmin[];
+}
+
+export interface paymentAndStatusAdmin {
+  order_id: string;
+  payment: string;
+  status: string;
+  shipper_id: string;
+}
+
+export interface ProviderOrigin {
+  provider_id: string;
+  provider_name: string;
+}
+
+export interface InventoryInAdmin {
+  inventory_id: string;
+  create_at: Date;
+  product_id: string;
+  color_id: string;
+  size_id: string;
+  min_quantity: number;
+  update_at: Date;
+  quantity: number;
+  product: {
+    category: CategoryOrigin;
+    imageUrl: string;
+    product_name: string;
+  };
+}
+
+export interface InventoryInSearchAdmin {
+  inventory_id: string;
+  product_id: string;
+  color_id: string;
+  size_id: string;
+  min_quantity: number;
+  quantity: number;
+  product: {
+    product_name: string;
+  };
+}
+
+export interface StockReceiptDetail {
+  inventory_id: string;
+  product_name: string; // can be ignored but I need to show name
+  product_id: string;
+  size_id: string;
+  color_id: string;
+  quantity: number;
+}
+
+export interface StockReceipt {
+  provider_id: string;
+  user_id: string;
+  stock_receipt_detail: StockReceiptDetail[];
+}
+
+//end admin type

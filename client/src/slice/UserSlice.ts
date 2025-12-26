@@ -1,5 +1,11 @@
 import { userService } from "@/service/user.service";
-import type { user, userData } from "@/type/types.frontend";
+import type {
+  shipperInOrderProfile,
+  user,
+  userData,
+  userDetailInAdminPanel,
+  userInAdminPanel,
+} from "@/type/types.frontend";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,12 +17,18 @@ const initialState: {
   errorUser: string | null;
   Message: string | null;
   User: user | null;
+  AllUser: userInAdminPanel[];
+  User_Admin: userDetailInAdminPanel | null;
+  AllUserShipper: shipperInOrderProfile[];
 } = {
+  AllUserShipper: [],
   loadingUser: false,
   data: null,
   errorUser: null,
   Message: null,
   User: null,
+  AllUser: [],
+  User_Admin: null,
 };
 
 export const fetchUpdateUser = createAsyncThunk(
@@ -46,7 +58,7 @@ export const fetchUpdateUser = createAsyncThunk(
       return response.Message;
     } catch (error: any) {
       console.log(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -66,14 +78,68 @@ export const fetchUserById = createAsyncThunk(
       return response.user;
     } catch (error: any) {
       console.log(error);
-      const message = error.response?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
-
     }
   }
 );
 
+export const fetchGetAllUser = createAsyncThunk(
+  "user/getAllUser",
+  async (
+    { page, role_id }: { page: number; role_id: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userService.getAllUser(page, role_id);
+      console.log("response.data in userSlice: ", response.users);
+      return response.users;
+    } catch (error: any) {
+      console.error("error in fetchGetAllUser: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchGetAUser_Admin = createAsyncThunk(
+  "user/GetAUser_Admin",
+  async (user_id: string, { rejectWithValue }) => {
+    try {
+      console.log("user_id: ", user_id);
+      const response = await userService.getAUser_Admin(user_id);
+      console.log("response.data in userSlice: ", response.user);
+      return response.user;
+    } catch (error: any) {
+      console.error("error in GetAUser_Admin: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchUserIsShipperByName = createAsyncThunk(
+  "user/fetchUserIsShipperByName/get",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userService.getAllUserIsShipperByRoleName(
+      );
+      console.log(
+        "response.data in getAllUserIsShipperByRoleName: ",
+        response.users
+      );
+      return response.users;
+    } catch (error: any) {
+      console.error("error in getAllUserIsShipperByRoleName: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user Slice",
   initialState,
@@ -108,6 +174,39 @@ const userSlice = createSlice({
       .addCase(fetchUserById.rejected, (state, action) => {
         state.loadingUser = false;
         state.errorUser = action.payload as string;
+      });
+    builder
+      .addCase(fetchGetAllUser.pending, (state, action) => {
+        state.loadingUser = true;
+      })
+      .addCase(fetchGetAllUser.fulfilled, (state, action) => {
+        state.loadingUser = false;
+        state.AllUser = action.payload! as userInAdminPanel[];
+      })
+      .addCase(fetchGetAllUser.rejected, (state, action) => {
+        state.loadingUser = false;
+      });
+    builder
+      .addCase(fetchGetAUser_Admin.pending, (state, action) => {
+        state.loadingUser = true;
+      })
+      .addCase(fetchGetAUser_Admin.fulfilled, (state, action) => {
+        state.loadingUser = false;
+        state.User_Admin = action.payload! as userDetailInAdminPanel;
+      })
+      .addCase(fetchGetAUser_Admin.rejected, (state, action) => {
+        state.loadingUser = false;
+      });
+    builder
+      .addCase(fetchUserIsShipperByName.pending, (state, action) => {
+        state.loadingUser = true;
+      })
+      .addCase(fetchUserIsShipperByName.fulfilled, (state, action) => {
+        state.loadingUser = false;
+        state.AllUserShipper = action.payload! as shipperInOrderProfile[];
+      })
+      .addCase(fetchUserIsShipperByName.rejected, (state, action) => {
+        state.loadingUser = false;
       });
   },
 });
