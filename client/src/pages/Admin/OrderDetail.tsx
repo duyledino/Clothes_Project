@@ -373,7 +373,7 @@ export default function OrderDetail() {
                         <div className="flex items-start gap-3">
                           <Phone size={18} className="text-[#616f89]" />
                           {/* Missing phone property */}
-                          <p className="text-sm">{"0123456789"}</p>
+                          <p className="text-sm">{OrderUserAdmin.user_create.phone}</p>
                         </div>
                       </div>
                     </div>

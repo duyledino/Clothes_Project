@@ -17,7 +17,7 @@ const createARole = async (req: Request, res: Response) => {
   const { role_name } = req.body;
 
   if (!role_name) {
-    throw new Error("Role name is required");
+    return res.status(400).json({ Message: "Thiếu tên role" });
   }
 
   const exists = await prisma.role.findFirst({
@@ -42,7 +42,7 @@ const createARole = async (req: Request, res: Response) => {
   });
 
   res.status(201).json({
-    Message: "Role created successfully",
+    Message: "Tạo role thành công.",
     newRole: newRole,
   });
 };
@@ -102,4 +102,55 @@ const updateARole = async (req: Request, res: Response) => {
   });
 };
 
-export { getAllRole, createARole, getARole, updateARole };
+const deleteARole = async (req: Request, res: Response) => {
+  const { role_id } = req.query as {
+    role_id: string;
+  };
+
+  const exists = await prisma.role.findFirst({
+    select: {
+      role_id: true,
+      role_name: true,
+    },
+    where: {
+      role_id: role_id,
+    },
+  });
+
+  if (!exists) {
+    return res.status(404).json({ Message: "Không tìm thấy vai trò này" });
+  }
+
+  const userInRole = await prisma.user.findFirst({
+    select: {
+      name: true,
+      email: true,
+    },
+    where: {
+      role_id: role_id,
+    },
+  });
+
+  if (userInRole) {
+    return res.status(400).json({
+      Message: `Không thể xóa: Vẫn còn người dùng (${userInRole.email}) đang giữ vai trò này.`,
+    });
+  }
+
+  const roleDel = await prisma.role.delete({
+    select: {
+      role_id: true,
+      role_name: true,
+    },
+    where: {
+      role_id: role_id,
+    },
+  });
+
+  return res.status(200).json({
+    Message: "Đã xóa vai trò thành công: " + roleDel.role_name,
+    Data: roleDel.role_id,
+  });
+};
+
+export { getAllRole, createARole, getARole, updateARole, deleteARole };

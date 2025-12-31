@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Package } from "lucide-react";
-
-// Mock data
-const PREPARE_ORDERS = [
-  { id: "1028", customer: "Alice Smith", date: "2023-12-25", items: 3, total: "$120.00", status: "Processing" },
-  { id: "1029", customer: "Bob Jones", date: "2023-12-26", items: 1, total: "$45.00", status: "Paid" },
-];
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { fetchGetPrepareOrders } from "@/slice/OrderSlice";
+import Loading from "@/components/ui/Loading";
+import Pagination from "@/components/general/Pagination";
 
 export default function PrepareOrders() {
+  const { ShipperPrepareOrders,loadingOrder,totalPagesPrepareOrders } = useAppSelector((state) => state.OrderSlice);
+  const dispatch = useAppDispatch();
+  const [page, setPage] = useState(1);
+  useEffect(()=>{
+    dispatch(fetchGetPrepareOrders({
+      page: page
+    }));
+  },[page])
   return (
+    <>
+    {loadingOrder && <Loading/>}
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Prepare Orders</h1>
@@ -27,11 +35,12 @@ export default function PrepareOrders() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {PREPARE_ORDERS.map((order) => (
-              <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-slate-900">#{order.id}</td>
-                <td className="px-6 py-4">{order.customer}</td>
-                <td className="px-6 py-4 text-slate-500">{order.date}</td>
+            {ShipperPrepareOrders.map((order) => (
+              <tr key={order.order_id} className="hover:bg-slate-50 transition-colors">
+                <td className="px-6 py-4 font-medium text-slate-900">#{order.order_id}</td>
+                <td className="px-6 py-4">{order.user_create.name}</td>
+                <td className="px-6 py-4 text-slate-500">{order.create_at.toLocaleString("vi-VN",{timeZone: "Asia/Ho_Chi_Minh"})
+                .replace("T"," ").replace("Z","")}</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     {order.status}
@@ -47,6 +56,8 @@ export default function PrepareOrders() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} setPage={setPage} total_page={totalPagesPrepareOrders}/>
     </div>
+    </>
   );
 }

@@ -49,6 +49,10 @@ import AddCategory from "./pages/Admin/AddCategory";
 import Categories from "./pages/Admin/Categories";
 import Providers from "./pages/Admin/Providers";
 import AddProvider from "./pages/Admin/AddProviders";
+import StockReceipts from "./pages/Admin/StockReceipts";
+import StockReceiptDetail from "./pages/Admin/StockReceiptDetail";
+import NotFound from "./pages/Public/NotFound";
+import ProtectRouteEmployee from "./auth/ProtectRouteEmployee";
 
 function App() {
   const location = useLocation();
@@ -131,9 +135,11 @@ function App() {
             <Route path="Products" element={<Products />} />
             <Route path="User" element={<Users />} />
             <Route path="Provider" element={<Providers />} />
+            <Route path="Receipt" element={<StockReceipts />} />
+            <Route path="Receipt/:receipt_id" element={<StockReceiptDetail />} />
           </Route>
         </Route>
-        {/* <Route element={<ProtectRouteEmployee />}> */}
+        <Route element={<ProtectRouteEmployee />}>
         <Route path="/Employee" element={<EmployeeLayout />}>
           <Route index element={<Navigate to="DoneOrders" replace />} />
           <Route path="DoneOrders" element={<DoneOrders />} />
@@ -146,7 +152,9 @@ function App() {
           {/* <Route path="Products" element={<Products />} /> */}
           {/* <Route path="User" element={<Users />} /> */}
         </Route>
-        {/* </Route> */}
+        </Route>
+        <Route path="/NotFound" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/NotFound" replace />} />
       </Routes>
     </>
   );

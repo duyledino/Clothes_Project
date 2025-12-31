@@ -1,5 +1,5 @@
 import { assets } from "@/assets/frontend_assets/assets";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddToCart from "./AddToCart";
 import Guarantee from "./Guarantee";
 import SkeletonProductInfo from "./SkeletonProductInfo";
@@ -21,9 +21,11 @@ const ProductInfo = ({
   product_color,
   tryon,
   Reviews,
+  inventories,
 }: Product_Review) => {
   console.log(product_size);
   if (
+    inventories === undefined ||
     product_color === undefined ||
     product_id === undefined ||
     product_name === undefined ||
@@ -37,6 +39,8 @@ const ProductInfo = ({
   }
   const [sizeProduct, setSizeProduct] = useState<Product_Size | null>(null);
   const [colorProduct, setColorProduct] = useState<Product_Color | null>(null);
+  const [lockColorId, setLockColorId] = useState<string[]>([]);
+  const [lockSizeId, setLockSizeId] = useState<string[]>([]);
   const image = imageUrl[0];
   const stars = Array.from(
     {
@@ -58,8 +62,44 @@ const ProductInfo = ({
     description,
     price,
     product_size,
-    tryon
+    tryon,
+    inventories,
   );
+  useEffect(() => {
+    if (sizeProduct !== null) {
+      const outOfStockColors =
+        inventories
+          ?.filter(
+            (item) =>
+              item.quantity === 0 && item.size_id === sizeProduct.size_id
+          )
+          .map((item) => item.color_id) ?? [];
+      setLockColorId(outOfStockColors);
+
+      if (colorProduct && outOfStockColors.includes(colorProduct.color_id)) {
+        setColorProduct(null);
+      }
+    } else {
+      setLockColorId([]);
+    }
+
+    if (colorProduct !== null) {
+      const outOfStockSizes =
+        inventories
+          ?.filter(
+            (item) =>
+              item.quantity === 0 && item.color_id === colorProduct.color_id
+          )
+          .map((item) => item.size_id) ?? [];
+      setLockSizeId(outOfStockSizes);
+
+      if (sizeProduct && outOfStockSizes.includes(sizeProduct.size_id)) {
+        setSizeProduct(null);
+      }
+    } else {
+      setLockSizeId([]);
+    }
+  }, [sizeProduct, colorProduct, inventories]);
   return (
     <>
       <div className="w-full flex md:flex-row flex-col md:px-0 px-3 gap-8">
@@ -125,18 +165,23 @@ const ProductInfo = ({
             <div className="flex gap-3">
               {product_size.map((item, index) => (
                 <div
+                  key={item.size_id}
                   className={`bg-gray-300 flex justify-center items-center text-foreground py-3 px-5 text-[16px] transition-all cursor-pointer ${
-                    sizeProduct?.size_id === item.size_id
+                    lockSizeId.find((i) => i == item.size_id) !== undefined
+                      ? `ring-1 ring-black text-gray-100 cursor-not-allowed`
+                      : sizeProduct?.size_id === item.size_id
                       ? "ring-1 ring-orange-300"
                       : ""
                   }`}
-                  onClick={() =>
-                    setSizeProduct((prev) =>
-                      // this is assign to prev
-                      // first click to get and the second will skip
-                      prev === item ? null : (prev = item)
-                    )
-                  }
+                  onClick={() => {
+                    lockSizeId.find((i) => i == item.size_id) === undefined
+                      ? setSizeProduct((prev) =>
+                          // this is assign to prev
+                          // first click to get and the second will skip
+                          prev === item ? null : (prev = item)
+                        )
+                      : "";
+                  }}
                 >
                   {item.size_id}
                 </div>
@@ -144,14 +189,16 @@ const ProductInfo = ({
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <p>Select size</p>
+            <p>Select màu</p>
             {/* // TODO: add size and review product  */}
             <div className="flex gap-3">
               {product_color.map((item, index) => (
                 <div
                   key={item.color_id}
                   className={`p-1 flex justify-center items-center ${
-                    item.color_id === colorProduct?.color_id
+                    lockColorId.find((i) => i == item.color_id) !== undefined
+                      ? `bg-black cursor-no-drop`
+                      : item.color_id === colorProduct?.color_id
                       ? "bg-orange-300"
                       : ""
                   } w-14 h-14`}
@@ -160,11 +207,13 @@ const ProductInfo = ({
                     style={{ backgroundColor: item.color_id }}
                     className={`flex justify-center items-center text-foreground w-full h-full transition-all cursor-pointer`}
                     onClick={() =>
-                      setColorProduct((prev) =>
-                        // this is assign to prev
-                        // first click to get and the second will skip
-                        prev === item ? null : (prev = item)
-                      )
+                      lockColorId.find((i) => i == item.color_id) === undefined
+                        ? setColorProduct((prev) =>
+                            // this is assign to prev
+                            // first click to get and the second will skip
+                            prev === item ? null : (prev = item)
+                          )
+                        : ""
                     }
                   ></div>
                 </div>
@@ -180,8 +229,9 @@ const ProductInfo = ({
                 price,
                 product_name,
                 product_size: sizeProduct,
-                product_color:colorProduct
+                product_color: colorProduct,
               }}
+              inventories={inventories}
             />
             <TryOnButton tryon={tryon} />
           </div>

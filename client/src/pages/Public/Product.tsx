@@ -23,6 +23,10 @@ const ProductDetail = () => {
   const dispatch = useAppDispatch();
   const { id } = useParams<{ id: string }>();
   useEffect(() => {
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    })
     if (id !== undefined) {
       dispatch(fetchGetProductById(id));
       dispatch(fetchReviewsByProductId(id));
@@ -36,8 +40,9 @@ const ProductDetail = () => {
   //   }
   // }, [error, errorReview]);
   console.log("Reviews: ", Reviews);
-  console.log("loading, loadingReview: ", loading,loadingReview);
-  console.log("product",Product);
+  console.log("loading, loadingReview: ", loading, loadingReview);
+  console.log("product", Product);
+  console.log("inventories: ", Product?.inventories);
   return (
     <>
       {loading || (loadingReview && <Loading />)}
@@ -52,6 +57,7 @@ const ProductDetail = () => {
           product_name={Product?.product_name}
           product_size={Product?.product_size}
           product_color={Product?.product_color}
+          inventories={Product?.inventories!}
         />
         <ProductDesAndReview
           product_id={Product?.product_id || ""}

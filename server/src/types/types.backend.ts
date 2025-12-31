@@ -10,7 +10,7 @@ export interface Product_Color{
 
 export interface details {
   product_id: string;
-  count: number;
+  quantity: number;
   subtotal: number;
   product_size: Product_Size;
   product_color: Product_Color;

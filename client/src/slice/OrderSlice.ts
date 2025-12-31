@@ -6,6 +6,10 @@ import type {
   OrderUserInAdmin,
   paymentAndStatus,
   paymentAndStatusAdmin,
+  ShipperDoneOrder,
+  ShipperOrderDetail,
+  ShipperPrepareOrder,
+  ShipperShippingOrder,
 } from "@/type/types.frontend";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
@@ -20,6 +24,13 @@ const initialState: {
   totalPages: number | null;
   OrdersUser: OrderUser[];
   OrderUserAdmin: OrderUserInAdmin | null;
+  ShipperDoneOrders: ShipperDoneOrder[];
+  ShipperPrepareOrders: ShipperPrepareOrder[];
+  ShipperShippingOrders: ShipperShippingOrder[];
+  totalPagesDoneOrders: number ;
+  totalPagesPrepareOrders: number ;
+  totalPagesShippingOrders: number ;
+  ShipperOrderDetail: ShipperOrderDetail|null;
 } = {
   errorOrder: null,
   loadingOrder: false,
@@ -29,6 +40,13 @@ const initialState: {
   totalPages: null,
   OrdersUser: [],
   OrderUserAdmin: null,
+  ShipperDoneOrders: [],
+  ShipperOrderDetail: null,
+  ShipperPrepareOrders: [],
+  ShipperShippingOrders: [],
+  totalPagesDoneOrders: 0,
+  totalPagesPrepareOrders: 0,
+  totalPagesShippingOrders: 0,
 };
 
 export const fetchApiAllOrder = createAsyncThunk(
@@ -113,12 +131,16 @@ export const fetchCreateOrder = createAsyncThunk(
   "create an order",
   // get user id and detail: detail
   async (
-    { user_id, detail }: { user_id: string; detail: detail[] },
+    {
+      user_id,
+      detail,
+      method,
+    }: { user_id: string; detail: detail[]; method: string },
     { rejectWithValue }
   ) => {
     console.log("detail: ", detail); // got this detail[]:
     try {
-      const response = await orderService.createOrder(user_id, detail);
+      const response = await orderService.createOrder(user_id, detail, method);
       toast.success(response.Message || "Tạo đơn thành công");
       return response;
     } catch (error: any) {
@@ -159,6 +181,110 @@ export const fetchOrderByOrderId = createAsyncThunk(
     } catch (error: any) {
       console.error(error);
       const message = error.repsonse?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+
+export const fetchGetDoneOrders = createAsyncThunk(
+  "getDoneOrders/get",
+  // get user id and detail: detail
+  async ({ shipper_id, page }: { shipper_id: string; page: number }, { rejectWithValue }) => {
+    console.log("detail: ", shipper_id);
+    try {
+      const response = await orderService.getDoneOrders(shipper_id, page);
+      console.log("get done orders: ", response.orders);
+      return response;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchGetPrepareOrders = createAsyncThunk(
+  "getPrepareOrders/get",
+  // get user id and detail: detail
+  async ({ page }: { page: number }, { rejectWithValue }) => {
+    try {
+      const response = await orderService.getPrepareOrders(page);
+      console.log("get prepare orders: ", response.orders);
+      return response;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchGetShippingOrdersByShipperId = createAsyncThunk(
+  "getShippingOrdersByShipperId/get",
+  // get user id and detail: detail
+  async ({ shipper_id, page }: { shipper_id: string; page: number }, { rejectWithValue }) => {
+    console.log("detail: ", shipper_id);
+    try {
+      const response = await orderService.getShippingOrdersByShipperId(shipper_id, page);
+      console.log("get shipping orders: ", response.orders);
+      return response;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchGetShipperOrderDetail = createAsyncThunk(
+  "getShipperOrderDetail/get",
+  async ({ order_id }: { order_id: string }, { rejectWithValue }) => {
+    console.log("detail: ", order_id);
+    try {
+      const response = await orderService.getShipperOrderDetail(order_id);
+      return response.order;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchUpdateShipperDelivered = createAsyncThunk(
+  "updateShipperDelivered/put",
+  async ({ order_id }: { order_id: string }, { rejectWithValue }) => {
+    console.log("detail: ", order_id);
+    try {
+      const response = await orderService.updateShipperDelivered(order_id);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchUpdateShipperRejected = createAsyncThunk(
+  "updateShipperRejected/put",
+  async ({ order_id }: { order_id: string }, { rejectWithValue }) => {
+    console.log("detail: ", order_id);
+    try {
+      const response = await orderService.updateShipperRejected(order_id);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -264,6 +390,49 @@ const orderSlice = createSlice({
     builder.addCase(fetchUpdateOrderAdmin.rejected, (state, action) => {
       state.loadingOrder = false;
       // state.errorOrder = action.payload as string;
+    });
+    builder.addCase(fetchGetDoneOrders.pending, (state) => {
+      state.loadingOrder = true;
+    });
+    builder.addCase(fetchGetDoneOrders.fulfilled, (state, action) => {
+      state.loadingOrder = false;
+      state.ShipperDoneOrders = action.payload.orders as ShipperDoneOrder[];
+      state.totalPagesDoneOrders = action.payload.total_page as number;
+    });
+    builder.addCase(fetchGetDoneOrders.rejected, (state, action) => {
+      state.loadingOrder = false;
+    });
+    builder.addCase(fetchGetPrepareOrders.pending, (state) => {
+      state.loadingOrder = true;
+    });
+    builder.addCase(fetchGetPrepareOrders.fulfilled, (state, action) => {
+      state.loadingOrder = false;
+      state.ShipperPrepareOrders = action.payload.orders as ShipperPrepareOrder[];
+      state.totalPagesPrepareOrders = action.payload.total_page as number;
+    });
+    builder.addCase(fetchGetPrepareOrders.rejected, (state, action) => {
+      state.loadingOrder = false;
+    });
+    builder.addCase(fetchGetShippingOrdersByShipperId.pending, (state) => {
+      state.loadingOrder = true;
+    });
+    builder.addCase(fetchGetShippingOrdersByShipperId.fulfilled, (state, action) => {
+      state.loadingOrder = false;
+      state.ShipperShippingOrders = action.payload.orders as ShipperShippingOrder[];
+      state.totalPagesShippingOrders = action.payload.total_page as number;
+    });
+    builder.addCase(fetchGetShippingOrdersByShipperId.rejected, (state, action) => {
+      state.loadingOrder = false;
+    });
+    builder.addCase(fetchGetShipperOrderDetail.pending, (state) => {
+      state.loadingOrder = true;
+    });
+    builder.addCase(fetchGetShipperOrderDetail.fulfilled, (state, action) => {
+      state.loadingOrder = false; 
+      state.ShipperOrderDetail = action.payload as ShipperOrderDetail;
+    });
+    builder.addCase(fetchGetShipperOrderDetail.rejected, (state, action) => {
+      state.loadingOrder = false;
     });
   },
 });

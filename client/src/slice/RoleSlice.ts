@@ -13,7 +13,6 @@ const initialState: {
   role: null,
 };
 
-
 export const fetchGetAllRole = createAsyncThunk(
   "role/getAllRole",
   async (_, { rejectWithValue }) => {
@@ -21,8 +20,7 @@ export const fetchGetAllRole = createAsyncThunk(
       const response = await roleService.getAllRole();
       return response.roles;
     } catch (error: any) {
-      const message =
-        error.response?.data?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -36,8 +34,7 @@ export const fetchGetARole = createAsyncThunk(
       const response = await roleService.getARole(role_id);
       return response.role;
     } catch (error: any) {
-      const message =
-        error.response?.data?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -52,8 +49,7 @@ export const fetchCreateARole = createAsyncThunk(
       toast.success(response.Message || "Tạo role thành công");
       return response.newRole;
     } catch (error: any) {
-      const message =
-        error.response?.data?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -67,21 +63,31 @@ export const fetchUpdateARole = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await roleService.updateARole(
-        role_id,
-        role_name
-      );
+      const response = await roleService.updateARole(role_id, role_name);
       toast.success(response.Message || "Cập nhật role thành công");
       return response.updatedRole;
     } catch (error: any) {
-      const message =
-        error.response?.data?.Message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
   }
 );
 
+export const fetchDeleteARole = createAsyncThunk(
+  "role/fetchDeleteARole",
+  async ({ role_id }: { role_id: string }, { rejectWithValue }) => {
+    try {
+      const response = await roleService.deleteARole(role_id);
+      toast.success(response.Message || "Xóa role thành công");
+      return response.Message;
+    } catch (error: any) {
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
 
 const roleSlice = createSlice({
   name: "role/roleSlice",
@@ -128,6 +134,15 @@ const roleSlice = createSlice({
         state.loadingRole = false;
       })
       .addCase(fetchUpdateARole.rejected, (state) => {
+        state.loadingRole = false;
+      })
+      .addCase(fetchDeleteARole.pending, (state) => {
+        state.loadingRole = true;
+      })
+      .addCase(fetchDeleteARole.fulfilled, (state) => {
+        state.loadingRole = false;
+      })
+      .addCase(fetchDeleteARole.rejected, (state) => {
         state.loadingRole = false;
       });
   },

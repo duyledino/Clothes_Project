@@ -9,7 +9,7 @@ const ContactUs = () => {
       <div className="container mx-auto">
         <div className="flex justify-center items-center gap-4 w-full mb-14">
           <h2 className="text-xl font-semibold text-gray-500 rounded-full uppercase">
-            Contact <span className="text-black">US</span>
+            LIÊN HỆ <span className="text-black">VỚI CHÚNG TÔI</span>
           </h2>
           <p className="w-9 h-0.5 rounded-full bg-black"></p>
         </div>
@@ -23,23 +23,23 @@ const ContactUs = () => {
           </div>
           <div className=" text-[14px] md:text-start text-center">
             <h3 className="text-2xl font-semibold text-gray-600 mb-4">
-              Our Store
+              Cửa Hàng Của Chúng Tôi
             </h3>
             <p className="text-gray-700 mb-2">54709 Willms Station</p>
             <p className="text-gray-700 mb-2">Suite 350, Washington, USA</p>
-            <p className="text-gray-700 mb-2">Tel: (415) 555-0132</p>
+            <p className="text-gray-700 mb-2">SĐT: (415) 555-0132</p>
             <p className="text-gray-700 mb-4">Email: admin@forever.com</p>
             <h3 className="text-2xl font-semibold text-gray-600 mb-4">
-              Careers at Forever
+              Tuyển Dụng tại Forever
             </h3>
             <p className="text-gray-700 mb-4">
-              Learn more about our teams and job openings.
+              Tìm hiểu thêm về đội ngũ của chúng tôi và các vị trí đang tuyển.
             </p>
             <Button
               variant={"ghost"}
               className="hover:bg-gray-900 hover:text-white text-gray-800 font-semibold py-6 px-8 rounded bg-transparent border-2 border-gray-900 cursor-pointer"
             >
-              Explore Jobs
+              Xem Việc Làm
             </Button>
           </div>
         </div>

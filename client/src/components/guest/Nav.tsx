@@ -70,6 +70,16 @@ const Nav = () => {
                 </Link>
               </li>
             )}
+            {user && user.user && user.user.role === "shipper" && (
+              <li>
+                <Link
+                  to="/Employee"
+                  className="uppercase w-full h-full ring-1 ring-black/30 px-5 py-2 rounded-full hover:bg-foreground hover:text-background transition-all"
+                >
+                  Shipper
+                </Link>
+              </li>
+            )}
         </ul>
       </nav>
     </>

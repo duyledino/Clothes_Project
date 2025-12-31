@@ -7,14 +7,6 @@ import { cloudinary } from "../../config/cloudinary.js";
 
 const prisma = new PrismaClient();
 
-interface queryFindProduct {
-  query: string;
-}
-
-interface queryIdProduct {
-  id: string;
-}
-
 // Request<
 //   ParamsDictionary = {}, // req.params
 //   ResBody = any,         // res.json body
@@ -190,9 +182,15 @@ const createAProduct = async (req: Request, res: Response) => {
     return res.status(400).json({ Message: "Missing info" });
   }
   // receive string first then covert them to string[]
-  const { product_name, description, price, category, size,color } = req.body as {
-    product_name:string, description:string, price:number, category:string, size:string ,color:string
-  };
+  const { product_name, description, price, category, size, color } =
+    req.body as {
+      product_name: string;
+      description: string;
+      price: number;
+      category: string;
+      size: string;
+      color: string;
+    };
   console.log(
     "title, description,price,category,size,color: ",
     product_name,
@@ -202,8 +200,8 @@ const createAProduct = async (req: Request, res: Response) => {
     size,
     color
   );
-  const sizes = size.split(',');
-  const colors = color.split(',');
+  const sizes = size.split(",");
+  const colors = color.split(",");
   console.log("file: ", files);
   console.log("sizes: ", sizes);
   console.log("colors: ", colors);
@@ -226,44 +224,52 @@ const createAProduct = async (req: Request, res: Response) => {
   }
   console.log("imageUrl: ", imageUrl);
   const new_product = await prisma.product.create({
-    data:{
+    data: {
       product_id: `PDT-${uuid().slice(0, 8)}`,
       description,
       price: BigInt(price),
       product_name: product_name,
       imageUrl,
       tryon: tryonImg!,
-      category_id:category
-    }
+      category_id: category,
+    },
   });
-  
+
   //success: then insert into product_size and product_color table
   await prisma.product_Size.createMany({
-    data: sizes.map((item,index)=>{return {size_id:item,product_id: new_product.product_id}})
+    data: sizes.map((item, index) => {
+      return { size_id: item, product_id: new_product.product_id };
+    }),
   });
   await prisma.product_Color.createMany({
-    data:colors.map((item,index)=>{return {color_id:item,product_id: new_product.product_id}})
+    data: colors.map((item, index) => {
+      return { color_id: item, product_id: new_product.product_id };
+    }),
   });
-  
-  let data:{
-    product_id:string,
-    size_id:string,
-    color_id:string,
-    quantity:number,
-    create_at: Date
+
+  let data: {
+    product_id: string;
+    size_id: string;
+    color_id: string;
+    quantity: number;
+    create_at: Date;
   }[] = [];
-  let size_data:any[] = sizes.map(item=>(
-    {product_id:new_product.product_id,size_id:item}
-  ));
-  let create_at:Date = new Date(); 
-  size_data.forEach((item,index) => {
-    colors.forEach((item1,index1)=>{
-     data = [...data,{...item,...{color_id: item1,quantity:0,create_at: create_at}}]
-    })
+  let size_data: any[] = sizes.map((item) => ({
+    product_id: new_product.product_id,
+    size_id: item,
+  }));
+  let create_at: Date = new Date();
+  size_data.forEach((item, index) => {
+    colors.forEach((item1, index1) => {
+      data = [
+        ...data,
+        { ...item, ...{ color_id: item1, quantity: 0, create_at: create_at } },
+      ];
+    });
   });
-  console.log("data",data); // [] ??
+  console.log("data", data); // [] ??
   await prisma.inventory.createMany({
-    data: data
+    data: data,
   });
   return res.status(200).json({ Message: "Create product successfully" });
 };
@@ -308,11 +314,8 @@ const reviseProduct = async (req: Request, res: Response) => {
   return res.status(200).json({ Message: "Revise product successfully" });
 };
 
-const findProduct = async (
-  req: Request,
-  res: Response
-) => {
-  const { query } = req.query as {query:string};
+const findProduct = async (req: Request, res: Response) => {
+  const { query } = req.query as { query: string };
   const result = await prisma.product.findMany({
     select: {
       product_id: true,
@@ -326,7 +329,7 @@ const findProduct = async (
       },
     },
   });
-  console.log("result: ",result);
+  console.log("result: ", result);
   const fixBigIntProducts = result.map((item: any) => ({
     ...item,
     price: Number(item.price),
@@ -335,11 +338,8 @@ const findProduct = async (
   return res.status(200).json({ result: fixBigIntProducts });
 };
 
-const getProductById = async (
-  req: Request,
-  res: Response
-) => {
-  const { product_id } = req.query as {product_id: string};
+const getProductById = async (req: Request, res: Response) => {
+  const { product_id } = req.query as { product_id: string };
   const product = await prisma.product.findFirst({
     where: {
       product_id: product_id,
@@ -351,15 +351,25 @@ const getProductById = async (
       description: true,
       price: true,
       product_size: true,
-      product_color:true,
+      product_color: true,
       tryon: true,
+      inventories: {
+        select: {
+          color_id: true,
+          product_id: true,
+          size_id: true,
+          quantity: true,
+        },
+      },
     },
   });
   if (!product) return res.status(400).json({ Message: "Product not found." });
+  console.log("product: ", product);
   const fixBigIntProduct = {
     ...product,
     price: Number(product.price),
   };
+  console.log("fixBigIntProduct: ", fixBigIntProduct);
   return res.status(200).json({ product: fixBigIntProduct });
 };
 
@@ -373,7 +383,9 @@ const getTotalPageFilter = async (req: Request, res: Response) => {
     },
     where: {
       AND: [
-        Category.length > 0 ? { category: { category_name:{in : Category} } } : {},
+        Category.length > 0
+          ? { category: { category_name: { in: Category } } }
+          : {},
       ],
     },
   });

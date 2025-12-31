@@ -47,8 +47,10 @@ const ProductSearchModalForAddStock = ({
             inventory_id: item.inventory_id,
             product_id: item.product_id,
             size_id: item.size_id,
-            quantity: 1,
-            product_name: item.product.product_name
+            quantity: item.quantity,
+            quantity_add: 1,
+            product_name: item.product.product_name,
+            min_quantity: item.min_quantity,
           },
         ])
     );

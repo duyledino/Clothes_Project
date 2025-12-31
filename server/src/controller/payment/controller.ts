@@ -54,7 +54,7 @@ const createPaymentUrl = async (req: Request, res: Response) => {
     vnp_Params["vnp_TxnRef"] = `${planId}`;
     vnp_Params["vnp_OrderInfo"] = `Thanh toán đơn hàng ${planId}`;
     vnp_Params["vnp_OrderType"] = "other";
-    vnp_Params["vnp_Amount"] = Math.round(total * 100).toString();
+    vnp_Params["vnp_Amount"] = Math.round((total+10000) * 100).toString();
     //must encode before set cipher text as queryString  !!
     vnp_Params[
       "vnp_ReturnUrl"

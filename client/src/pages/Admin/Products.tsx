@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { products } from "@/assets/frontend_assets/assets";
 import { Button } from "@/components/ui/button";
 
-import { RotateCcw, Trash } from "lucide-react";
+import { Plus, RotateCcw, Trash } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "react-toastify";
 import Pagination from "@/components/guest/Pagination";
@@ -12,14 +12,25 @@ import {
   fetchProductFromApiAdmin,
   fetchReviseProduct,
 } from "@/slice/ProductSlice";
+import { useNavigate } from "react-router-dom";
 
-const tags = ["image", "name", "size", "category", "price", "sold", "action"];
+const tags = [
+  "image",
+  "name",
+  "size",
+  "màu sắc",
+  "category",
+  "price",
+  "sold",
+  "action",
+];
 
 const Products = () => {
   const [page, setPage] = useState(1);
   const { loading, ProductsAdmin, error, Message } = useAppSelector(
     (state) => state.ProductSlice
   );
+  const router = useNavigate();
   const dispatch = useAppDispatch();
   useEffect(() => {
     console.log("Products Admin: ", ProductsAdmin);
@@ -28,17 +39,17 @@ const Products = () => {
   const handleClickDel = async (id: string) => {
     const ids: string[] = [];
     ids.push(id);
-    const {type} = await dispatch(fetchDeleteProduct({ ids: ids }));
-    if(type.search("reject")==-1){
-      dispatch(fetchProductFromApiAdmin({page}));
+    const { type } = await dispatch(fetchDeleteProduct({ ids: ids }));
+    if (type.search("reject") == -1) {
+      dispatch(fetchProductFromApiAdmin({ page }));
     }
   };
-  const handleClickRevise = async(id: string) => {
+  const handleClickRevise = async (id: string) => {
     const ids: string[] = [];
     ids.push(id);
-    const {type} = await dispatch(fetchReviseProduct({ ids: ids }));
-    if(type.search("reject")==-1){
-      dispatch(fetchProductFromApiAdmin({page}));
+    const { type } = await dispatch(fetchReviseProduct({ ids: ids }));
+    if (type.search("reject") == -1) {
+      dispatch(fetchProductFromApiAdmin({ page }));
     }
   };
   console.log("products: ", ProductsAdmin);
@@ -46,9 +57,21 @@ const Products = () => {
     <>
       {loading && <Loading />}
       <div>
-        <h1 className="mb-3 text-gray-900">Products</h1>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="mb-3 text-gray-900 font-bold text-3xl">Sản phẩm</h1>
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              router("addProduct");
+            }}
+            className="flex items-center gap-2 bg-[#135bec] hover:bg-[#135bec]/90 text-primary-foreground px-4 py-2 rounded-[--radius] hover:opacity-90 transition-all text-sm font-medium shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Sản Phẩm
+          </Button>
+        </div>
         <ul className="flex flex-col gap-3">
-          <li className="list-none md:grid hidden grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 md:place-items-center bg-gray-100 p-2 ">
+          <li className="list-none md:grid hidden grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 md:place-items-center bg-gray-100 p-2 ">
             {tags.map((item, index) => (
               <p key={index} className="capitalize text-gray-900">
                 {item}
@@ -58,7 +81,7 @@ const Products = () => {
           {ProductsAdmin.map((item, index) => (
             <li
               key={item.product_id}
-              className={`p-2 list-none grid md:grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 grid-cols-2 md:place-items-center md:gap-0 gap-2 ${
+              className={`p-2 list-none grid md:grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 grid-cols-2 md:place-items-center md:gap-0 gap-2 ${
                 item.status === "suspend" ? "bg-red-200" : ""
               }`}
             >
@@ -73,9 +96,17 @@ const Products = () => {
                 {item.product_name}
               </p>
               <div className="text-gray-500 md:text-sm text-[12px]">
-                <p>{item.product_size.map(item=>item.size_id).join(",")}</p>
+                <p>{item.product_size.map((item) => item.size_id).join(",")}</p>
               </div>
-
+              <div className="flex gap-1">
+                {item.product_color.map((item) => (
+                  <span
+                    key={item.color_id + item.product_id}
+                    className="inline-block w-3.5 h-3.5"
+                    style={{ backgroundColor: `${item.color_id}` }}
+                  ></span>
+                ))}
+              </div>
               <p className="text-gray-500 md:text-sm text-[12px]">
                 {item.category.category_name}
               </p>

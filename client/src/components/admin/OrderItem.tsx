@@ -94,16 +94,21 @@ const OrderItem = ({ order_data }: { order_data: OrderData }) => {
             </p>
             <p className="md:text-sm text-[12px] text-gray-500">
               Tạo :{" "}
-              {
-                order_data.create_at
-                  .toLocaleString("vi-VN", {
-                    timeZone: "Asia/Ho_Chi_Minh",
-                  })
-                  .split("T")[0]
-              }
+              {order_data.create_at
+                .toLocaleString("vi-VN", {
+                  timeZone: "Asia/Ho_Chi_Minh",
+                })
+                .replace("T", " ")
+                .replace("Z", "")}
             </p>
             <p className="md:text-sm text-[12px] text-gray-500">
-              Cập nhật : {order_data.update_at.toLocaleString().split("T")[0]}
+              Cập nhật :{" "}
+              {order_data.update_at
+                .toLocaleString("vi-VN", {
+                  timeZone: "Asia/Ho_Chi_Minh",
+                })
+                .replace("T", " ")
+                .replace("Z", "")}
             </p>
           </div>
         </div>
@@ -112,13 +117,15 @@ const OrderItem = ({ order_data }: { order_data: OrderData }) => {
             {order_data.total.toLocaleString("vi-VN")} VND
           </div>
           <div className="">
-            {order_data.payment == "done" && order_data.status == "done" ? (
+            {(order_data.payment == "done" && order_data.status == "done" ) || (order_data.status == "canceled")? (
               <Select defaultValue={order_data.status} disabled>
                 <SelectTrigger className="md:w-[180px] w-[140px] md:text-sm text-[12px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={`${order_data.status}`}>{order_data.status}</SelectItem>
+                  <SelectItem value={`${order_data.status}`}>
+                    {order_data.status}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             ) : (

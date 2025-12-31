@@ -1,19 +1,22 @@
 "use client";
+import UpdateInventoryModal from "@/components/admin/UpdateInventoryModal";
 import Pagination from "@/components/general/Pagination";
 import Loading from "@/components/ui/Loading";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { fetchGetAllInventory } from "@/slice/InventorySlice";
+import { fetchGetAllInventory, fetchUpdateNewMinQuantityInventory } from "@/slice/InventorySlice";
+import type { InventoryInAdmin } from "@/type/types.frontend";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-// 
+//
 
 function getStatus(quantity: number, min_quantity: number) {
   if (quantity === 0)
-    return { text: "Out of Stock", cls: "bg-red-100 text-red-800" };
+    return { text: "Hết hàng", cls: "bg-red-100 text-red-800" };
   if (quantity <= min_quantity)
-    return { text: "Low Stock", cls: "bg-yellow-100 text-yellow-800" };
-  return { text: "In Stock", cls: "bg-green-100 text-green-800" };
+    return { text: "SL thấp", cls: "bg-yellow-100 text-yellow-800" };
+  return { text: "Còn hàng", cls: "bg-green-100 text-green-800" };
 }
 
 export default function Inventory() {
@@ -23,11 +26,39 @@ export default function Inventory() {
   const { loadingInventory, total_page, Inventories } = useAppSelector(
     (state) => state.InventorySlice
   );
+  const [selectInventory,setSelectInventory] = useState<InventoryInAdmin | null>(null);
+  const [isOpenUpdateModal, setIsOpenUpdateModal] = useState<boolean>(false);
+  const onUpdate=async (inventory_id: string, new_min_quantity: number)=>{
+    if(!inventory_id && !new_min_quantity){
+      toast.error("Thiếu thông tin cập nhật tồn kho");
+      return;
+    }
+    const {type} = await dispatch(fetchUpdateNewMinQuantityInventory({
+      inventory_id,
+      new_min_quantity
+    }));
+    if(type.search("reject")==-1){
+      dispatch(fetchGetAllInventory(page));
+      setIsOpenUpdateModal(false);
+    }
+  } 
   useEffect(() => {
     dispatch(fetchGetAllInventory(page));
   }, []);
+  useEffect(() => {
+    if(selectInventory!=null){
+      setIsOpenUpdateModal(true);
+    }
+  }, [selectInventory]);
   return (
     <>
+      <UpdateInventoryModal
+                  key={selectInventory?.inventory_id}
+                  inventoryItem={selectInventory}
+                  isOpen={isOpenUpdateModal}
+                  onClose={()=>{setIsOpenUpdateModal(false)}}
+                  onUpdate={onUpdate}
+                  />
       {loadingInventory && <Loading />}
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
@@ -50,7 +81,8 @@ export default function Inventory() {
                 <Th>Product</Th>
                 <Th>IDs (Inv / Prod)</Th>
                 <Th>Status</Th>
-                <Th>Quantity</Th>
+                <Th>SL hiện tại</Th>
+                <Th>SL tối thiểu</Th>
                 <Th>Dates</Th>
                 <th></th>
               </tr>
@@ -60,6 +92,7 @@ export default function Inventory() {
               {Inventories.map((item) => {
                 const st = getStatus(item.quantity, item.min_quantity);
                 return (
+                  <>
                   <tr
                     key={
                       item.inventory_id +
@@ -67,7 +100,7 @@ export default function Inventory() {
                       item.color_id +
                       item.size_id
                     }
-                    className="hover:bg-gray-50"
+                    className={`hover:bg-gray-50 ${item.quantity<=item.min_quantity?"bg-yellow-100":item.quantity===0?"bg-red-100":""}`}
                   >
                     <td className="p-4 flex justify-center items-center">
                       <img
@@ -83,7 +116,7 @@ export default function Inventory() {
                         {item.product.category.category_name}, {item.size_id},{" "}
                         <span
                           className="inline-block w-3 h-3"
-                          style={{backgroundColor: `${item.color_id}`}}
+                          style={{ backgroundColor: `${item.color_id}` }}
                         ></span>
                       </div>
                     </td>
@@ -108,9 +141,11 @@ export default function Inventory() {
                     </td>
 
                     <td className="px-6 py-4 text-sm">
-                      <b>{item.quantity}</b> units
+                      <b>{item.quantity}</b> đơn vị
                     </td>
-
+                    <td className="px-6 py-4 text-sm">
+                      <b>{item.min_quantity}</b> đơn vị
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       <div>
                         Created:{" "}
@@ -133,17 +168,23 @@ export default function Inventory() {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      <button className="text-blue-500 hover:text-blue-600">
+                      <button 
+                      onClick={()=>{
+                        // setIsOpenUpdateModal(true);
+                        setSelectInventory(item);
+                      }}
+                      className="cursor-pointer text-blue-500 hover:text-blue-600">
                         Edit
                       </button>
                     </td>
                   </tr>
+                  </>
                 );
               })}
             </tbody>
           </table>
         </div>
-        <Pagination page={page} setPage={setPage} total_page={total_page}/>
+        <Pagination page={page} setPage={setPage} total_page={total_page} />
       </div>
     </>
   );

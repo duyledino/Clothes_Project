@@ -8,8 +8,8 @@ export const authService = {
     console.log(response,'>>>>>>>>>>>>>>>>>>>>>>');
     return response.data;
   },
-  signup:async(email: string,name:string,password:string)=>{
-    const respone = await myAxios.post("/user/createAUser",{email,password,name});
+  signup:async(email: string,name:string,password:string,phone:string)=>{
+    const respone = await myAxios.post("/user/createAUser",{email,password,name,phone});
     return respone.data;
   },
   logout:async()=>{

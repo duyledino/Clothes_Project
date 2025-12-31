@@ -46,6 +46,23 @@ const authenticateUser = (req: reqAuth, res: Response, next: NextFunction) => {
   }
 };
 
+const authenticateShipper = (req: reqAuth, res: Response, next: NextFunction) => {
+  if (!req)
+    return res.status(401).json({ Message: `Wrong token or token expires` });
+  console.log("req.user: ", req.user);
+  const isShipper = req.user.role == "shipper" || req.user.role == "admin";
+
+  //check isShipper is true or false  
+  if (!isShipper) {
+    console.log(req.user.name, ":Khong la shipper");
+    res.cookie("my_cookie", "", {
+      expires: new Date(0),
+    });
+    return res.status(403).json({ Message: `Unauthenticate` });
+  }
+  next();
+};
+
 const authenticateAdmin = (req: reqAuth, res: Response, next: NextFunction) => {
   if (!req)
     return res.status(401).json({ Message: `Wrong token or token expires` });
@@ -63,4 +80,4 @@ const authenticateAdmin = (req: reqAuth, res: Response, next: NextFunction) => {
   next();
 };
 
-export { createToken, authenticateAdmin, authenticateUser };
+export { createToken, authenticateAdmin, authenticateUser, authenticateShipper };

@@ -14,10 +14,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { fetchGetAllUser, fetchGetAUser_Admin } from "@/slice/UserSlice";
+import { fetchGetAllUser, fetchGetAUser_Admin, fetchUpdateUserAdmin } from "@/slice/UserSlice";
 import Loading from "@/components/ui/Loading";
 import { fetchGetAllRole } from "@/slice/RoleSlice";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Confirm from "@/components/general/Confirm";
 
 function badgeStatus(status: boolean) {
   if (status) return "bg-green-100 text-green-800";
@@ -29,23 +31,12 @@ export default function Users() {
     (state) => state.UserSlice
   );
   const router = useNavigate();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { roles, loadingRole } = useAppSelector((state) => state.RoleSlice);
   const dispatch = useAppDispatch();
   const [query, setQuery] = useState("");
   const [filterRoleId, setFilterRoleId] = useState<string>("");
   const [selectedId, setSelectedId] = useState<string>("");
-  // const list = useMemo(() => {
-  //   const q = query.trim().toLowerCase();
-  //   return AllUser.filter((u) => {
-  //     const okFilter = filter === "ALL" ? true : u.role.role_name === filter;
-  //     const okQuery =
-  //       !q ||
-  //       u.name.toLowerCase().includes(q) ||
-  //       u.email.toLowerCase().includes(q) ||
-  //       String(u.user_id).includes(q);
-  //     return okFilter && okQuery;
-  //   });
-  // }, [query, filter]);
   console.log("roles: ",roles);
   useEffect(() => {
     dispatch(fetchGetAllRole());
@@ -64,9 +55,39 @@ export default function Users() {
   console.log("AllUser: ", AllUser);
   console.log("User_Admin: ", User_Admin);
   if (!User_Admin) return null;
-
+  const handleResetPass = async() => {
+    if(User_Admin.user_info.user_id === null 
+      || User_Admin.user_info.name === null 
+      || User_Admin.user_info.name === "" 
+      || User_Admin.user_info.role.role_id === null 
+      || User_Admin.user_info.status === null
+    || User_Admin.user_info.email === null
+    || User_Admin.user_info.email === ""){
+      toast.error("Thông tin người dùng không hợp lệ");
+      return;
+    }
+    
+    const {type} = await dispatch(fetchUpdateUserAdmin({
+      user_id: User_Admin.user_info.user_id,
+      name: User_Admin.user_info.name,
+      address: User_Admin.user_info.address,
+      password: "123456",
+      status: User_Admin.user_info.status,
+      role_id: User_Admin.user_info.role.role_id,
+    }));
+    if(type.search("reject") == -1){
+      toast.success("Reset password thành công");
+      dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
+    }
+  }
   return (
     <>
+      <Confirm
+        isOpen={isConfirmOpen}
+        setOpen={setIsConfirmOpen}
+        content="Bạn có chắc chắn muốn reset mật khẩu với mật khẩu mặc định là 123456 ?"
+        onConfirm={handleResetPass}
+      />
       {(loadingUser || loadingRole) && <Loading />}
       <div className="flex h-[calc(100vh-0px)] w-full overflow-hidden bg-[#f6f6f8] text-slate-900">
         <main className="flex-1 flex flex-col h-full overflow-hidden relative">
@@ -238,9 +259,9 @@ export default function Users() {
                     style={{ backgroundImage: `url('${selected.avatar}')` }}
                   /> */}
                     <div>
-                      <h3 className="text-xl font-bold">{User_Admin.name}</h3>
+                      <h3 className="text-xl font-bold">{User_Admin.user_info.name}</h3>
                       <p className="text-sm text-slate-500">
-                        User ID: #{User_Admin.user_id}
+                        User ID: #{User_Admin.user_info.user_id}
                       </p>
                     </div>
                   </div>
@@ -250,7 +271,12 @@ export default function Users() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                  <button 
+                  onClick={()=>{
+                  //  handleResetPass() 
+                   setIsConfirmOpen(true)
+                  }}
+                  className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
                     <RotateCcw size={16} />
                     Reset Pass
                   </button>
@@ -279,16 +305,18 @@ export default function Users() {
                         Email Address
                       </label>
                       <p className="text-sm font-medium text-slate-900">
-                        {User_Admin.email}
+                        {User_Admin.user_info.email}
                       </p>
-                    </div>
+                    </div>                                                              
 
-                    {/* <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">
-                      Phone Number
-                    </label>
-                    <p className="text-sm font-medium text-slate-900">{selected.phone}</p>
-                  </div> */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                        Phone Number
+                      </label>
+                      <p className="text-sm font-medium text-slate-900">
+                        {User_Admin.user_info.phone}
+                      </p>
+                  </div>
 
                     <div>
                       <label className="block text-xs font-medium text-slate-500 mb-1">
@@ -296,11 +324,13 @@ export default function Users() {
                       </label>
                       <select
                         className="block w-full rounded-lg border-slate-300 bg-white text-slate-900 py-2 pl-3 pr-8 text-sm focus:border-[#135bec] focus:ring-[#135bec] shadow-sm"
-                        defaultValue={"Admin"}
+                        defaultValue={User_Admin.user_info.role.role_id}
                       >
-                        <option>Admin</option>
-                        <option>Manager</option>
-                        <option>Customer</option>
+                        {roles.map((role) => (
+                          <option key={role.role_id} value={role.role_id}>
+                            {role.role_name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -380,7 +410,7 @@ export default function Users() {
                       </span>
                     </div>
                     <p className="text-sm text-slate-900 font-medium">
-                      {User_Admin?.address}
+                      {User_Admin?.user_info?.address}
                     </p>
                   </div>
                 </section>

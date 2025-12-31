@@ -20,4 +20,10 @@ export const sizeService = {
     });
     return response.data;
   },
+  deleteASize: async (size_id: string) => {
+    const response = await myAxios.delete(
+      `/size/deleteASize?size_id=${size_id}`
+    );
+    return response.data;
+  },
 };

@@ -25,7 +25,7 @@ export const fetchGetAllProvider = createAsyncThunk(
       return response;
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Không thể lấy danh sách nhà cung cấp";
+        error.response?.data?.Message || "Không thể lấy danh sách nhà cung cấp";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -40,7 +40,7 @@ export const fetchGetAProvider = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Không tìm thấy nhà cung cấp";
+        error.response?.data?.Message || "Không tìm thấy nhà cung cấp";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -65,7 +65,7 @@ export const fetchCreateAProvider = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Lỗi khi tạo nhà cung cấp";
+        error.response?.data?.Message || "Lỗi khi tạo nhà cung cấp";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -90,7 +90,22 @@ export const fetchUpdateAProvider = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Lỗi khi cập nhật nhà cung cấp";
+        error.response?.data?.Message || "Lỗi khi cập nhật nhà cung cấp";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchDeleteAProvider = createAsyncThunk(
+  "provider/fetchDeleteAProvider",
+  async ({ provider_id }: { provider_id: string }, { rejectWithValue }) => {
+    try {
+      const response = await providerService.deleteAProvider(provider_id);
+      toast.success(response.Message || "Xóa nhà cung cấp thành công");
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -130,6 +145,17 @@ const providerSlice = createSlice({
       .addCase(fetchGetAProvider.rejected, (state) => {
         state.loadingProvider = false;
       })
+
+      .addCase(fetchDeleteAProvider.pending, (state) => {
+        state.loadingProvider = true;
+      })
+      .addCase(fetchDeleteAProvider.fulfilled, (state) => {
+        state.loadingProvider = false;
+      })
+      .addCase(fetchDeleteAProvider.rejected, (state) => {
+        state.loadingProvider = false;
+      })
+
       // Create & Update
       .addMatcher(
         (action) =>

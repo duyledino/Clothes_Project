@@ -164,6 +164,7 @@ const Profile = () => {
                 user_id="123"
                 email="test@example.com"
                 name="Test User"
+                phone="123"
               />
             ) : (
               <UserInfo
@@ -171,6 +172,7 @@ const Profile = () => {
                 user_id={User.user_id}
                 email={User.email}
                 name={User.name}
+                phone={User.phone}
               />
             )}
             {OrdersUser.length === 0 ? (

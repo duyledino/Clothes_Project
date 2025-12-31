@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { assets } from "@/assets/admin_assets/assets";
+import { assets } from "@/assets/shipper_assets/assets";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
@@ -25,11 +25,11 @@ const HeaderEmployee = () => {
           <img
             src={assets.logo}
             alt="logo"
-            className="w-36 h-auto object-contain"
+            className="w-40 h-auto object-contain"
           />
         </Link>
         <div className="flex items-center gap-4">
-             <span className="font-semibold text-gray-700">Employee Portal</span>
+             {/* <span className="font-semibold text-gray-700">Employee Portal</span> */}
             {localStore["user"] ? (
             <Button
                 onClick={() => {

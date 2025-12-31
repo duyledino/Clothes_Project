@@ -9,7 +9,7 @@ import { fetchUpdateUser, fetchUserById, resetUserState } from "@/slice/UserSlic
 import Loading from "../ui/Loading";
 import type { user } from "@/type/types.frontend";
 
-const UserInfo = ({ user_id, email, name, address }: user) => {
+const UserInfo = ({ user_id, email, name, address,phone }: user) => {
   const dispatch = useAppDispatch();
   const { Message, errorUser, loadingUser } = useAppSelector(
     (state) => state.UserSlice
@@ -121,6 +121,21 @@ const UserInfo = ({ user_id, email, name, address }: user) => {
             type="email"
             id="email"
             value={email}
+            readOnly
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <Label
+            htmlFor="phone"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            SĐT:
+          </Label>
+          <Input
+            type="text"
+            id="phone"
+            value={phone}
             readOnly
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />

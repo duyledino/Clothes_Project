@@ -12,6 +12,18 @@ export const userService = {
     return response.data;
   },
 
+  updateUserAdmin: async (data: {
+    user_id: string;
+    name: string;
+    address: string;
+    password: string;
+    status: boolean;
+    role_id: string;
+  }) => {
+    const response = await myAxios.put("/user/updateUser_admin", data);
+    return response.data;
+  },
+
   // GET /user/getAUser?id=...
   getUserById: async (user_id: string) => {
     const response = await myAxios.get(`/user/getAUser?user_id=${user_id}`);
@@ -31,5 +43,18 @@ export const userService = {
   getAllUserIsShipperByRoleName:async()=>{
     const response = await myAxios.get(`/user/getAllUserIsShipperByRoleName?role_name=${"shipper"}`);
     return response.data;
-  }
+  },
+
+  createAUserAdmin: async (data: {
+    email: string;
+    password: string;
+    name: string;
+    phone: string;
+    role_id: string;
+    address: string;
+    status: boolean;
+  }) => {
+    const response = await myAxios.post("/user/createAUserAdmin", data);
+    return response.data;
+  },
 };

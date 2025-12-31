@@ -13,7 +13,6 @@ const initialState: {
   color: null,
 };
 
-
 export const fetchGetAllColor = createAsyncThunk(
   "color/getAllColor",
   async (_, { rejectWithValue }) => {
@@ -21,8 +20,8 @@ export const fetchGetAllColor = createAsyncThunk(
       const response = await colorService.getAllColor();
       return response.colors;
     } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Something went wrong";
+      console.log(error);
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -36,8 +35,7 @@ export const fetchGetAColor = createAsyncThunk(
       const response = await colorService.getAColor(color_id);
       return response.color;
     } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -51,15 +49,11 @@ export const fetchCreateAColor = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await colorService.createAColor(
-        color_name,
-        color_code
-      );
+      const response = await colorService.createAColor(color_name, color_code);
       toast.success(response.message || "Tạo màu thành công");
       return response.newColor;
     } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -79,21 +73,39 @@ export const fetchUpdateAColor = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await colorService.updateAColor(
-        color_id,
-        color_name
-      );
+      const response = await colorService.updateAColor(color_id, color_name);
       toast.success(response.message || "Cập nhật màu thành công");
       return response.updatedColor;
     } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Something went wrong";
+      const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
       return rejectWithValue(message);
     }
   }
 );
 
+export const fetchDeleteAColor = createAsyncThunk(
+  "color/deleteAColor",
+  async (
+    {
+      color_id,
+    }: {
+      color_id: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await colorService.deleteAColor(color_id);
+      toast.success(response.message || "Xóa màu thành công");
+      return response.updatedColor;
+    } catch (error: any) {
+      console.log(error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
 
 const colorSlice = createSlice({
   name: "color/colorSlice",
@@ -140,6 +152,15 @@ const colorSlice = createSlice({
         state.loadingColor = false;
       })
       .addCase(fetchUpdateAColor.rejected, (state) => {
+        state.loadingColor = false;
+      })
+      .addCase(fetchDeleteAColor.pending, (state) => {
+        state.loadingColor = true;
+      })
+      .addCase(fetchDeleteAColor.fulfilled, (state) => {
+        state.loadingColor = false;
+      })
+      .addCase(fetchDeleteAColor.rejected, (state) => {
         state.loadingColor = false;
       });
   },

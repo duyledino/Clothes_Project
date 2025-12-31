@@ -14,9 +14,16 @@ import { useNavigate } from "react-router-dom";
 const AddToCart = ({
   product,
   price,
+  inventories,
 }: {
   product: ProductData_Cart;
   price: number;
+   inventories: {
+    color_id: string;
+    product_id: string;
+    size_id: string;
+    quantity: number;
+  }[]|null;
 }) => {
   const { carts, error, loading, Message } = useAppSelector(
     (state) => state.CartSlice
@@ -37,6 +44,7 @@ const AddToCart = ({
         item.product_color?.color_id === product.product_color?.color_id
     );
     console.log("item in add to cart: ", item);
+    
     let objectItem: {
       product: ProductData_Cart;
       quantity: number;
@@ -60,6 +68,21 @@ const AddToCart = ({
       product_color:null
     };
     if (item) {
+      if(inventories){
+      const check = inventories.find(
+        (item) =>
+          item.color_id === product.product_color?.color_id &&
+          item.size_id === product.product_size?.size_id && 
+          product.product_id === item.product_id
+      );
+      console.log("check: ", check);
+      if (check && check.quantity <= item.quantity) {
+        toast.error(`Số lượng trong của ${product.product_name}
+           ${product.product_size?.size_id} ${product.product_color?.color_id}
+            không đủ. SL tồn: ${check.quantity}`);
+        return;
+      }   
+    }
       objectItem["product"] = item.product;
       objectItem["quantity"] = item.quantity + 1;
       objectItem["subtotal"] = item.subtotal + item.product.price;
@@ -67,6 +90,20 @@ const AddToCart = ({
       objectItem["product_size"] = item.product_size;
       objectItem["product_color"] = item.product_color
     } else {
+      if(inventories){
+      const check = inventories.find(
+        (item) =>
+          item.color_id === product.product_color?.color_id &&
+          item.size_id === product.product_size?.size_id && product.product_id === item.product_id
+      );
+      console.log("check: ", check);
+      if (check && check.quantity == 0) {
+        toast.error(`Số lượng trong của ${product.product_name}
+           ${product.product_size?.size_id} ${product.product_color?.color_id}
+            không đủ. SL tồn: ${check.quantity}`);
+        return;
+      }   
+    }
       objectItem["product"] = product;
       objectItem["quantity"] = 1;
       objectItem["subtotal"] = price;
@@ -85,8 +122,8 @@ const AddToCart = ({
     );
     if (type.search("reject") == -1) {
       console.log("user?user: ",user?.user.user_id);
-      dispatch(refeshAddToCart());
-      dispatch(fetchApiCart(user?.user.user_id!));
+      // dispatch(fetchApiCart({user_id: user!.user.user_id!}));
+      dispatch(fetchApiCart(user!.user.user_id!));
     }
   };
   // useEffect(() => {

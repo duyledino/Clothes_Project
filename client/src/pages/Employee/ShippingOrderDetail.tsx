@@ -1,47 +1,93 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Calendar, User, Package, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Package, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { fetchGetShipperOrderDetail, fetchUpdateShipperDelivered, fetchUpdateShipperRejected } from "@/slice/OrderSlice";
+import { toast } from "react-toastify";
+import Loading from "@/components/ui/Loading";
+import Confirm from "@/components/general/Confirm";
 
 export default function ShippingOrderDetail() {
   const { order_id } = useParams();
-  const navigate = useNavigate();
-
-  // Mock data for detail
-  const order = {
-    id: order_id,
-    customer: "Charlie Day",
-    phone: "+1 555-0199",
-    address: "123 Main St, Philadelphia, PA 19147",
-    create_at: "2023-12-24 10:30 AM",
-    items: [
-      { name: "Premium Cotton T-Shirt", quantity: 2, price: "$25.00" },
-      { name: "Slim Fit Jeans", quantity: 1, price: "$45.00" },
-    ],
-    total: "$95.00",
-  };
-
+  const router = useNavigate();
+  const dispatch = useAppDispatch();
+  const [openConfirmDeliverd, setOpenConfirmDeliverd] = useState(false);
+  const [openConfirmDecline, setOpenConfirmDecline] = useState(false);
+  const {loadingOrder,ShipperOrderDetail} = useAppSelector((state) => state.OrderSlice);
+  useEffect(() => {
+    if(order_id){
+      dispatch(fetchGetShipperOrderDetail({order_id: order_id}));
+    }else{
+      router(-1);
+      toast.error("Không tìm thấy đơn này");
+    }
+  },[order_id]);
+  const onConfirmDeliverd =async  ()=>{
+    const {type} = await dispatch(fetchUpdateShipperDelivered({
+      order_id: order_id!,
+    }));
+    if(type.search("reject") == -1){
+      // toast.success("Đã giao hàng");
+      router(-1);
+      setOpenConfirmDeliverd(false);
+    }
+  }
+  const onConfirmDecline = async ()=>{
+    const {type} = await dispatch(fetchUpdateShipperRejected({
+      order_id: order_id!,
+    }));
+    if(type.search("reject") == -1){
+      router(-1);
+      setOpenConfirmDecline(false);
+    }
+  }
+  console.log("ShipperOrderDetail:",ShipperOrderDetail);
   return (
+    <>
+    {loadingOrder && <Loading/>}
+    <Confirm
+    content="Bạn có chắc chắn muốn với hành động đã nhận hàng này?"
+    setOpen={setOpenConfirmDeliverd}
+    isOpen={openConfirmDeliverd}
+    onConfirm={onConfirmDeliverd}
+    />
+    <Confirm
+    content="Bạn có chắc chắn muốn với hành động khách hàng không nhận hàng này?"
+    setOpen={setOpenConfirmDecline}
+    isOpen={openConfirmDecline}
+    onConfirm={onConfirmDecline}
+    />
     <div className="max-w-4xl mx-auto">
-      <button 
-        onClick={() => navigate(-1)} 
+      <Button 
+      variant={"ghost"}
+        onClick={() => router(-1)} 
         className="flex items-center text-slate-500 hover:text-slate-900 mb-6 transition-colors"
       >
         <ArrowLeft size={20} className="mr-2" />
         Back to Shipping Orders
-      </button>
+      </Button>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Order #{order.id}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Order #{ShipperOrderDetail?.order_id}</h1>
             <p className="text-slate-500 text-sm mt-1">Shipping Details</p>
           </div>
           <div className="flex gap-2">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Button
+            onClick={() => setOpenConfirmDecline(true)}
+             variant={"destructive"} className="bg-red-600 hover:bg-red-700 text-white">
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Khách Hàng Không Nhận
+              </Button>
+
+              <Button 
+              onClick={() => setOpenConfirmDeliverd(true)}
+              className="bg-green-600 hover:bg-green-700 text-white">
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Mark as Delivered
+                  Đã giao
               </Button>
           </div>
         </div>
@@ -55,8 +101,8 @@ export default function ShippingOrderDetail() {
                         <User size={16} /> Customer Info
                     </h3>
                     <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                        <p className="font-bold text-slate-900 text-lg">{order.customer}</p>
-                        <p className="text-slate-600">{order.phone}</p>
+                        <p className="font-bold text-slate-900 text-lg">{ShipperOrderDetail?.user_create.name}</p>
+                        <p className="text-slate-600">SĐT: {ShipperOrderDetail?.user_create.phone ?? "Chưa cập nhật"}</p>
                     </div>
                 </section>
 
@@ -65,7 +111,7 @@ export default function ShippingOrderDetail() {
                         <MapPin size={16} /> Delivery Address
                     </h3>
                     <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                        <p className="text-slate-900 leading-relaxed">{order.address}</p>
+                        <p className="text-slate-900 leading-relaxed">{ShipperOrderDetail?.user_create.address}</p>
                     </div>
                 </section>
 
@@ -73,7 +119,7 @@ export default function ShippingOrderDetail() {
                     <h3 className="text-sm font-bold uppercase text-slate-500 tracking-wider mb-4 flex items-center gap-2">
                         <Calendar size={16} /> Order Date
                     </h3>
-                    <p className="text-slate-900 font-medium">{order.create_at}</p>
+                    <p className="text-slate-900 font-medium">{ShipperOrderDetail?.create_at.toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"}).replace("T"," ").replace("Z","")}</p>
                 </section>
             </div>
 
@@ -92,18 +138,22 @@ export default function ShippingOrderDetail() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {order.items.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td className="px-4 py-3 text-sm text-slate-900">{item.name}</td>
+                            {ShipperOrderDetail?.order_detail.map((item, idx) => (
+                                <tr key={item.color.color_id+item.size.size_id}>
+                                    <td className="px-4 py-3 text-sm text-slate-900">{item.product.product_name}</td>
                                     <td className="px-4 py-3 text-sm text-slate-900 text-center">{item.quantity}</td>
-                                    <td className="px-4 py-3 text-sm text-slate-900 text-right">{item.price}</td>
+                                    <td className="px-4 py-3 text-sm text-slate-900 text-right">{item.price.toLocaleString("vi-VN")} VND</td>
                                 </tr>
                             ))}
+                            <tr key={"tienship"} className="w-full flex justify-between">
+                                    <td className="px-4 py-3 text-sm text-slate-900">Tiền ship</td>
+                                    <td className="px-4 py-3 text-sm text-slate-900 text-center">{Number(10000).toLocaleString("vi-VN")} VND</td>
+                                </tr>
                         </tbody>
                         <tfoot className="bg-slate-50 border-t border-slate-200">
                              <tr>
                                 <td colSpan={2} className="px-4 py-3 text-sm font-bold text-slate-900 text-right">Total</td>
-                                <td className="px-4 py-3 text-sm font-bold text-slate-900 text-right">{order.total}</td>
+                                <td className="px-4 py-3 text-sm font-bold text-slate-900 text-right">{Number(ShipperOrderDetail?.total! + 10000).toLocaleString("vi-VN")} VND</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -112,5 +162,6 @@ export default function ShippingOrderDetail() {
         </div>
       </div>
     </div>
+    </>
   );
 }

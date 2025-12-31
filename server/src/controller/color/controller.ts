@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// 1. Get All Colors
 const getAllColor = async (req: Request, res: Response) => {
   const colors = await prisma.color.findMany();
   return res.status(200).json({
@@ -11,7 +10,6 @@ const getAllColor = async (req: Request, res: Response) => {
     colors: colors,
   });
 };
-
 // 2. Create A Color
 const createAColor = async (req: Request, res: Response) => {
   const { color_name, color_code } = req.body as {
@@ -20,7 +18,7 @@ const createAColor = async (req: Request, res: Response) => {
   };
 
   if (!color_name || !color_code)
-    throw new Error("Color name and color code is required");
+    return res.status(404).json({ Message: "Thiếu mã màu hoặc tên màu" });
 
   const existsColor = await prisma.color.findFirst({
     select: {
@@ -50,7 +48,7 @@ const createAColor = async (req: Request, res: Response) => {
 const getAColor = async (req: Request, res: Response) => {
   const { color_id } = req.query as { color_id: string };
 
-  if (!color_id) throw new Error("Color ID is required");
+  if (!color_id) return res.status(404).json({ Message: "Thiếu mã màu" });
 
   const color = await prisma.color.findFirst({
     where: { color_id },
@@ -74,7 +72,7 @@ const updateAColor = async (req: Request, res: Response) => {
   };
 
   if (!color_id || !color_name)
-    throw new Error("Color ID and Name are required");
+    return res.status(404).json({ Message: "Thiếu mã màu hoặc tên màu" });
 
   const existing = await prisma.color.findFirst({ where: { color_id } });
   if (!existing) {
@@ -92,4 +90,62 @@ const updateAColor = async (req: Request, res: Response) => {
   });
 };
 
-export { getAllColor, createAColor, getAColor, updateAColor };
+const deleteAColor = async (req: Request, res: Response) => {
+  const { color_id } = req.query as {
+    color_id: string;
+  };
+  const decode_color_id = decodeURIComponent(color_id);
+  // 1. Kiểm tra màu sắc có tồn tại không
+  const exists = await prisma.color.findFirst({
+    select: {
+      color_id: true,
+    },
+    where: {
+      color_id: decode_color_id,
+    },
+  });
+
+  if (!exists) {
+    return res.status(404).json({ Message: "Không tìm thấy màu này" });
+  }
+
+  // 2. Kiểm tra xem có sản phẩm nào đang sử dụng màu này không
+  const existsProductHasColor = await prisma.product_Color.findFirst({
+    select: {
+      color_id: true,
+      product: {
+        select: {
+          product_name: true,
+        },
+      },
+    },
+    where: {
+      color_id: decode_color_id,
+    },
+  });
+
+  if (existsProductHasColor) {
+    return res.status(400).json({
+      Message: `Vẫn còn sản phẩm sử dụng màu này: ${existsProductHasColor.product?.product_name}`,
+    });
+  }
+
+  // 3. Tiến hành xóa màu sắc
+  const colorDel = await prisma.color.delete({
+    select: { 
+      color_id: true,
+      color_name: true 
+    },
+    where: { 
+      color_id: decode_color_id 
+    },
+  });
+
+  return res
+    .status(200)
+    .json({ 
+      Message: `Đã xóa màu thành công: ${colorDel.color_name}`,
+    });
+};
+
+export { getAllColor, createAColor, getAColor, updateAColor,deleteAColor };

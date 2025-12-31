@@ -7,7 +7,7 @@ const AboutComponent = () => {
       <div className="w-full">
         <div className="flex justify-center items-center gap-4 w-full mb-14">
           <h2 className="text-xl font-semibold text-gray-500 rounded-full">
-            ABOUT <span className="text-black">US</span>
+            VỀ <span className="text-black">CHÚNG TÔI</span>
           </h2>
           <p className="w-9 h-0.5 rounded-full bg-black"></p>
         </div>
@@ -21,27 +21,27 @@ const AboutComponent = () => {
           </div>
           <div className="md:flex-2 w-full text-[14px]">
             <p className="text-gray-700 mb-4">
-              Forever was born out of a passion for innovation and a desire to
-              revolutionize the way people shop online. Our journey began with a
-              simple idea: to provide a platform where customers can easily
-              discover, explore, and purchase a wide range of products from the
-              comfort of their homes.
+              Forever ra đời từ niềm đam mê đổi mới và mong muốn cách mạng hóa
+              cách mọi người mua sắm trực tuyến. Hành trình của chúng tôi bắt
+              đầu từ một ý tưởng đơn giản: cung cấp một nền tảng nơi khách hàng
+              có thể dễ dàng khám phá, tìm hiểu và mua sắm đa dạng các sản phẩm
+              ngay tại nhà.
             </p>
             <p className="text-gray-700 mb-4">
-              Since our inception, we've worked tirelessly to curate a diverse
-              selection of high-quality products that cater to every taste and
-              preference. From fashion and beauty to electronics and home
-              essentials, we offer an extensive collection sourced from trusted
-              brands and suppliers.
+              Kể từ khi thành lập, chúng tôi đã làm việc không ngừng nghỉ để
+              tuyển chọn những sản phẩm chất lượng cao, đa dạng phục vụ mọi sở
+              thích và nhu cầu. Từ thời trang và làm đẹp đến đồ điện tử và đồ
+              dùng gia đình, chúng tôi cung cấp một bộ sưu tập phong phú từ các
+              thương hiệu và nhà cung cấp đáng tin cậy.
             </p>
             <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-              Our Mission
+              Sứ Mệnh Của Chúng Tôi
             </h3>
             <p className="text-gray-700">
-              Our mission at Forever is to empower customers with choice,
-              convenience, and confidence. We're dedicated to providing a
-              seamless shopping experience that exceeds expectations, from
-              browsing and ordering to delivery and beyond.
+              Sứ mệnh của chúng tôi tại Forever là trao quyền cho khách hàng với
+              sự lựa chọn, tiện lợi và tự tin. Chúng tôi tận tâm mang đến trải
+              nghiệm mua sắm liền mạch vượt mong đợi, từ khâu duyệt web, đặt
+              hàng đến giao hàng và hơn thế nữa.
             </p>
           </div>
         </div>

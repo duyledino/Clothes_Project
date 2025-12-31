@@ -2,6 +2,7 @@ import express, { type Application } from "express";
 import {
   banUser,
   createAUser,
+  createAUserAdmin,
   getAllUser,
   getAllUserIsShipperByRoleName,
   getAUser,
@@ -38,6 +39,11 @@ const route = (app: Application) => {
     asyncHandler(getAUser_Admin)
   );
   router.post("/createAUser", asyncHandler(createAUser));
+  router.post("/createAUserAdmin",
+     asyncHandler(authenticateUser), 
+     asyncHandler(authenticateAdmin), 
+     asyncHandler(createAUserAdmin));
+
   router.post(
     "/logout",
     asyncHandler(authenticateUser),

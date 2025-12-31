@@ -5,7 +5,10 @@ export const categoryService = {
     const response = await myAxios.get("/category/getAllCategory");
     return response.data;
   },
-
+  getAllCategoryAdmin: async () => {
+    const response = await myAxios.get("/category/getAllCategoryAdmin");
+    return response.data;
+  },
   createACategory: async (category_name: string) => {
     const response = await myAxios.post("/category/createACategory", {
       category_name,
@@ -25,6 +28,12 @@ export const categoryService = {
       category_id,
       category_name,
     });
+    return response.data;
+  },
+  deleteACategory: async (category_id: string) => {
+    const response = await myAxios.delete(
+      `/category/deleteACategory?category_id=${category_id}`
+    );
     return response.data;
   },
 };

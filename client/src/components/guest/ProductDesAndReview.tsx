@@ -77,7 +77,7 @@ const ProductDesAndReview = ({
       toast.error("No token");
       return;
     }
-    const { token, id } = JSON.parse(localStore);
+    const { id } = JSON.parse(localStore);
     if (
       reviews.find(
         (item) => item.product_id === getValue?.product_id && item.user_id === id

@@ -87,4 +87,79 @@ const getInventoryBySearchingNameOrId = async (req: Request, res: Response) => {
   return res.status(200).json({ inventories: inventories });
 };
 
-export { getAllInventory, getInventoryBySearchingNameOrId };
+
+const getInventoryFollowingCart = async (req: Request, res: Response) => {
+  const { user_id } = req.query as {
+    user_id: string;
+  };
+  const cartItems = await prisma.cart.findFirst({
+    select:{
+      cart_detail:{
+        select:{
+          product_id:true,
+          size_id:true,
+          color_id:true,
+          quantity:true
+        }
+      }
+    },
+    where: {
+      user_id: user_id,
+    },
+  });
+  if(cartItems!.cart_detail.length == 0){
+    return res.status(200).json({ inventories: [] });
+  }
+  const inventories = await prisma.inventory.findMany({
+    select: {
+      color_id: true,
+      inventory_id: true,
+      quantity: true,
+      product_id: true,
+      size_id: true,
+    },
+    where: {
+      AND:[
+       {
+        product_id:cartItems!.cart_detail.find((item)=>item.product_id)!.product_id,
+       },
+       {
+        size_id:cartItems!.cart_detail.find((item)=>item.size_id)!.size_id,
+       },
+       {
+        color_id:cartItems!.cart_detail.find((item)=>item.color_id)!.color_id,
+       }
+      ]
+    },
+  }); 
+  console.log("inventories",inventories);
+  return res.status(200).json({ inventories: inventories });
+};
+
+const updateNewMinQuantityInventory = async(req:Request,res:Response)=>{
+  const {inventory_id,new_min_quantity} = req.body as {
+    inventory_id:string;
+    new_min_quantity:number;
+  };
+  const existsInventory = await prisma.inventory.findFirst({
+    where:{
+      inventory_id:inventory_id,
+    }
+  });
+  if(!existsInventory){
+    return res.status(400).json({Message:"Không tìm thấy tồn kho này"});
+  }
+  await prisma.inventory.update({
+    where:{
+      inventory_id:inventory_id,
+    },
+    data:{
+      min_quantity:new_min_quantity,
+    }
+  });
+  return res.status(200).json({Message:"Cập nhật thành công số lượng tối thiểu tồn kho"});
+}
+
+export { getAllInventory, getInventoryBySearchingNameOrId, getInventoryFollowingCart,
+  updateNewMinQuantityInventory
+ };

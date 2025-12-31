@@ -29,7 +29,7 @@ const Collection = () => {
   }, [error]);
   return (
     <>
-      {loading && <Loading />}
+      {(loading||loadingCategory) && <Loading />}
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0 }}

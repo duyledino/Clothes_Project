@@ -109,4 +109,57 @@ const updateAProvider = async (req: Request, res: Response) => {
   });
 };
 
-export { getAllProvider, createAProvider, getAProvider, updateAProvider };
+const deleteAProvider = async (req: Request, res: Response) => {
+  const { provider_id } = req.query as {
+    provider_id: string;
+  };
+
+  const exists = await prisma.provider.findFirst({
+    select: {
+      provider_id: true,
+      provider_name: true,
+    },
+    where: {
+      provider_id: provider_id,
+    },
+  });
+
+  if (!exists) {
+    return res.status(404).json({ Message: "Không tìm thấy nhà cung cấp này" });
+  }
+
+  const existProviderInStockReceipt = await prisma.stock_Receipt.count({
+    where: {
+      provider_id: provider_id,
+    },
+  });
+
+  if (existProviderInStockReceipt > 0) {
+    return res
+      .status(400)
+      .json({ Message: "Nhà cung cấp vẫn còn tồn tại trong phiếu nhập" });
+  }
+
+  const providerDel = await prisma.provider.delete({
+    select: {
+      provider_id: true,
+      provider_name: true,
+    },
+    where: {
+      provider_id: provider_id,
+    },
+  });
+
+  return res.status(200).json({
+    Message: "Đã xóa nhà cung cấp thành công: " + providerDel.provider_name,
+    Data: providerDel.provider_id,
+  });
+};
+
+export {
+  getAllProvider,
+  createAProvider,
+  getAProvider,
+  deleteAProvider,
+  updateAProvider,
+};

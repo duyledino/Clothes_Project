@@ -65,6 +65,46 @@ export const fetchUpdateUser = createAsyncThunk(
   }
 );
 
+export const fetchUpdateUserAdmin = createAsyncThunk(
+  "updateUserAdmin/put",
+  async (
+    {
+      user_id,
+      password,
+      address,
+      name,
+      status,
+      role_id,
+    }: {
+      user_id: string;
+      password: string;
+      address: string;
+      name: string;
+      status: boolean;
+      role_id: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userService.updateUserAdmin({
+        user_id,
+        password,
+        address,
+        name,
+        status,
+        role_id,
+      });
+      toast.success(response.Message || "Cập nhật thành công");
+      return response.Message;
+    } catch (error: any) {
+      console.log(error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 export const fetchUserById = createAsyncThunk(
   "fetchUserById/get",
   async ({ user_id }: { user_id: string }, { rejectWithValue }) => {
@@ -140,6 +180,34 @@ export const fetchUserIsShipperByName = createAsyncThunk(
     }
   }
 );
+export const fetchCreateAUserAdmin = createAsyncThunk(
+  "user/createAUserAdmin/post",
+  async (
+    data: {
+      email: string;
+      password: string;
+      name: string;
+      phone: string;
+      role_id: string;
+      address: string;
+      status: boolean;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userService.createAUserAdmin(data);
+      console.log("response.data in createAUserAdmin: ", response.Message);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.error("error in createAUserAdmin: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user Slice",
   initialState,
@@ -206,6 +274,17 @@ const userSlice = createSlice({
         state.AllUserShipper = action.payload! as shipperInOrderProfile[];
       })
       .addCase(fetchUserIsShipperByName.rejected, (state, action) => {
+        state.loadingUser = false;
+      });
+    builder
+      .addCase(fetchCreateAUserAdmin.pending, (state, action) => {
+        state.loadingUser = true;
+      })
+      .addCase(fetchCreateAUserAdmin.fulfilled, (state, action) => {
+        state.loadingUser = false;
+        state.Message = action.payload! as string;
+      })
+      .addCase(fetchCreateAUserAdmin.rejected, (state, action) => {
         state.loadingUser = false;
       });
   },

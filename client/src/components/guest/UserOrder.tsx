@@ -117,7 +117,7 @@ const UserOrder: React.FC<UserOrderProps> = ({
             Cancel
           </Button>
         )}
-        {((OrderUser.payment === "done" || OrderUser.status === "done") &&
+        {((OrderUser.payment === "done" || OrderUser.status === "done") ||
           OrderUser.method === "COD") ||
         OrderUser.status === "canceled" ? (
           ""

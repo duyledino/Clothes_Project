@@ -20,12 +20,13 @@ import {
   fetchGetInventoryBySearchingNameOrId,
 } from "@/slice/InventorySlice";
 import Loading from "@/components/ui/Loading";
+import { useNavigate } from "react-router-dom";
 
 const AddStockReceipt = () => {
   const [query, setQuery] = useState<string>("");
   const [stockDetail, setStockDetail] = useState<StockReceiptDetail[]>([]);
   const [providerId, setProviderId] = useState<string>("");
-  // const [userId,]
+  const router = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   // const { ProductsAdmin } = useAppSelector((state) => state.ProductSlice);
@@ -110,7 +111,11 @@ const AddStockReceipt = () => {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-secondary rounded-full transition-colors">
+            <button
+            onClick={()=>{
+              router(-1);
+            }}
+            className="p-2 hover:bg-secondary rounded-full transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
@@ -197,7 +202,7 @@ const AddStockReceipt = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Quantity:</span>
                   <span className="font-medium">
-                    {stockDetail.reduce((pre, cur) => (pre += cur.quantity), 0)}
+                    {stockDetail.reduce((pre, cur) => (pre += cur.quantity_add), 0)}
                   </span>
                 </div>
               </div>
@@ -226,7 +231,9 @@ const AddStockReceipt = () => {
                     <tr>
                       <th className="px-4 py-3">Product</th>
                       <th className="px-4 py-3">Variation (Size/Color)</th>
-                      <th className="px-4 py-3 w-32">Quantity</th>
+                      <th className="px-4 py-3 w-32">SL hiện có trong kho</th>
+                      <th className="px-4 py-3 w-32">SL tối thiểu trong kho</th>
+                      <th className="px-4 py-3 w-32">SL thêm vào kho</th>
                       <th className="px-4 py-3 w-16 text-center">Action</th>
                     </tr>
                   </thead>
@@ -257,6 +264,24 @@ const AddStockReceipt = () => {
                           </td>
                           <td className="px-4 py-4">
                             <input
+                              type="number"
+                              min="1"
+                              disabled
+                              value={item.quantity}
+                              className="w-full bg-background border border-input rounded px-2 py-1 text-sm outline-none"
+                            />
+                          </td>
+                          <td className="px-4 py-4">
+                            <input
+                              type="number"
+                              min="1"
+                              disabled
+                              value={item.min_quantity}
+                              className="w-full bg-background border border-input rounded px-2 py-1 text-sm outline-none"
+                            />
+                          </td>
+                          <td className="px-4 py-4">
+                            <input
                               onChange={(e) => {
                                 console.log(
                                   "Chagen quenaity: ",
@@ -269,7 +294,7 @@ const AddStockReceipt = () => {
                                     ) {
                                       return {
                                         ...itemInc,
-                                        quantity: Number(e.target.value),
+                                        quantity_add: Number(e.target.value),
                                       };
                                     }
                                     return itemInc;
@@ -278,8 +303,7 @@ const AddStockReceipt = () => {
                               }}
                               type="number"
                               min="1"
-                              value={item.quantity}
-                              placeholder="1"
+                              value={item.quantity_add}
                               className="w-full bg-background border border-input rounded px-2 py-1 text-sm outline-none"
                             />
                           </td>

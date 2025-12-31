@@ -22,6 +22,7 @@ export const fetchGetASize = createAsyncThunk(
       console.error("error fetchGetASize:", error);
       const message = error.response?.data?.Message || "Something went wrong";
       toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -35,6 +36,7 @@ export const fetchGetAllSize = createAsyncThunk(
     } catch (error: any) {
       console.log("error in fetchGetAllSize: ", error);
       const message = error.response?.data.Message || "Something went wrong";
+      toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -45,11 +47,12 @@ export const fetchCreateASize = createAsyncThunk(
   async ({ size_name }: { size_name: string }, { rejectWithValue }) => {
     try {
       const response = await sizeService.createASize(size_name);
-      toast.success(response.Message || "Tạo màu thành công");
+      toast.success(response.Message || "Tạo size thành công");
       return response.newSize;
     } catch (error: any) {
       console.log("error in fetchCreateASize: ", error);
       const message = error.response?.data.Message || "Something went wrong";
+      toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -68,6 +71,24 @@ export const fetchUpdatedSize = createAsyncThunk(
     } catch (error: any) {
       console.log("error in fetchCreateASize: ", error);
       const message = error.response?.data.Message || "Something went wrong";
+      toast.error(message);
+
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchDeleteASize = createAsyncThunk(
+  "size/fetchDeleteASize",
+  async ({ size_id }: { size_id: string }, { rejectWithValue }) => {
+    try {
+      const response = await sizeService.deleteASize(size_id);
+      toast.success(response.Message || "Xóa màu thành công");
+      return response.Message;
+    } catch (error: any) {
+      console.log("error in fetchCreateASize: ", error);
+      const message = error.response?.data.Message || "Something went wrong";
+      toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -116,7 +137,16 @@ const sizeSlice = createSlice({
       })
       .addCase(fetchUpdatedSize.rejected, (state) => {
         state.loadingSize = false;
+      })
+      .addCase(fetchDeleteASize.pending, (state) => {
+        state.loadingSize = true;
+      })
+      .addCase(fetchDeleteASize.fulfilled, (state) => {
+        state.loadingSize = false;
+      })
+      .addCase(fetchDeleteASize.rejected, (state) => {
+        state.loadingSize = false;
       });
   },
 });
- export default sizeSlice.reducer;
+export default sizeSlice.reducer;

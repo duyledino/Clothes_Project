@@ -40,11 +40,12 @@ export const signup = createAsyncThunk(
       email,
       password,
       name,
-    }: { email: string; password: string; name: string },
+      phone,
+    }: { email: string; password: string; name: string; phone: string },
     { rejectWithValue }
   ) => {
     try {
-      const data = await authService.signup(email, name, password);
+      const data = await authService.signup(email, name, password, phone);
       toast.success(data.Message);
       return data;
     } catch (error: any) {

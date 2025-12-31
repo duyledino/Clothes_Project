@@ -19,14 +19,17 @@ export const colorService = {
     return response.data;
   },
 
-  updateAColor: async (
-    color_id: string,
-    color_name: string,
-  ) => {
+  updateAColor: async (color_id: string, color_name: string) => {
     const response = await myAxios.put("/color/updateAColor", {
       color_id,
       color_name,
     });
+    return response.data;
+  },
+  deleteAColor: async (color_id: string) => {
+    const response = await myAxios.delete(
+      `/color/deleteAColor?color_id=${encodeURIComponent(color_id)}`
+    );
     return response.data;
   },
 };

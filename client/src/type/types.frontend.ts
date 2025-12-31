@@ -44,6 +44,12 @@ export interface ProductData {
   category: string;
   product_size: Product_Size[];
   product_color: Product_Color[];
+  inventories: {
+    color_id: string;
+    product_id: string;
+    size_id: string;
+    quantity: number;
+  }[] | null;
 }
 
 //end product type
@@ -108,6 +114,7 @@ export interface userInOrderProfile {
   email: string;
   address: string;
   name: string;
+  phone: string;
 }
 
 export interface shipperInOrderProfile {
@@ -150,6 +157,7 @@ export interface user {
   email: string;
   name: string;
   address: string;
+  phone: string;
 }
 
 // end user type
@@ -170,7 +178,6 @@ export interface Review {
   };
 }
 
-// Define the initial state
 export interface ReviewState {
   Reviews: Review[];
   loadingReview: boolean;
@@ -187,6 +194,12 @@ export interface Product_Review {
   product_color: Product_Color[] | undefined;
   tryon: string | undefined;
   Reviews: Review[];
+  inventories: {
+    color_id: string;
+    product_id: string;
+    size_id: string;
+    quantity: number;
+  }[] | null;
 }
 
 // end review type
@@ -253,9 +266,21 @@ export interface RoleOrigin {
 export interface CategoryOrigin {
   category_id: string;
   category_name: string;
+  link_total: number | null;
 }
 
 // end category type
+
+
+// inventory type
+export interface InventoryInCartUser {
+  color_id: string,
+  inventory_id: string,
+  quantity: number,
+  product_id: string,
+  size_id: string,
+}
+// end inventory type
 
 // admin type
 
@@ -277,15 +302,12 @@ export interface userInAdminPanel {
   name: string;
   address: string;
   role: RoleOrigin;
+  phone: string;
   status: boolean;
 }
 
 export interface userDetailInAdminPanel {
-  user_id: string;
-  email: string;
-  name: string;
-  address: string;
-  role: RoleOrigin;
+  user_info: userInAdminPanel
   carts: cartItem[];
   orders: orderUserInAdminPanel[];
 }
@@ -373,6 +395,8 @@ export interface StockReceiptDetail {
   size_id: string;
   color_id: string;
   quantity: number;
+  min_quantity: number;
+  quantity_add: number;
 }
 
 export interface StockReceipt {
@@ -381,4 +405,103 @@ export interface StockReceipt {
   stock_receipt_detail: StockReceiptDetail[];
 }
 
+export interface StockReceipt {
+  receipt_id: string;
+  provider: ProviderOrigin;
+  user: {user_id:string,name:string}; // Or just name/email
+  create_at: Date;
+  total_quantity: number; 
+  stock_receipt_details: {
+    inventory_id: string;
+    product_name: string;
+    product_id: string;
+    size_id: string;
+    color_id: string;
+    quantity: number;
+  }[];
+}
+
 //end admin type
+
+
+// shipper type
+
+export interface ShipperDoneOrder {
+  order_id: string;
+  user_create: userInOrderProfile;
+  user_ship: shipperInOrderProfile | null;
+  total: number;
+  create_at: Date;
+  update_at: Date;
+  delivered_date: Date;
+  payment: string;
+  status: string;
+  method: string;
+  order_detail: OrderDetailInAdmin[];
+}
+
+export interface ShipperPrepareOrder {
+   order_id: string,
+      user_create: {
+          name: string,
+        address: string,
+        email: string,
+      },
+      user_ship: {
+        user_id: string,
+        name: string,
+      },
+      method: string,
+      create_at: Date,
+      update_at: Date,
+      status: string,
+      payment: string,
+      delivered_date: Date,
+}
+
+export interface ShipperShippingOrder {
+  order_id: string,
+      user_create: {
+          name: string,
+        address: string,
+        email: string,
+      },
+      user_ship: {
+          user_id: string,
+          name: string,
+      },
+      method: string,
+      create_at: Date,
+      update_at: Date,
+      status: string,
+      payment: string,
+      delivered_date: Date,
+}
+
+export interface ShipperOrderDetail {
+  order_id: string,
+    user_create: {
+      name: string,
+      address: string,
+      email: string,
+      phone: string,
+    },
+    method: string,
+    create_at: Date,
+    update_at: Date,
+    status: string,
+    payment: string,
+    total: number,
+    order_detail: {
+      product_id: string,
+      quantity: number,
+      price: number,
+      color: ColorOrigin,
+      size: SizeOrigin,
+      product: {
+        product_name: string,
+      },
+    }[]
+}
+
+// end shipper type

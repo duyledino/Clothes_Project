@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Search,
-  MoreHorizontal,
   Edit2,
   Trash2,
   Building2,
@@ -12,7 +11,14 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Loading from "@/components/ui/Loading";
-import { fetchGetAllProvider } from "@/slice/ProviderSlice";
+import {
+  fetchDeleteAProvider,
+  fetchGetAllProvider,
+} from "@/slice/ProviderSlice";
+import type { ProviderOrigin } from "@/type/types.frontend";
+import { toast } from "react-toastify";
+import UpdateProviderModal from "@/components/admin/UpdateProviderModal";
+import { fetchUpdateAProvider } from "@/slice/ProviderSlice";
 
 const Providers = () => {
   const router = useNavigate();
@@ -20,11 +26,55 @@ const Providers = () => {
   const { loadingProvider, providers, total_provider } = useAppSelector(
     (state) => state.ProviderSlice
   );
+  
+  const [selectedProvider, setSelectedProvider] = useState<ProviderOrigin | null>(null);
+  const [isOpenUpdateModal, setIsOpenUpdateModal] = useState<boolean>(false);
+
+  const onUpdate = async (provider_id: string, provider_name: string) => {
+    if (!provider_id || !provider_name) {
+      toast.error("Thiếu thông tin cập nhật");
+      return;
+    }
+    const { type } = await dispatch(
+      fetchUpdateAProvider({
+        provider_id,
+        provider_name,
+      })
+    );
+    if (type.search("reject") == -1) {
+      dispatch(fetchGetAllProvider());
+      setIsOpenUpdateModal(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProvider != null) {
+      setIsOpenUpdateModal(true);
+    }
+  }, [selectedProvider]);
   useEffect(() => {
     dispatch(fetchGetAllProvider());
   }, []);
+  const handleDelete = async (item: ProviderOrigin) => {
+    if (!item || item.provider_id === "") {
+      toast.error("Thiếu mã nhà cung cấp");
+      return;
+    }
+    const { type } = await dispatch(
+      fetchDeleteAProvider({ provider_id: item.provider_id })
+    );
+    if (type.search("reject") == -1) {
+      dispatch(fetchGetAllProvider());
+    }
+  };
   return (
     <>
+      <UpdateProviderModal
+        isOpen={isOpenUpdateModal}
+        onClose={() => setIsOpenUpdateModal(false)}
+        providerItem={selectedProvider}
+        onUpdate={onUpdate}
+      />
       {loadingProvider && <Loading />}
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Page Header */}
@@ -95,6 +145,9 @@ const Providers = () => {
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1">
                           <Button
+                            onClick={() => {
+                              setSelectedProvider(item);
+                            }}
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
@@ -102,6 +155,9 @@ const Providers = () => {
                             <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
+                            onClick={() => {
+                              handleDelete(item);
+                            }}
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10"

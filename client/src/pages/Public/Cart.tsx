@@ -41,12 +41,14 @@ const CartPage = () => {
         detail: carts
           .filter((item) => item.active === true)
           .map((item) => ({
+            product_name: item.product.product_name,
+            quantity: item.quantity,
             product_id: item.product.product_id,
-            count: item.quantity,
             subtotal: item.subtotal,
             product_size: item.product_size,
             product_color: item.product_color,
           })),
+        method: method,
       })
     );
     if (type.search("reject") == -1) {
@@ -55,6 +57,7 @@ const CartPage = () => {
       dispatch(resetState());
     }
   };
+  console.log("method: ", method);
   //NOTE:check Message or error after fetch api
   useEffect(() => {
     // if (MessageOrder && !errorOrder) {
@@ -126,7 +129,11 @@ const CartPage = () => {
             <ClientCart carts={carts} />
           </div>
           <div className="lg:w-2/5 w-full md:self-end">
-            <CartTotal carts={carts} setMethod={setMethod} handleClick={handleCLick} />
+            <CartTotal
+              carts={carts}
+              setMethod={setMethod}
+              handleClick={handleCLick}
+            />
           </div>
         </div>
       </div>

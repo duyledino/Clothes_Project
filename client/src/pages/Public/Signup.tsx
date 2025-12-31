@@ -21,17 +21,19 @@ const SignUp = () => {
     name: "",
     password: "",
     confirmPassword: "",
+    phone: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const check = signupSchema.safeParse(formData);
     // Add signup logic here
+    console.log("check: ",check);
     if (!check.success) {
       toast.error(JSON.parse(check.error?.message as string)[0].message);
     } else {
       const { type } = await dispatch(
-        signup({ email: formData.email, name: formData.name,password: formData.password })
+        signup({ email: formData.email, name: formData.name,password: formData.password,phone: formData.phone })
       );
       console.log(type);
       if (type.search("reject")==-1) {
@@ -100,6 +102,17 @@ const SignUp = () => {
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
+                }
+                className="block w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                placeholder="Phone"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
                 }
                 className="block w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
               />

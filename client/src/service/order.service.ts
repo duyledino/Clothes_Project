@@ -17,7 +17,7 @@ export const orderService = {
   // PUT /order/updateOrder?id=... (Body: payment, status)
   updateOrder: async (
     order_id: string,
-    data: { payment: string; status: string; shipper_id: string|null }
+    data: { payment: string; status: string; shipper_id: string | null }
   ) => {
     console.log("order_id", order_id);
     const response = await myAxios.put(
@@ -28,10 +28,11 @@ export const orderService = {
   },
 
   // POST /order/createAOrder (Body: userId, details)
-  createOrder: async (user_id: string, details: detail[]) => {
+  createOrder: async (user_id: string, details: detail[], method: string) => {
     const response = await myAxios.post("/order/createAOrder", {
       user_id: user_id,
       details: details,
+      method: method,
     });
     return response.data;
   },
@@ -39,7 +40,7 @@ export const orderService = {
   // GET /order/getOrderByUserId?user_id=...
   getOrderByUserId: async (user_id: string) => {
     const response = await myAxios.get(
-      `/order/getOrderById?user_id=${user_id}`
+      `/order/getOrderByUserId?user_id=${user_id}`
     );
     return response.data;
   },
@@ -47,6 +48,32 @@ export const orderService = {
     const response = await myAxios.get(
       `/order/getOrderByOrderId?order_id=${order_id}`
     );
+    return response.data;
+  },
+  getDoneOrders: async (shipper_id: string, page: number) => {
+    const response = await myAxios.get(`/order/getDoneOrders?shipper_id=${shipper_id}&page=${page}`);
+    return response.data;
+  },
+  getPrepareOrders: async (page: number) => {
+    const response = await myAxios.get(`/order/getPrepareOrders?page=${page}`);
+    return response.data;
+  },
+  getShippingOrdersByShipperId: async (shipper_id: string, page: number) => {
+    const response = await myAxios.get(
+      `/order/getShippingOrdersByShipperId?shipper_id=${shipper_id}&page=${page}`
+    );
+    return response.data;
+  },
+  getShipperOrderDetail: async (order_id: string) => {
+    const response = await myAxios.get(`/order/getShipperOrderDetail?order_id=${order_id}`);
+    return response.data;
+  },
+  updateShipperDelivered: async (order_id: string) => {
+    const response = await myAxios.put(`/order/updateShipperDelivered?order_id=${order_id}`);
+    return response.data;
+  },
+  updateShipperRejected: async (order_id: string) => {
+    const response = await myAxios.put(`/order/updateShipperRejected?order_id=${order_id}`);
     return response.data;
   },
 };

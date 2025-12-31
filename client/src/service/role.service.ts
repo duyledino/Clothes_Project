@@ -17,9 +17,7 @@ export const roleService = {
 
   // Get a role by id
   getARole: async (role_id: string) => {
-    const response = await myAxios.get(
-      `/role/getARole?role_id=${role_id}`
-    );
+    const response = await myAxios.get(`/role/getARole?role_id=${role_id}`);
     return response.data;
   },
 
@@ -29,6 +27,12 @@ export const roleService = {
       role_id,
       role_name,
     });
+    return response.data;
+  },
+  deleteARole: async (role_id: string) => {
+    const response = await myAxios.delete(
+      `/role/deleteARole?role_id=${role_id}`
+    );
     return response.data;
   },
 };

@@ -12,6 +12,7 @@ model User {
   email             String          @unique
   password          String
   name              String?
+  phone             String          @db.VarChar(10)
   address           String          @default("")
   create_at         DateTime        @default(now())
   update_at         DateTime        @updatedAt
@@ -220,6 +221,7 @@ model Stock_Receipt {
   provider_id          String
   user                User                   @relation(fields: [user_id], references: [user_id])
   providers            Provider               @relation(fields: [provider_id], references: [provider_id])
+  create_at            DateTime               @default(now())
   stock_receipt_detail Stock_Receipt_Detail[]
 }
 

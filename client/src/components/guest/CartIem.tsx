@@ -9,10 +9,11 @@ import {
   refeshAddToCart,
 } from "@/slice/CartSlice";
 import Loading from "../ui/Loading";
-import type { cartItem, Product_Color, Product_Size } from "@/type/types.frontend";
+import type { cartItem, InventoryInCartUser, Product_Color, Product_Size } from "@/type/types.frontend";
 
 interface Item {
   cartItem: cartItem;
+  InventoryInCartUser: InventoryInCartUser[];
   handleChange: (
     value: string | null, // the value to store update in cart
     product_id: string,
@@ -27,7 +28,7 @@ interface Item {
   handleDelete: (product_id: string, size_id: string,color_id:string) => void;
 }
 
-const CartIem = ({ cartItem, handleChange, handleDelete }: Item) => {
+const CartIem = ({ cartItem, InventoryInCartUser, handleChange, handleDelete }: Item) => {
   const { loading } = useAppSelector((state) => state.CartSlice);
   const [quan, setQuan] = useState<string | number>(cartItem.quantity);
   const [click, setClick] = useState<boolean>(cartItem.active);
@@ -99,12 +100,24 @@ const CartIem = ({ cartItem, handleChange, handleDelete }: Item) => {
           </div>
           <div className="flex items-center justify-between flex-1">
             <Input
-              onChange={(e) =>
+              onChange={(e) =>{
+                    if(InventoryInCartUser){
+                      const inventory = InventoryInCartUser.find((item) => item.product_id === cartItem.product.product_id 
+                      && item.size_id === cartItem.product_size?.size_id 
+                      && item.color_id === cartItem.product_color?.color_id);
+                      if(inventory && inventory.quantity < Number(e.target.value)){
+                        toast.error(`Số lượng trong của ${cartItem.product.product_name}
+                                   ${cartItem.product_size?.size_id} ${cartItem.product_color?.color_id}
+                                    không đủ. SL tồn: ${inventory.quantity}`);
+                        return;
+                      }
+                    }
                 setQuan((prev) => {
                   prev = e.target.value;
                   setActivate(click);
                   return prev;
                 })
+              }
               }
               type="number"
               value={quan}

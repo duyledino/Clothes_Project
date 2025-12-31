@@ -7,6 +7,7 @@ import {
   MessageCircleMore,
   PackageSearch,
   PaintRoller,
+  ReceiptText,
   Ruler,
   Shapes,
   User,
@@ -27,9 +28,9 @@ const nav = [
     logo: (className: string) => <Warehouse className={className} />,
   },
   {
-    link: "/Admin/Products/AddProduct",
-    name: "Add Product",
-    logo: (className: string) => <CirclePlus className={className} />,
+    link: "/Admin/Receipt",
+    name: "Phiếu nhập kho",
+    logo: (className: string) => <ReceiptText className={className} />,
   },
   {
     link: "/Admin/Products",

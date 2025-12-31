@@ -73,6 +73,7 @@ const getAllUser = async (req: Request, res: Response) => {
       name: true,
       role: true,
       status: true,
+      phone: true,
     },
     where: {
       role_id: role_id === "" ? {} : role_id,
@@ -103,6 +104,7 @@ const getAUser_Admin = async (req: Request, res: Response) => {
       user_id: true,
       role: true,
       status: true,
+      phone: true,
       order_user_create: {
         select: {
           order_id: true,
@@ -111,6 +113,7 @@ const getAUser_Admin = async (req: Request, res: Response) => {
           payment: true,
           status: true,
           total: true,
+
           update_at: true,
           user_create: {
             select: {
@@ -152,12 +155,15 @@ const getAUser_Admin = async (req: Request, res: Response) => {
     },
   });
   const format_user = {
-    user_id: user?.user_id,
-    email: user?.email,
-    address: user?.address,
-    name: user?.name,
-    status: user?.status,
-    role: user?.role,
+    user_info:{
+      user_id: user?.user_id,
+      email: user?.email,
+      address: user?.address,
+      name: user?.name,
+      phone: user?.phone,
+      status: user?.status,
+      role: user?.role,
+    },
     carts: user?.carts?.cart_detail.map((item) => ({
       quantity: item.quantity,
       subtotal: item.quantity * Number(item.product.price),
@@ -189,6 +195,7 @@ const getAUser = async (req: Request, res: Response) => {
       name: true,
       address: true,
       user_id: true,
+      phone: true,
     },
     where: {
       user_id: user_id,
@@ -200,8 +207,8 @@ const getAUser = async (req: Request, res: Response) => {
 
 //client will check empty;
 const createAUser = async (req: Request, res: Response) => {
-  const { email, password, name } = req.body;
-  console.log(" email, password, name ", email, password, name);
+  const { email, password, name,phone } = req.body;
+  console.log(" email, password, name,phone: ", email, password, name,phone);
   const exists = await prisma.user.findFirst({
     where: {
       email: email,
@@ -221,6 +228,7 @@ const createAUser = async (req: Request, res: Response) => {
       email: email,
       password: hashPass,
       name: name,
+      phone: phone,
       create_at: new Date(),
       role_id: regular_role?.role_id ?? "regular",
     },
@@ -241,13 +249,58 @@ const createAUser = async (req: Request, res: Response) => {
   });
 };
 
+const createAUserAdmin = async (req: Request, res: Response) => {
+  const { email, password, name,phone,role_id,address,status } = req.body;
+  console.log(" email, password, name,phone,role_id,address,status: ", email, password, name,phone,role_id,address,status);
+  const exists = await prisma.user.findFirst({
+
+    where: {
+      email: email,
+    },
+  });
+  if (exists) return res.status(400).json({ Message: "Người dùng này đã tồn tại rồi" });
+  const salt = await genSalt(5);
+  const hashPass = await hash(password, salt);
+  const role = await prisma.role.findFirst({
+    where: {
+      role_id: role_id,
+    },
+  });
+  if (!role) return res.status(400).json({ Message: "Quyền hạn không tìm thấy" });
+  let user;
+  user = await prisma.user.create({
+    data: {
+      email: email,
+      password: hashPass,
+      name: name,
+      phone: phone,
+      create_at: new Date(),
+      role_id: role?.role_id!,
+      address: address,
+      status: status,
+    },
+    include: {
+      role: true,
+    },
+  });
+  await prisma.cart.create({
+    data: {
+      user_id: user.user_id,
+    },
+  });
+  return res.status(200).json({
+    Message: "Tạo người dùng thành công",
+  });
+};
+
 const updateUser_admin = async (req: Request, res: Response) => {
-  const { user_id, address, name, role_id, status } = req.body as {
+  const { user_id, address, name, role_id, status, password } = req.body as {
     user_id: string;
     address: string;
     name: string;
     role_id: string;
     status: boolean;
+    password: string;
   };
 
   const exists = await prisma.user.findUnique({
@@ -259,8 +312,9 @@ const updateUser_admin = async (req: Request, res: Response) => {
   if (!exists) {
     return res.status(404).json({ Message: "User not found" });
   }
-
-  const updated = await prisma.user.update({
+  let updated;
+if (password === "" || password == null) {
+    updated = await prisma.user.update({
     where: {
       user_id: user_id,
     },
@@ -271,11 +325,28 @@ const updateUser_admin = async (req: Request, res: Response) => {
       status: status,
     },
   });
+  } else {
+    const salt = await genSalt(5);
+    const hashPass = await hash(password, salt);
+    updated = await prisma.user.update({
+      data: {
+        name: name,
+        password: hashPass,
+        address: address,
+        role_id: role_id,
+        status: status,
+      },
+      where: {
+        user_id: user_id,
+      },
+    });
+  }
+   
 
   console.log("updated: ", updated);
 
   return res.status(200).json({
-    Message: "Update successfully",
+    Message: "Cập nhật thành công",
     data: updated,
   });
 };
@@ -373,5 +444,6 @@ export {
   logoutUser,
   updateUser,
   getAUser_Admin,
-  getAllUserIsShipperByRoleName
+  getAllUserIsShipperByRoleName,
+  createAUserAdmin,
 };
