@@ -1,5 +1,5 @@
 import express, { type Application } from 'express'
-import {createAOrder,getAllOrder,getDoneOrders,getOrderByOrderId,getOrderByUserId,getPrepareOrders,getShipperOrderDetail,getShippingOrdersByShipperId,getTotalPage,updateAOrder, updateShipperDeliverd, updateShipperRejected} from '../controller/order/controller.js'
+import {createAOrder,getAllOrder,getDoneOrders,getOrderByOrderId,getOrderByUserId,getPrepareOrders,getShipperOrderDetail,getShippingOrdersByShipperId,getTotalPage,updateAOrder, updateShipperDeliverd, updateShipperRejected, updateShipperTakeOrder} from '../controller/order/controller.js'
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { authenticateUser,authenticateAdmin, authenticateShipper } from '../middleware/authentication.js';
 
@@ -18,6 +18,7 @@ const route = (app:Application)=>{
     router.get("/getShipperOrderDetail",asyncHandler(authenticateUser),asyncHandler(authenticateShipper),asyncHandler(getShipperOrderDetail));
     router.put("/updateShipperDelivered",asyncHandler(authenticateUser),asyncHandler(authenticateShipper),asyncHandler(updateShipperDeliverd));
     router.put("/updateShipperRejected",asyncHandler(authenticateUser),asyncHandler(authenticateShipper),asyncHandler(updateShipperRejected));
+    router.put("/updateShipperTakeOrder",asyncHandler(authenticateUser),asyncHandler(authenticateShipper),asyncHandler(updateShipperTakeOrder));
     return app.use("/api/v1/order",router);
 }
 

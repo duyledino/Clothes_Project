@@ -30,6 +30,10 @@ const CartPage = () => {
       toast.error("Cần đăng nhập để thực hiện thao tác này");
       router("/login");
     }
+    if(user!.user.isVerify===false){
+      toast.error("Vui lòng xác minh tài khoản của bạn");
+      return;
+    }
     if (method == null) {
       toast.error("Hãy chọn phương thức thanh toán");
       return;

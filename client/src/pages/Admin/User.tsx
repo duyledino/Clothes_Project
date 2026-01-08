@@ -295,7 +295,9 @@ export default function Users() {
                     style={{ backgroundImage: `url('${selected.avatar}')` }}
                   /> */}
                     <div>
-                      <h3 className="text-xl font-bold">{User_Admin?.user_info.name}</h3>
+                      <h3 className="text-xl font-bold">{User_Admin?.user_info.name} {User_Admin.user_info.isVerify ? "" : 
+                      <p className="text-xl font-bold text-red-300">(Chưa kích hoạt tài khoản)</p>
+                      } </h3>
                       <p className="text-sm text-slate-500">
                         User ID: #{User_Admin?.user_info.user_id}
                       </p>

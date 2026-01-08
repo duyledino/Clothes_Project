@@ -33,6 +33,10 @@ const AddToCart = ({
   console.log("carts: ", carts);
   const dispatch = useAppDispatch();
   const handleAddToCart = async () => {
+    if(user?.user.isVerify===false){
+      toast.error("Vui lòng xác minh tài khoản của bạn");
+      return;
+    }
     if (product.product_size === null || product.product_color === null) {
       toast.error("Vui lòng chọn size và màu");
       return;

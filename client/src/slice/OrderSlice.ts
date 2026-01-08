@@ -291,6 +291,23 @@ export const fetchUpdateShipperRejected = createAsyncThunk(
   }
 );
 
+export const fetchUpdateShipperTakeOrder = createAsyncThunk(
+  "updateShipperTakeOrder/put",
+  async ({ order_id,shipper_id }: { order_id: string,shipper_id:string }, { rejectWithValue }) => {
+    // console.log("detail: ", order_id,);
+    try {
+      const response = await orderService.updateShipperTakeOrder(order_id,shipper_id);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.log("error: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState,

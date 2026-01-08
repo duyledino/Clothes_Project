@@ -11,6 +11,7 @@ import Loading from "@/components/ui/Loading";
 
 const ChatPublicPage = () => {
   const dispatch = useAppDispatch();
+  const router = useNavigate();
   const { chatUser, loadingChat } = useAppSelector((state) => state.ChatSlice);
   const [current, setCurrent] = useState<Message[]>([]);
   const [singleChat, setSingleChat] = useState<ChatUser | null>(null);
@@ -18,6 +19,11 @@ const ChatPublicPage = () => {
   // console.log("user: ", user!.user);
   useEffect(()=>{
     if (user && user.user) {
+      if(user.user.isVerify===false){
+        toast.error("Vui lòng xác minh tài khoản của bạn");
+        router("/Profile");
+        return;
+      }
       console.log("user: ", user.user);
       dispatch(fetchChatsByUserId({ user_id: user.user.user_id }));
     }

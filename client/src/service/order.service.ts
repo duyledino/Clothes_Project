@@ -76,4 +76,8 @@ export const orderService = {
     const response = await myAxios.put(`/order/updateShipperRejected?order_id=${order_id}`);
     return response.data;
   },
+  updateShipperTakeOrder: async(order_id:string,shipper_id:string)=>{
+    const resposne = await myAxios.put(`/order/updateShipperTakeOrder?order_id=${order_id}&shipper_id=${shipper_id}`)
+    return resposne.data;
+  }
 };

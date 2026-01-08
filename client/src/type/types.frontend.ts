@@ -3,6 +3,7 @@ export interface AuthUser {
   user: {
     user_id: string;
     role: string;
+    isVerify: boolean;
   };
 }
 //End Auth types
@@ -323,6 +324,7 @@ export interface userInAdminPanel {
   role: RoleOrigin;
   phone: string;
   status: boolean;
+  isVerify:boolean;
 }
 
 export interface userDetailInAdminPanel {

@@ -1,19 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { Package } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { fetchGetPrepareOrders } from "@/slice/OrderSlice";
+import { fetchGetPrepareOrders, fetchUpdateShipperTakeOrder } from "@/slice/OrderSlice";
 import Loading from "@/components/ui/Loading";
 import Pagination from "@/components/general/Pagination";
+import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
 
 export default function PrepareOrders() {
   const { ShipperPrepareOrders,loadingOrder,totalPagesPrepareOrders } = useAppSelector((state) => state.OrderSlice);
+  const {user} = useAppSelector(state=>state.AuthSlice);
   const dispatch = useAppDispatch();
   const [page, setPage] = useState(1);
   useEffect(()=>{
     dispatch(fetchGetPrepareOrders({
       page: page
     }));
-  },[page])
+  },[page]);
+  const handleClick=async(order_id:string)=>{
+    if( !user || user.user.user_id == ""){
+      toast.error("Lỗi: Không có mã người dùng (user_id)");
+      return;
+    }
+    if(order_id == ""){
+      toast.error("Không tìm thấy mã đơn hàng");
+      return;
+    }
+    const {type} = await dispatch(fetchUpdateShipperTakeOrder({
+      order_id: order_id,
+      shipper_id: user.user.user_id
+    }));
+    if(type.search("reject")==-1){
+      dispatch(fetchGetPrepareOrders({page:page}));
+    }
+  }
   return (
     <>
     {loadingOrder && <Loading/>}
@@ -47,9 +67,11 @@ export default function PrepareOrders() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button className="text-[#135bec] font-bold text-sm hover:underline">
-                    Take Order
-                  </button>
+                  <Button
+                  onClick={()=>{handleClick(order.order_id)}}
+                  variant={"ghost"} className="text-[#135bec] font-bold text-sm hover:underline">
+                    Giao đơn này
+                  </Button>
                 </td>
               </tr>
             ))}

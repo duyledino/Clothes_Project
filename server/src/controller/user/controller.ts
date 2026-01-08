@@ -50,6 +50,7 @@ const loginUser = async (req: Request, res: Response) => {
       role: exists.role.role_name,
       email: exists.email,
       user_id: exists.user_id,
+      isVerify:exists.isVerify,
     },
   });
 };
@@ -169,6 +170,7 @@ const getAUser_Admin = async (req: Request, res: Response) => {
       phone: user?.phone,
       status: user?.status,
       role: user?.role,
+      isVerify: user?.isVerify
     },
     carts: user?.carts?.cart_detail.map((item) => ({
       quantity: item.quantity,

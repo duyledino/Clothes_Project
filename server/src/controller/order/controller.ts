@@ -8,7 +8,7 @@ import { chdir } from "node:process";
 const prisma = new PrismaClient();
 
 const getAllOrder = async (req: Request, res: Response) => {
-  const { page } = req.query ;
+  const { page } = req.query;
   const orders = await prisma.order.findMany({
     select: {
       user_create: {
@@ -41,9 +41,9 @@ const getAllOrder = async (req: Request, res: Response) => {
       method: true,
     },
     take: Number(page) * 8,
-    orderBy:{
-      create_at:"desc"
-    }
+    orderBy: {
+      create_at: "desc",
+    },
   });
   const fixBigInt = orders.map((item) => ({
     ...item,
@@ -443,9 +443,9 @@ const getOrderByOrderId = async (req: Request, res: Response) => {
 
 const getDoneOrders = async (req: Request, res: Response) => {
   //get done orders by shipper_id
-  const { shipper_id, page } = req.query as { 
-    shipper_id: string, 
-    page: number | string 
+  const { shipper_id, page } = req.query as {
+    shipper_id: string;
+    page: number | string;
   };
   console.log("shipper_id: ", shipper_id);
   const orders = await prisma.order.findMany({
@@ -498,7 +498,9 @@ const getDoneOrders = async (req: Request, res: Response) => {
     total: Number(item.total),
   }));
   console.log("format_orders in getDoneOrders: ", format_orders);
-  return res.status(200).json({ orders: format_orders, total_page: Math.ceil(total / 10) });
+  return res
+    .status(200)
+    .json({ orders: format_orders, total_page: Math.ceil(total / 10) });
 };
 
 const getPrepareOrders = async (req: Request, res: Response) => {
@@ -506,11 +508,8 @@ const getPrepareOrders = async (req: Request, res: Response) => {
   const { page } = req.query as { page: number | string };
   const total = await prisma.order.count({
     where: {
-        status: "pending",
-        OR:[
-          {payment: "pending"},
-          {payment: "done"}
-        ]
+      status: "pending",
+      OR: [{ payment: "pending" }, { payment: "done" }],
     },
   });
   const orders = await prisma.order.findMany({
@@ -537,12 +536,8 @@ const getPrepareOrders = async (req: Request, res: Response) => {
       delivered_date: true,
     },
     where: {
-        status: "pending",
-        OR:[
-          {payment: "pending"},
-          {payment: "done"}
-        ]
-
+      status: "pending",
+      OR: [{ payment: "pending" }, { payment: "done" }],
     },
     skip: (Number(page) - 1) * 10,
     take: 10,
@@ -559,12 +554,17 @@ const getPrepareOrders = async (req: Request, res: Response) => {
     delivered_date: item.delivered_date,
   }));
   console.log("format_orders: ", format_orders);
-  return res.status(200).json({ orders: format_orders, total_page: Math.ceil(total / 10) });
+  return res
+    .status(200)
+    .json({ orders: format_orders, total_page: Math.ceil(total / 10) });
 };
 
 const getShippingOrdersByShipperId = async (req: Request, res: Response) => {
   //get shipping orders by shipper_id
-  const { shipper_id, page } = req.query as { shipper_id: string; page: number | string };
+  const { shipper_id, page } = req.query as {
+    shipper_id: string;
+    page: number | string;
+  };
   const orders = await prisma.order.findMany({
     select: {
       order_id: true,
@@ -590,25 +590,18 @@ const getShippingOrdersByShipperId = async (req: Request, res: Response) => {
       delivered_date: true,
     },
     where: {
-        shipper_id: shipper_id,
-        status: "shipping",
-        OR:[
-          {payment: "pending"},
-          {payment: "done"}
-        ]
-
+      shipper_id: shipper_id,
+      status: "shipping",
+      OR: [{ payment: "pending" }, { payment: "done" }],
     },
     skip: (Number(page) - 1) * 10,
     take: 10,
   });
   const total = await prisma.order.count({
     where: {
-        shipper_id: shipper_id,
-        status: "shipping",
-        OR:[
-          {payment: "pending"},
-          {payment: "done"}
-        ]
+      shipper_id: shipper_id,
+      status: "shipping",
+      OR: [{ payment: "pending" }, { payment: "done" }],
     },
   });
   const format_orders = orders.map((item) => ({
@@ -623,7 +616,9 @@ const getShippingOrdersByShipperId = async (req: Request, res: Response) => {
     delivered_date: item.delivered_date,
   }));
   console.log("format_orders: ", format_orders);
-  return res.status(200).json({ orders: format_orders, total_page: Math.ceil(total / 10) });
+  return res
+    .status(200)
+    .json({ orders: format_orders, total_page: Math.ceil(total / 10) });
 };
 
 const getShipperOrderDetail = async (req: Request, res: Response) => {
@@ -650,23 +645,23 @@ const getShipperOrderDetail = async (req: Request, res: Response) => {
           product_id: true,
           quantity: true,
           price: true,
-          color:{
-            select:{
+          color: {
+            select: {
               color_id: true,
               color_name: true,
-            }
+            },
           },
-          size:{
-            select:{
-              size_id:true,
-              size_name:true,
-            }
+          size: {
+            select: {
+              size_id: true,
+              size_name: true,
+            },
           },
-          product:{
-            select:{
-              product_name:true,
-            }
-          }
+          product: {
+            select: {
+              product_name: true,
+            },
+          },
         },
       },
     },
@@ -682,7 +677,7 @@ const getShipperOrderDetail = async (req: Request, res: Response) => {
     update_at: order?.update_at,
     status: order?.status,
     payment: order?.payment,
-    total:Number(order?.total),
+    total: Number(order?.total),
     order_detail: order?.order_detail.map((item) => ({
       product_id: item.product_id,
       quantity: item.quantity,
@@ -691,79 +686,117 @@ const getShipperOrderDetail = async (req: Request, res: Response) => {
       size: item.size,
       product: item.product,
     })),
-  };  
+  };
   console.log("format_order: ", format_order);
   return res.status(200).json({ order: format_order });
 };
 
-const updateShipperDeliverd=async(req:Request,res:Response)=>{
-    const {order_id}=req.query as {order_id:string};
-    if(!order_id || order_id === ""){
-        return res.status(400).json({Message: "Không tìm thấy đơn hàng này"});
-    }
-    const order=await prisma.order.update({
-        where:{
-            order_id:order_id,
-        },
-        data:{
-            status:"done",
-            payment:"done",
-            delivered_date:new Date(),
-        },
-    });
-    console.log("order: ",order);
-    return res.status(200).json({Message: "Đã cập nhật thành công"});
-}
+const updateShipperDeliverd = async (req: Request, res: Response) => {
+  const { order_id } = req.query as { order_id: string };
+  if (!order_id || order_id === "") {
+    return res.status(400).json({ Message: "Không tìm thấy đơn hàng này" });
+  }
+  const order = await prisma.order.update({
+    where: {
+      order_id: order_id,
+    },
+    data: {
+      status: "done",
+      payment: "done",
+      delivered_date: new Date(),
+    },
+  });
+  console.log("order: ", order);
+  return res.status(200).json({ Message: "Đã cập nhật thành công" });
+};
 
-const updateShipperRejected=async(req:Request,res:Response)=>{
-    const {order_id}=req.query as {order_id:string};
-    if(!order_id || order_id === ""){
-        return res.status(400).json({Message: "Không tìm thấy đơn hàng này"});
-    }
-    const order_update=await prisma.order.update({
-      select:{
-        order_id:true,
-        order_detail:true,
+const updateShipperRejected = async (req: Request, res: Response) => {
+  const { order_id } = req.query as { order_id: string };
+  if (!order_id || order_id === "") {
+    return res.status(400).json({ Message: "Không tìm thấy đơn hàng này" });
+  }
+  const order_update = await prisma.order.update({
+    select: {
+      order_id: true,
+      order_detail: true,
+    },
+    where: {
+      order_id: order_id,
+    },
+    data: {
+      status: "canceled",
+      payment: "canceled",
+      delivered_date: new Date(),
+    },
+  });
+  for (const item of order_update.order_detail) {
+    const inventory = await prisma.inventory.findFirst({
+      where: {
+        size_id: item.size_id,
+        color_id: item.color_id,
+        product_id: item.product_id,
       },
-        where:{
-            order_id:order_id,
-        },
-        data:{
-            status:"canceled",
-            payment:"canceled",
-            delivered_date:new Date(),
-        },
     });
-    for(const item of order_update.order_detail){
-      const inventory=await prisma.inventory.findFirst({
-        where:{
-          size_id: item.size_id,
-          color_id: item.color_id,
-          product_id: item.product_id,
-        },
-      });
-      if(!inventory){
-        return res.status(404).json({Message: "Không tìm thấy sản phẩm này"});
-      }
-      await prisma.inventory.update({
-        where:{
-          inventory_id: inventory.inventory_id,
-          size_id: item.size_id,
-          color_id: item.color_id,
-          product_id: item.product_id,
-        },
-        data:{
-          quantity:{
-            increment:item.quantity,
-          },
-        },
-      });
+    if (!inventory) {
+      return res.status(404).json({ Message: "Không tìm thấy sản phẩm này" });
     }
-    console.log("order: ",order_update);
-    return res.status(200).json({Message: "Đã cập nhật thành công"});
-}
+    await prisma.inventory.update({
+      where: {
+        inventory_id: inventory.inventory_id,
+        size_id: item.size_id,
+        color_id: item.color_id,
+        product_id: item.product_id,
+      },
+      data: {
+        quantity: {
+          increment: item.quantity,
+        },
+      },
+    });
+  }
+  console.log("order: ", order_update);
+  return res.status(200).json({ Message: "Đã cập nhật thành công" });
+};
+
+const updateShipperTakeOrder = async (req: Request, res: Response) => {
+  const { shipper_id, order_id } = req.query as {
+    shipper_id: string;
+    order_id: string;
+  };
+  await prisma.$transaction(async (pris) => {
+    const existsUser = await pris.user.findFirst({
+      where: {
+        user_id: shipper_id,
+      },
+    });
+    const existsOrder = await pris.order.findFirst({
+      where: {
+        order_id: order_id,
+      },
+    });
+    if (!existsUser) {
+      return res.status(404).json({ Message: "Không tìm thấy người dùng này" });
+    }
+    if (!existsOrder) {
+      return res.status(404).json({ Message: "Không tìm thấy đơn hàng này" });
+    }
+    await pris.order.update({
+      data: {
+        status: "shipping",
+        shipper_id: shipper_id,
+      },
+      where: {
+        order_id: order_id,
+      },
+    });
+    return res
+      .status(200)
+      .json({ Message: existsUser.name + " (bạn) sẽ giao đơn hàng này." });
+  });
+};
 
 export {
+  updateShipperTakeOrder,
   getOrderByOrderId,
   createAOrder,
   updateAOrder,
