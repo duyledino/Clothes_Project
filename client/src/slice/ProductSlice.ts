@@ -31,11 +31,6 @@ const initialState: {
   totalPage: 0,
 };
 
-const baseUrl =
-  import.meta.env.VITE_NODE_ENV === "development"
-    ? import.meta.env.VITE_SERVER_API
-    : "/api";
-
 export const fetchBestSellerProductFromApi = createAsyncThunk(
   "get/getBestSeller",
   async (_, { rejectWithValue }) => {
@@ -162,6 +157,22 @@ export const fetchGetProductById = createAsyncThunk(
   }
 );
 
+export const fetchGetProductByIdAdmin = createAsyncThunk(
+  "product/getProductByIdAdmin",
+  async (product_id: string, { rejectWithValue }) => {
+    try {
+      const response = await productService.getProductByIdAdmin(product_id);
+      console.log(response.data);
+      return response.product;
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 export const fetchTotalPage = createAsyncThunk(
   "product/getTotalPage",
   async (
@@ -228,6 +239,24 @@ export const fetchReviseProduct = createAsyncThunk(
     }
   }
 );
+
+export const fetchUpdateProduct = createAsyncThunk(
+  "product/updateProduct",
+  async ({productData,product_id}: { product_id: string,productData: FormData | { images: []; title: string; description: string; price: number } }, { rejectWithValue }) => {
+    try {
+      const response = await productService.updateProduct(product_id,productData);
+      console.log("update product: ", response.data);
+      toast.success(response.Message||"Cập nhật sản phẩm thành công");
+      return response.Message;
+    } catch (error: any) {
+      console.error(error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "productSlice",
   initialState,
@@ -363,7 +392,29 @@ const productSlice = createSlice({
       .addCase(fetchReviseProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(fetchGetProductByIdAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGetProductByIdAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.Product = action.payload as ProductData;
+      })
+      .addCase(fetchGetProductByIdAdmin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchUpdateProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUpdateProduct.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(fetchUpdateProduct.rejected, (state, action) => {
+        state.loading = false;
+      })
+      ;
   },
 });
 

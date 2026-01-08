@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
-import cookie_parser from 'cookie-parser';
+import cookie_parser from "cookie-parser";
 import "dotenv/config";
 import bot from "./route/botRoute.js";
 import user from "./route/userRoute.js";
@@ -19,13 +19,13 @@ import role from "./route/roleRoute.js";
 import color from "./route/colorRoute.js";
 import size from "./route/sizeRoute.js";
 import provider from "./route/providerRoute.js";
-import category from './route/categoryRoute.js';
-import test from './route/testRoute.js';
+import category from "./route/categoryRoute.js";
+import test from "./route/testRoute.js";
 
-
-import { WebSocketServer } from "ws";
-import { broadcastToUser } from "./util/socket.js";
-import { createMessageWebsoket } from "./controller/chat/controller.js";
+import { Server } from "socket.io";
+import { PrismaClient } from "@prisma/client";
+import { puter } from "./config/puter.js";
+import { responseAI, saveMessage } from "./controller/chat/controller.js";
 
 const app = express();
 app.use(express.json());
@@ -62,59 +62,184 @@ provider(app);
 category(app);
 test(app);
 
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`server is running on port http://localhost:${PORT}`);
 });
 
-const wss = new WebSocketServer({ server });
+const io = new Server(3501, {
+  cors: {
+    origin: `${process.env.client_Url}`,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
-const chats: Record<any, any> = {};
-
-wss.on("connection", (ws) => {
-  let user: { userId: string } | null = null;
+const prisma = new PrismaClient();
+io.on("connection", async (socket) => {
   console.log("✅ Client connected. 1 User is connected");
-  ws.on("error", (err) => {
-    console.error("❌Failed to connect websocket:\n", err);
-  });
-  ws.on("message", async function (data) {
-    const parsedData: {
-      type: string;
-      message: string;
-      fromId: string;
-      chatId: string;
-      toId: string;
-    } = JSON.parse(data as any);
-    //register for the very first time
-    if (parsedData.type === "register") {
-      const { fromId } = parsedData;
-      chats[fromId] = ws;
-      console.log("✅ Register for message");
-      return;
-    }
-    //this is toId
-    const { message, chatId, fromId, toId } = parsedData;
-    if (!chats[fromId]) chats[fromId] = ws;
-    // if(!chats[toId]) chats[toId] = ws;
-    console.log("received:", parsedData);
-    user = { userId: fromId };
+  socket.on("typing", (data) => {
+    if (!data) return;
+
     try {
-      //send to specific userId
-      //dont need to use Set because this application doesn't support chat room
-      // NOTE: nothing is gonna send for the very first time
-      broadcastToUser(chats, chatId, toId, message);
-      //NOTE: then save to database
-      await createMessageWebsoket(parsedData);
-    } catch (err) {
-      console.error("❌ Error handling message:", err);
-      ws.send(
-        JSON.stringify({ error: "Invalid message format or server error." })
-      );
+      const parsedData = JSON.parse(data);
+      const { chat_id, user_id, isTyping } = parsedData;
+      
+      console.log(`Typing status: ${isTyping} from ${user_id} in ${chat_id}`);
+
+      socket.to(chat_id).emit("typing", JSON.stringify({ 
+        chat_id, 
+        user_id, 
+        isTyping 
+      }));
+
+    } catch (error) {
+      console.log("❌ Error parsing typing data:", error);
+      socket.emit("message",JSON.stringify("Lỗi hệ thống !! "+error))
     }
   });
-  ws.on("close", () => {
-    if (user && chats[user.userId]) {
-      delete chats[user.userId];
-      console.log(`❌ User ${user.userId} disconnected`);
+  socket.on("register", async (data) => {
+    const parsedData: {
+      from_id: string;
+      chat_id: string;
+      to_id: string;
+    } = JSON.parse(data as any);
+    socket.join(parsedData.chat_id);
+    try {
+      const is_admin_online = await prisma.user.findFirst({
+        select: {
+          user_id: true,
+          role: {
+            select: {
+              role_name: true,
+            },
+          },
+        },
+        where: {
+          user_id: parsedData.from_id,
+        },
+      });
+      socket.data.isAdminOnline = is_admin_online?.role?.role_name === "admin";
+      socket
+        .to(parsedData.chat_id)
+        .emit("register", JSON.stringify(parsedData));
+      // if(socket.data.isAdminOnline){
+      //   socket.to(parsedData.chat_id).emit("register",{
+      //     message:"admin online",
+      //     from_id:parsedData.from_id,
+      //     chat_id:parsedData.chat_id,
+      //     to_id:parsedData.to_id
+      //   });
+      // }else{
+      //   socket.to(parsedData.chat_id).emit("register",{
+      //     message:"admin offline",
+      //     from_id:parsedData.from_id,
+      //     chat_id:parsedData.chat_id,
+      //     to_id:parsedData.to_id
+      //   });
+      // }
+    } catch (error) {
+      console.log(error);
     }
+
+    console.log("✅ Register for message: ", parsedData);
+  });
+  socket.on("message", async (data) => {
+    const parseData: {
+      message_id: string;
+      chat_id: string;
+      message: string;
+      from_id: string;
+    } = JSON.parse(data);
+    console.log(
+      "✅ Receive message from : ",
+      parseData.from_id,
+      "chat_id:",
+      parseData.chat_id,
+      "message:",
+      parseData.message
+    );
+    // console.log("socket.data.isAdminOnline: ",socket.data.isAdminOnline);
+    // check room không phải check người gửi !!!!
+    // 2. CHECK THE ROOM: Who is currently in this chat?
+    // fetchSockets() returns an array of all sockets in this room
+    const socketsInRoom = await io.in(parseData.chat_id).fetchSockets();
+    // console.log("socketsInRoom: ",socketsInRoom);
+    // 3. Find if there is an Admin in the room
+    // We look for a socket that is NOT the sender AND has isAdminOnline = true
+    const adminIsOnline = socketsInRoom.some((remoteSocket) => {
+      console.log(
+        "remoteSocket.data.isAdminOnline: ",
+        remoteSocket.data.isAdminOnline
+      );
+      return remoteSocket.data.isAdminOnline;
+    });
+    console.log("adminIsOnline: ", adminIsOnline);
+    if (adminIsOnline) {
+      socket.to(parseData.chat_id).emit(
+        "message",
+        JSON.stringify({
+          message: parseData.message,
+          from_id: parseData.from_id,
+          chat_id: parseData.chat_id,
+          message_id: parseData.message_id,
+          isAdmin: true,
+        })
+      );
+      const saveUserMessage = await saveMessage(
+        parseData.message,
+        parseData.chat_id,
+        parseData.from_id
+      );
+      const saveAdminMessage = await saveMessage(
+        parseData.message,
+        parseData.chat_id,
+        parseData.from_id
+      );
+    } else {
+      try {
+        socket.emit("typing",JSON.stringify({
+          user_id:parseData.from_id,
+          chat_id:parseData.chat_id,
+          isTyping:true
+        }));
+        const message_ai = await responseAI(parseData.message);
+        console.log("message_ai: ", message_ai);
+        const admin = await prisma.user.findFirst({
+          select: { user_id: true },
+          where: { role: { role_name: "admin" } },
+        });
+        socket.emit("typing",JSON.stringify({
+          user_id:parseData.from_id,
+          chat_id:parseData.chat_id,
+          isTyping:false
+        }));
+        socket.emit(
+          "message",
+          JSON.stringify({
+            message: message_ai,
+            from_id: "AI",
+            chat_id: parseData.chat_id,
+            message_id: parseData.message_id,
+            isAdmin: false,
+          })
+        );
+
+        const saveUserMessage = await saveMessage(
+          parseData.message,
+          parseData.chat_id,
+          parseData.from_id
+        );
+        const saveAIMessage = await saveMessage(
+          message_ai!.toString(),
+          parseData.chat_id,
+          admin!.user_id
+        );
+      } catch (error) {
+        console.log(">>>>>>>>>.error: ", error);
+      }
+    }
+  });
+  socket.on("disconnect", () => {
+    console.log("❌ Client disconnected");
   });
 });

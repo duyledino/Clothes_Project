@@ -108,7 +108,8 @@ export default function Size() {
           {/* Content */}
           <div className="flex flex-1 overflow-hidden">
             <div className="flex-1 overflow-auto bg-slate-50 p-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-slate-50 text-slate-500">
                     <tr>
@@ -168,6 +169,50 @@ export default function Size() {
                   </tbody>
                 </table>
               </div>
+            
+            {/* Mobile Cards View */}
+            <div className="md:hidden grid gap-4">
+              {[...sizes]
+                      .sort((a, b) =>
+                        a.size_name
+                          .toLowerCase()
+                          .localeCompare(b.size_name.toLowerCase(), undefined, {
+                            sensitivity: "base",
+                          })
+                      )
+                      .map((item) => (
+                <div key={item.size_id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-700">
+                           {item.size_name}
+                        </div>
+                        <div>
+                           <h3 className="font-bold text-slate-900">{item.size_name}</h3>
+                           <p className="text-xs text-slate-500 font-mono">#{item.size_id}</p>
+                        </div>
+                     </div>
+                     <div className="flex gap-1">
+                        <button 
+                                onClick={()=>{
+                                  setSelectedSize(item);
+                                }}
+                              className="p-2 text-slate-400 hover:text-[#135bec] transition-colors">
+                                <Pencil size={18} />
+                        </button>
+                        <button
+                                onClick={() => {
+                                  handleDelete(item);
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                              >
+                                <Trash size={18} />
+                        </button>
+                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
             </div>
           </div>
         </main>

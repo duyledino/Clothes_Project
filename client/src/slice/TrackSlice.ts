@@ -12,16 +12,11 @@ const initState = {
   bestCustomer: [] as BestCustomer[],
 };
 
-const baseUrl =
-  import.meta.env.VITE_NODE_ENV === "development"
-    ? import.meta.env.VITE_SERVER_API
-    : "/api";
-
 export const fetchRevenue = createAsyncThunk(
   "fetch revenue",
-  async (_, { rejectWithValue }) => {
+  async (filter:string, { rejectWithValue }) => {
     try {
-      const response = await trackService.getRevenue();
+      const response = await trackService.getRevenue(filter);
       return response.revenue;
     } catch (error: any) {
       console.error("error: ", error);

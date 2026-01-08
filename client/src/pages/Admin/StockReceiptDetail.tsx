@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Printer, Package, User, Calendar, MapPin } from 'lucide-react';
-import type { StockReceipt } from '../../type/types.frontend';
+import { ArrowLeft, Printer, Package, User, Calendar } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/hooks';
 import { fetchGetStockReceiptByReceiptId } from '@/slice/InventorySlice';
 import Loading from '@/components/ui/Loading';
@@ -104,7 +103,7 @@ const StockReceiptDetail: React.FC = () => {
         <div className="p-6 border-b dark:border-gray-700">
             <h2 className="font-bold text-xl">Danh sách sản phẩm</h2>
         </div>
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
               <tr className="text-left text-gray-500 font-medium text-sm">
@@ -143,6 +142,34 @@ const StockReceiptDetail: React.FC = () => {
                 </tr>
             </tfoot>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden grid gap-4 p-4">
+             {stockReceiptDetail?.stock_receipt_details.map((item, index) => (
+                <div key={item.inventory_id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border dark:border-gray-700">
+                     <div className="flex justify-between mb-2">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{item.product_name}</span>
+                        <span className="text-xs text-gray-500 font-mono">#{index + 1}</span>
+                     </div>
+                     <div className="flex gap-2 text-xs text-gray-500 mb-3">
+                        <span className="bg-white px-2 py-1 rounded border">Size: {item.size_id}</span>
+                        <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border">
+                            Color: <span style={{backgroundColor: item.color_id}} className='inline-block w-3 h-3 border border-gray-100'></span>
+                        </span>
+                     </div>
+                     <div className="flex justify-between items-center border-t pt-2 dark:border-gray-700">
+                        <span className="text-xs text-gray-400">Inv ID: {item.inventory_id}</span>
+                        <span className="font-bold text-primary">{item.quantity} đơn vị</span>
+                     </div>
+                </div>
+             ))}
+              <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex justify-between items-center">
+                    <span className="font-black uppercase text-gray-600 dark:text-gray-300 text-sm">Tổng cộng</span>
+                    <span className="font-black text-xl text-primary">
+                        {stockReceiptDetail?.stock_receipt_details.reduce((sum, item) => sum + item.quantity, 0)} đơn vị
+                    </span>
+             </div>
         </div>
       </div>
     </div>

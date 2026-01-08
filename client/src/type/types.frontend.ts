@@ -44,6 +44,7 @@ export interface ProductData {
   category: string;
   product_size: Product_Size[];
   product_color: Product_Color[];
+  product_category?: CategoryOrigin[];
   inventories: {
     color_id: string;
     product_id: string;
@@ -158,6 +159,7 @@ export interface user {
   name: string;
   address: string;
   phone: string;
+  isVerify: boolean;
 }
 
 // end user type
@@ -207,9 +209,8 @@ export interface Product_Review {
 // track type
 
 export interface Revenue {
-  month: number;
-  year: number;
-  total: number;
+  label: string;
+  value: number;
 }
 
 export interface BestSeller {
@@ -223,12 +224,6 @@ export interface BestCustomer {
   user_id: string;
   name: string;
   email: string;
-  total: number;
-}
-
-export interface monthAndRevenue {
-  month: string;
-  year: number;
   total: number;
 }
 
@@ -282,6 +277,30 @@ export interface InventoryInCartUser {
 }
 // end inventory type
 
+// chat type
+
+export interface ChatUser {
+    chat_id: string;
+    user_id_admin: string;
+    user_id_user: string;
+    chat_admin: {
+        name: string;
+    };
+    create_at: Date;
+}
+
+export interface ChatAdmin {
+    chat_id: string;
+    user_id_admin: string;
+    user_id_user: string;
+    chat_user: {
+        name: string;
+    };
+    create_at: Date;
+}
+
+// end chat type
+
 // admin type
 
 export interface orderUserInAdminPanel {
@@ -317,7 +336,7 @@ export interface ProductDataAmin {
   product_name: string;
   price: number;
   imageUrl: string[];
-  category: CategoryOrigin;
+  product_category: CategoryOrigin[];
   product_size: Product_Size[];
   product_color: Product_Color[];
   count: number;
@@ -420,6 +439,25 @@ export interface StockReceipt {
     quantity: number;
   }[];
 }
+
+export interface ChatAdmin{
+    chat_id: string;
+    user_id_admin: string;
+    user_id_user: string;
+    chat_user: {
+        name: string;
+    };
+    create_at: Date;
+}
+
+export interface Message {
+  message_id: string;
+  chat_id: string;
+  user_id: string;
+  message: string;
+  isAdmin: boolean | null;
+};
+
 
 //end admin type
 

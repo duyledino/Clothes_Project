@@ -46,13 +46,12 @@ export const productService = {
           price: number;
         }
   ) => {
+    console.log("productData: ", productData);
     const response = await myAxios.post(
       "/product/createAProduct",
       productData,
       {
         headers: {
-          // If sending FormData, Axios usually sets this automatically,
-          // but explicit is okay too if needed.
           "Content-Type": "multipart/form-data",
         },
       }
@@ -60,10 +59,17 @@ export const productService = {
     return response.data;
   },
 
-  // GET /product/getProductById
   getProductById: async (product_id: string) => {
     console.log("product_id: >>>>>>>>>>>", product_id);
     const response = await myAxios.get(`/product/getProductById?product_id=${product_id}`);
+    return response.data;
+  },
+
+  // GET /product/getProductByIdAdmin
+  getProductByIdAdmin: async (product_id: string) => {
+    const response = await myAxios.get(
+      `/product/getProductByIdAdmin?product_id=${product_id}`
+    );
     return response.data;
   },
 
@@ -93,6 +99,15 @@ export const productService = {
   // PUT /product/reviseProduct
   reviseProducts: async (ids: string[]) => {
     const response = await myAxios.put("/product/reviseProduct", { ids });
+    return response.data;
+  },
+
+  updateProduct: async (product_id: string, productData: FormData | { images: []; title: string; description: string; price: number }) => {
+    const response = await myAxios.put(`/product/updateAProduct?product_id=${product_id}`, productData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 };

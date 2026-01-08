@@ -73,6 +73,78 @@ export const logout = createAsyncThunk(
   }
 );
 
+export const sendVerifyMail = createAsyncThunk(
+  "auth/sendVerifyMail",
+  async (
+    { user_id }: { user_id: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await authService.sendVerifyMail(user_id);
+      toast.success(data.Message);
+      return data;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.Message);
+      return rejectWithValue(error.response?.data?.Message);
+    }
+  }
+);
+
+export const sendVerifyForgetPasswordMail = createAsyncThunk(
+  "auth/sendVerifyForgetPasswordMail",
+  async (
+    { email }: { email: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await authService.sendVerifyForgetPasswordMail(email);
+      toast.success(data.Message);
+      return data;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.Message);
+      return rejectWithValue(error.response?.data?.Message);
+    }
+  }
+);
+
+export const verify = createAsyncThunk(
+  "auth/verify",
+  async (
+    { token, user_id }: { token: string; user_id: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await authService.verify(token, user_id);
+      toast.success(data.Message);
+      return data;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.Message);
+      return rejectWithValue(error.response?.data?.Message);
+    }
+  }
+);
+
+export const verifyForgetPassword = createAsyncThunk(
+  "auth/verifyForgetPassword",
+  async (
+    { token, user_id,password }: { token: string; user_id: string,password:string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await authService.forgetPassword(token, user_id,password);
+      toast.success(data.Message);
+      return data;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.Message);
+      return rejectWithValue(error.response?.data?.Message);
+    }
+  }
+);
+
 const slice = createSlice({
   initialState: initialState,
   name: "authSlice",
@@ -118,7 +190,44 @@ const slice = createSlice({
       })
       .addCase(logout.rejected, (state) => {
         state.loading = false;
-      });
+      })
+      .addCase(sendVerifyMail.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(sendVerifyMail.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendVerifyMail.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendVerifyForgetPasswordMail.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(sendVerifyForgetPasswordMail.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendVerifyForgetPasswordMail.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(verify.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(verify.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(verify.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(verifyForgetPassword.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(verifyForgetPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(verifyForgetPassword.rejected, (state) => {
+        state.loading = false;
+      })
+      ;
   },
 });
 

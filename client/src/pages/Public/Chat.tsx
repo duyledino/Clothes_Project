@@ -1,4 +1,3 @@
-;
 import React, { useEffect, useRef, useState } from "react";
 import ChatSidebar from "@/components/guest/ChatSidebar";
 import ChatMessageArea from "@/components/guest/ChatMessageArea";
@@ -6,131 +5,100 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "react-toastify";
 import { fetchChatsByUserId } from "@/slice/ChatSlice";
 import { useNavigate } from "react-router-dom";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-type Chat = {
-  chatId: string;
-  toUser: User;
-  fromUser: User;
-};
-
-type Message = {
-  messageId: string;
-  chatId: string;
-  //fromUserID
-  userId: string;
-  content: string;
-};
+import type { ChatUser, Message } from "@/type/types.frontend";
+import { socket } from "@/config/socket";
+import Loading from "@/components/ui/Loading";
 
 const ChatPublicPage = () => {
-  const router = useNavigate();
-  const socketRef = useRef<WebSocket | null>(null);
   const dispatch = useAppDispatch();
-  const { chats } = useAppSelector((state) => state.ChatSlice);
-  const [localStore, setLocalStore] = useState<string | null>(null);
+  const { chatUser, loadingChat } = useAppSelector((state) => state.ChatSlice);
   const [current, setCurrent] = useState<Message[]>([]);
-  const [singleChat, setSingleChat] = useState<Chat>(() => {
-    if (chats && chats?.length > 0) return chats[0];
-    return {
-      chatId: "default",
-      toUser: {
-        email: "temp@gmail.com",
-        id: "123",
-        name: "temp",
-      },
-      fromUser: {
-        email: "temp@gmail.com",
-        id: "123",
-        name: "temp",
-      },
-    };
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) {
-        console.log("no user login");
-        router("/");
-      }
-      setLocalStore(storedUser);
+  const [singleChat, setSingleChat] = useState<ChatUser | null>(null);
+  const { user } = useAppSelector((state) => state.AuthSlice);
+  // console.log("user: ", user!.user);
+  useEffect(()=>{
+    if (user && user.user) {
+      console.log("user: ", user.user);
+      dispatch(fetchChatsByUserId({ user_id: user.user.user_id }));
     }
-    socketRef.current = new WebSocket(`${import.meta.env.VITE_SOCKET}`);
-    socketRef.current.onopen = () => {
-      console.log("✅Client websocket is connected");
-    };
-    socketRef.current.onmessage = (e) => {
-      console.log("received from server: ", e.data);
-      const { messageId, message, fromId, chatId } = JSON.parse(e.data);
-      setCurrent((prev) => [
-        ...prev,
-        { messageId: messageId, content: message, userId: fromId, chatId },
-      ]);
-    };
-    socketRef.current.onclose = (e) => {
-      console.log("Websocket is closed");
-    };
-    socketRef.current.onerror = (e) => {
-      console.error("websocket error: ", e);
-    };
+  },[]);
+  useEffect(() => {
+    if (user && user.user) {
+      console.log("user: ", user.user);
+      // dispatch(fetchChatsByUserId({ user_id: user.user.user_id }));
+      socket.on("connection", () => {
+        console.log("✅Client websocket is connected");
+      });
+    }
     return () => {
-      if (socketRef.current) socketRef.current.close();
+      socket.off("connection");
     };
   }, []);
   useEffect(() => {
-    if (localStore) {
-      const { token, id } = JSON.parse(localStore);
-      dispatch(fetchChatsByUserId({ token, userId: id }));
+    if (chatUser) {
+      setSingleChat(chatUser[0]);
     }
-  }, [localStore]);
+  }, [chatUser]);
   useEffect(() => {
-    if (chats) {
-      setSingleChat(chats[0]);
-    }
-  }, [chats]);
-  useEffect(() => {
-    if (singleChat && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current?.send(
-        JSON.stringify({ type: "register", fromId: singleChat.fromUser.id })
+    if (singleChat) {
+      socket.emit(
+        "register",
+        JSON.stringify({
+          from_id: singleChat.user_id_user,
+          chat_id: singleChat.chat_id,
+          to_id: singleChat.user_id_admin,
+        })
       );
     }
-  }, [singleChat, socketRef.current?.OPEN]);
-  console.log("chats: ", chats);
+    socket.on("register", (data) => {
+      console.log("✅Client websocket is connected");
+    });
+    return () => {
+      socket.off("register");
+    };
+  }, [singleChat]);
+  useEffect(() => {
+    socket.on("message", (data) => {
+      console.log("received from server: ", data);
+      const { message_id, message, from_id, chat_id,isAdmin } = JSON.parse(data);
+      setCurrent((prev) => [
+        ...prev,
+        {
+          message_id: message_id,
+            message: message,
+          user_id: from_id,
+          chat_id: chat_id,
+          isAdmin: isAdmin
+        },
+      ]);
+    });
+    return () => {
+      socket.off("message");
+    };
+  }, []);
+  console.log("chats: ", chatUser);
   console.log("currnet: ", current);
   return (
-    <div className="flex flex-1 h-[86vh] bg-white text-gray-900 border-b-2">
-      <ChatSidebar
-        chats={chats || []}
-        setSingleChat={setSingleChat}
-        singleChat={singleChat}
-      />
-      {singleChat.chatId !== "default" && localStore ? (
-        <ChatMessageArea
-          localStore={localStore}
+    <>
+      {loadingChat && <Loading />}
+      <div className="flex flex-1 h-[86vh] bg-white text-gray-900 border-b-2">
+        <ChatSidebar
           setCurrent={setCurrent}
-          current={current}
-          socketRef={socketRef}
-          fromId={singleChat ? singleChat.fromUser.id : "123"}
-          toId={singleChat ? singleChat.toUser.id : "123"}
-          chatId={singleChat.chatId}
+          chats={chatUser || []}
+          setSingleChat={setSingleChat}
+          singleChat={singleChat}
         />
-      ) : (
-        <ChatMessageArea
-          localStore={localStore}
-          setCurrent={setCurrent}
-          current={[]}
-          socketRef={socketRef}
-          fromId={singleChat.fromUser.id}
-          toId={singleChat.toUser.id}
-          chatId={singleChat.chatId}
-        />
-      )}
-    </div>
+        {singleChat && singleChat?.chat_id !== "default" && user ? (
+          <ChatMessageArea
+            setCurrent={setCurrent}
+            current={current}
+            chat_id={singleChat!.chat_id}
+          />
+        ) : (
+          ""
+        )}
+      </div>
+    </>
   );
 };
 

@@ -44,9 +44,9 @@ const Nav = () => {
               </li>
             );
           })}
-          {localStore["user"] &&
-            JSON.parse(localStore["user"]!).id !== "" &&
-            !JSON.parse(localStore["user"]!).admin && (
+          {user?.user &&
+            user.user.user_id !== "" &&
+            user.user.role !== "admin" && (
               <li>
                 <Link
                   to={`/Chat`}

@@ -14,7 +14,11 @@ const PublicLayout = () => {
       location.pathname.includes("/Login") ||
       location.pathname.includes("/login") ||
       location.pathname.includes("/Signup") ||
-      location.pathname.includes("/signup")
+      location.pathname.includes("/signup") || 
+      location.pathname.includes("/Verify")||
+      location.pathname.includes("/ForgetPassword")||
+      location.pathname.includes("/verify")||
+      location.pathname.includes("/forgetPassword")
     )
       setIsInclude(false);
     else setIsInclude(true);

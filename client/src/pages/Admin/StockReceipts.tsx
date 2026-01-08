@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Search, Filter } from 'lucide-react';
-import type { StockReceipt } from '../../type/types.frontend';
 import { useAppDispatch, useAppSelector } from '@/hooks/hooks';
 import { fetchGetAllStockReceipt } from '@/slice/InventorySlice';
 import Loading from '@/components/ui/Loading';
@@ -10,8 +9,8 @@ const StockReceipts: React.FC = () => {
   const router = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const dispatch = useAppDispatch();
-  const [page,setPage] = useState(1);
-  const {stockReceipts,loadingInventory,total_stock_page}= useAppSelector(state=>state.InventorySlice);
+  const [page] = useState(1);
+  const {stockReceipts,loadingInventory}= useAppSelector(state=>state.InventorySlice);
   const handleRowClick = (id: string) => {
     router(`${id}`); // Relative navigation, assumes route is setup correctly
   };
@@ -53,7 +52,7 @@ const StockReceipts: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-[#1a202c] rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
@@ -116,6 +115,50 @@ const StockReceipts: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden grid gap-4">
+        {stockReceipts.map((receipt) => (
+          <div 
+            key={receipt.receipt_id} 
+            className="bg-white dark:bg-[#1a202c] rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700 cursor-pointer"
+            onClick={() => handleRowClick(receipt.receipt_id)}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <span className="text-xs text-gray-400 font-mono">#{receipt.receipt_id}</span>
+                <h3 className="font-bold text-gray-900 dark:text-white">{receipt.provider.provider_name}</h3>
+              </div>
+              <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full font-bold">
+                 Total: {receipt.total_quantity}
+              </span>
+            </div>
+            
+            <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2 mb-3">
+               <div className="flex justify-between">
+                  <span className="text-gray-400 text-xs">Người nhập:</span>
+                  <span>{receipt.user.name}</span>
+               </div>
+               <div className="flex justify-between">
+                  <span className="text-gray-400 text-xs">Ngày nhập:</span>
+                  <span>{new Date(receipt.create_at).toLocaleDateString('vi-VN')}</span>
+               </div>
+            </div>
+             <div className="flex justify-end border-t pt-3 dark:border-gray-700">
+                <button 
+                  className="flex items-center gap-1 text-primary text-sm font-medium hover:underline"
+                >
+                  <Eye className="h-4 w-4" /> Xem chi tiết
+                </button>
+             </div>
+          </div>
+        ))}
+         {stockReceipts.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              Không tìm thấy phiếu nhập nào.
+            </div>
+          )}
       </div>
     </div>
     </>

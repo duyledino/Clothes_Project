@@ -9,8 +9,13 @@ import {
   getAUser_Admin,
   loginUser,
   logoutUser,
+  sendVerifyForgetPasswordMail,
+  sendVerifyMail,
+  unbanUser,
   updateUser,
   updateUser_admin,
+  verifyForgetPassword,
+  verifyUser,
 } from "../controller/user/controller.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import {
@@ -62,6 +67,12 @@ const route = (app: Application) => {
     asyncHandler(authenticateAdmin),
     asyncHandler(banUser)
   );
+  router.put(
+    "/unbanUser",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    asyncHandler(unbanUser)
+  );
   router.post("/login", asyncHandler(loginUser));
   router.get(
     "/getAllUserIsShipperByRoleName",
@@ -69,6 +80,10 @@ const route = (app: Application) => {
     asyncHandler(authenticateAdmin),
     asyncHandler(getAllUserIsShipperByRoleName)
   );
+  router.post("/sendVerifyMail", asyncHandler(sendVerifyMail));
+  router.post("/sendVerifyForgetPasswordMail", asyncHandler(sendVerifyForgetPasswordMail));
+  router.post("/verify", asyncHandler(verifyUser));
+  router.post("/verifyForgetPassword", asyncHandler(verifyForgetPassword));
   return app.use("/api/v1/user", router);
 };
 

@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
-// import { cloudinary } from "../../config/cloundinary.js";
 import fs from "fs";
 import { v4 as uuid } from "uuid";
 import { cloudinary } from "../../config/cloudinary.js";
@@ -15,7 +14,7 @@ const prisma = new PrismaClient();
 // >
 const getAllProducts = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string);
-  const { category, sort } = req.body; // why it's undefined
+  const { category, sort } = req.body;
   console.log("category, subcategory, sort: ", category, sort);
   const Category = category.map((item: any) => item.toLowerCase());
   const products = await prisma.product.findMany({
@@ -26,8 +25,8 @@ const getAllProducts = async (req: Request, res: Response) => {
       description: true,
       price: true,
       count: true,
-      category: true,
       status: true,
+      Product_Category:true
     },
     skip: 8 * (page - 1),
     take: 8,
@@ -35,11 +34,9 @@ const getAllProducts = async (req: Request, res: Response) => {
       status: {
         equals: "active",
       },
-      AND: [
-        Category.length > 0
-          ? { category: { category_id: { in: Category } } }
-          : {},
-      ],
+      AND:[
+        Category.length > 0 ? { Product_Category: { some: { category_id: { in: Category } } } } : {},
+      ]
     },
     orderBy:
       sort !== ""
@@ -70,7 +67,16 @@ const getAllProductsAdmin = async (req: Request, res: Response) => {
       price: true,
       product_size: true,
       product_color: true,
-      category: true,
+      Product_Category:{
+        select:{
+          category:{
+            select:{
+              category_name:true,
+              category_id:true
+            }
+          }
+        }
+      },
       count: true,
       status: true,
     },
@@ -80,38 +86,20 @@ const getAllProductsAdmin = async (req: Request, res: Response) => {
       price: "desc",
     },
   });
+  // console.log("products: ", products[0]!.Product_Category.map((item: any) => item.category.category_name));
   const fixBigIntProducts = products.map((item: any) => ({
-    ...item,
+    product_id:item.product_id,
+    product_name:item.product_name,
+    imageUrl:item.imageUrl,
+    product_size:item.product_size,
+    product_color:item.product_color,
+    product_category: item.Product_Category.map((item1: any) => item1.category),
+    count:item.count,
+    status:item.status,
     price: Number(item.price),
   }));
-  return res.status(200).json({ products: fixBigIntProducts });
-};
+  console.log("products: ", fixBigIntProducts);
 
-const getAllProductsAdminStock = async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string);
-  console.log("page ", page);
-  const products = await prisma.product.findMany({
-    select: {
-      product_id: true,
-      product_name: true,
-      imageUrl: true,
-      price: true,
-      product_size: true,
-      product_color: true,
-      category: true,
-      count: true,
-      status: true,
-    },
-    skip: 8 * (page - 1),
-    take: 8,
-    orderBy: {
-      price: "desc",
-    },
-  });
-  const fixBigIntProducts = products.map((item: any) => ({
-    ...item,
-    price: Number(item.price),
-  }));
   return res.status(200).json({ products: fixBigIntProducts });
 };
 
@@ -150,6 +138,11 @@ const getBestSeller = async (req: Request, res: Response) => {
       price: true,
     },
     take: 4,
+    where: {
+      status: {
+        equals: "active",
+      },
+    },
     orderBy: {
       count: "desc",
     },
@@ -202,9 +195,11 @@ const createAProduct = async (req: Request, res: Response) => {
   );
   const sizes = size.split(",");
   const colors = color.split(",");
+  const categories = category.split(",");
   console.log("file: ", files);
   console.log("sizes: ", sizes);
   console.log("colors: ", colors);
+  console.log("categories: ", categories);
   if (product_name === "" || description === "")
     return res.status(400).json({ Message: "Failed to create product" });
   if (!files || files.length === 0)
@@ -231,10 +226,15 @@ const createAProduct = async (req: Request, res: Response) => {
       product_name: product_name,
       imageUrl,
       tryon: tryonImg!,
-      category_id: category,
+      
     },
   });
-
+  await prisma.product_Category.createMany({
+    data: categories.map((item) => ({
+      category_id: item,
+      product_id: new_product.product_id,
+    })),
+  });
   //success: then insert into product_size and product_color table
   await prisma.product_Size.createMany({
     data: sizes.map((item, index) => {
@@ -272,6 +272,134 @@ const createAProduct = async (req: Request, res: Response) => {
     data: data,
   });
   return res.status(200).json({ Message: "Create product successfully" });
+};
+
+const updateAProduct = async (req: Request, res: Response) => {
+  const files_temp = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const files = files_temp['photos'];
+  const fileTryon = files_temp['tryon'];
+  const { product_id } = req.query as { product_id: string };
+  // receive string first then covert them to string[]
+  console.log("product_id: ", product_id);
+  console.log("fileTryon: ", fileTryon);
+  const { product_name, description, price, category, size, color, image, tryonURL } =
+    req.body as {
+      product_name: string;
+      description: string;
+      price: number;
+      category: string;
+      size: string;
+      color: string;
+      image: string;
+      tryonURL: string;
+    };
+  console.log(
+    "title, description,price,category,size,color: ",
+    product_name,
+    description,
+    price,
+    category,
+    size,
+    color,
+    tryonURL
+  );
+  const images = image.split(",");
+  const sizes = size.split(",");
+  const colors = color.split(",");
+  const categories = category.split(",");
+  console.log("file: ", files);
+  console.log("sizes: ", sizes);
+  console.log("colors: ", colors);
+  console.log("categories: ", categories);
+  if (product_name === "" || description === "")
+    return res.status(400).json({ Message: "Thiếu thông tin" });
+
+  const imageUrl = [...images];
+  let tryonImg = tryonURL;
+  if(files && files.length > 0){
+    for (let i = 0; i < files!.length; i++) {
+      const data = fs.readFileSync(files![i]!.path);
+      const base64Image = `data:${files![i]!.mimetype};base64,${Buffer.from(
+        data
+      ).toString("base64")}`;
+      const { secure_url } = await cloudinary.uploader.upload(base64Image);
+      console.log("secure_url: ", secure_url);
+      if (i === files!.length - 1) tryonImg = secure_url;
+      else imageUrl.push(secure_url);
+      fs.unlinkSync(files![i]!.path);
+    }
+  }
+  if( fileTryon && fileTryon.length > 0){
+    const data = fs.readFileSync(fileTryon[0]!.path);
+    const base64Image = `data:${fileTryon[0]!.mimetype};base64,${Buffer.from(
+      data
+    ).toString("base64")}`;
+    const { secure_url } = await cloudinary.uploader.upload(base64Image);
+    console.log("secure_url: ", secure_url);
+    tryonImg = secure_url;
+    fs.unlinkSync(fileTryon[0]!.path);
+  }
+  console.log("imageUrl: ", imageUrl);
+  await prisma.product.update({
+    data: {
+      description,
+      price: BigInt(price),
+      product_name: product_name,
+      imageUrl: !imageUrl ? [] : imageUrl,
+      tryon: !tryonImg ? "" : tryonImg,
+    },
+    where: {
+      product_id: product_id,
+    },
+    
+  });
+  await prisma.product_Category.createMany({
+    data: categories.map((item) => ({
+      category_id: item,
+      product_id: product_id,
+    })),
+    skipDuplicates: true,
+  });
+  await prisma.product_Size.createMany({
+    data: sizes.map((item, index) => {
+      return { size_id: item, product_id: product_id };
+    }),
+    skipDuplicates: true,
+  });
+  await prisma.product_Color.createMany({
+    data: colors.map((item, index) => {
+      return { color_id: item, product_id: product_id };
+    }),
+    skipDuplicates: true,
+  });
+let data: {
+    product_id: string;
+    size_id: string;
+    color_id: string;
+    quantity: number;
+    create_at: Date;
+  }[] = [];
+  let create_at: Date = new Date();
+  if(sizes.length > 0 && colors.length > 0){
+    let size_data: any[] = sizes.map((item) => ({
+    product_id: product_id,
+    size_id: item,
+  }));
+  size_data.forEach((item, index) => {
+    colors.forEach((item1, index1) => {
+      data = [
+        ...data,
+        { ...item, ...{ color_id: item1, quantity: 0, create_at: create_at } },
+      ];
+    });
+  });
+  }
+  console.log("data", data); // [] ??
+  await prisma.inventory.createMany({
+    data: data.length > 0 ? data : [],
+    skipDuplicates: true,
+  });
+  return res.status(200).json({ Message: "Cập nhật sản phẩm thành công" });
 };
 
 //cannot delete this because constraint to detail so mark it is deleted to delete it (not for sell anymore !!)
@@ -384,7 +512,7 @@ const getTotalPageFilter = async (req: Request, res: Response) => {
     where: {
       AND: [
         Category.length > 0
-          ? { category: { category_name: { in: Category } } }
+          ? { Product_Category: { every: { category_id: { in: Category } } } }
           : {},
       ],
     },
@@ -393,6 +521,38 @@ const getTotalPageFilter = async (req: Request, res: Response) => {
   console.log("total: ", total);
   return res.status(200).json({ total: Number(Math.ceil(Number(total) / 8)) });
 };
+
+const getProductByIdAdmin = async (req: Request, res: Response) => {
+  const { product_id } = req.query as { product_id: string };
+  const product = await prisma.product.findFirst({
+    where: {
+      product_id: product_id,
+    },
+    select: {
+      product_id: true,
+      product_name: true,
+      imageUrl: true,
+      description: true,
+      price: true,
+      product_size: true,
+      product_color: true,
+      tryon: true,
+      Product_Category: {
+        select: {
+          category: true,
+        },
+      },
+    },
+  });
+  if (!product) return res.status(400).json({ Message: "Product not found." });
+  const fixBigIntProduct = {
+    ...product,
+    price: Number(product.price),
+    product_category: product.Product_Category.map((item) => item.category),
+  };
+  return res.status(200).json({ product: fixBigIntProduct });
+};
+
 
 export {
   getTotalPageFilter,
@@ -405,4 +565,6 @@ export {
   getProductById,
   getAllProductsAdmin,
   reviseProduct,
+  getProductByIdAdmin,
+  updateAProduct,
 };

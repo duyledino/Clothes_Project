@@ -30,5 +30,24 @@ export const createProductSchema = z.object({
 
   size: z.array(SizeSchema).min(1, { message: "Hãy thêm ít nhất 1 size" }),
 
-  category: CategorySchema,
+  category: z.array(CategorySchema).min(1, { message: "Hãy thêm ít nhất 1 loại sản phẩm" }),
+});
+
+
+export const updateProductSchema = z.object({
+  images: z
+    .array(z.string({ message: "Hãy thêm URL hình sản phẩm" }))
+    .min(1, { message: "Hãy thêm ít nhất 1 tấm hình sản phẩm" }),
+
+  productName: z.string().min(1, "Tên sản phẩm bị thiếu"),
+
+  description: z.string().min(1, "Mô tả sản phẩm bị thiếu"),
+
+  color: z.array(ColorSchema).min(1, { message: "Hãy thêm ít nhất 1 màu sắc" }),
+
+  price: z.number({ message: "Giá bị thiếu" }).gt(10000,{message: "Giá phải lớn hơn 10,000"}),
+
+  size: z.array(SizeSchema).min(1, { message: "Hãy thêm ít nhất 1 size" }),
+
+  category: z.array(CategorySchema).min(1, { message: "Hãy thêm ít nhất 1 loại sản phẩm" }),
 });

@@ -17,16 +17,22 @@ model User {
   create_at         DateTime        @default(now())
   update_at         DateTime        @updatedAt
   status            Boolean         @default(true)
+  isVerify          Boolean         @default(false)
+  verify_token      String?         
+  expire_verify_at  DateTime?       
+  forget_password_token  String?         
+  expire_forget_password_at     DateTime?
   order_user_create Order[]         @relation("user_create")
   order_user_ship   Order[]         @relation("user_ship")
   carts             Cart?
   chat_message      Chat_Message[]
-  fromChat          Chat_User[]     @relation("FromUser")
-  toChat            Chat_User[]     @relation("ToUser")
   review            Review[]
   stock_receipt     Stock_Receipt[]
   role              Role            @relation(fields: [role_id], references: [role_id])
   role_id           String
+
+  chat_admin Chat[] @relation("chat_admin")
+  chat_user Chat[] @relation("chat_user")
 }
 
 model Role {
@@ -48,19 +54,27 @@ model Product {
   status               String                 @default("active") // suspend, active
   order_detail         Order_Detail[]
   reviews              Review[]
-  category             Category               @relation(fields: [category_id], references: [category_id])
   product_size         Product_Size[]
-  category_id          String
+  Product_Category     Product_Category[]
   product_color        Product_Color[]
   cart_detail          Cart_Detail[]
   inventories          Inventory[]
   stock_receipt_detail Stock_Receipt_Detail[]
 }
 
+model Product_Category {
+  product_id String
+  category_id String
+  product    Product? @relation(fields: [product_id], references: [product_id])
+  category   Category? @relation(fields: [category_id], references: [category_id])
+  @@id([product_id, category_id])
+}
+
+
 model Category {
   category_id   String    @id @default(uuid())
   category_name String
-  product       Product[]
+  Product_Category Product_Category[]
 }
 
 model Size {
@@ -172,30 +186,25 @@ model Review {
   @@id([product_id, user_id])
 }
 
-model Chat_User {
-  chatId     String
-  userIdFrom String
-  userIdTo   String
-  Chat       Chat   @relation(fields: [chatId], references: [chatId])
-  fromUser   User   @relation("FromUser", fields: [userIdFrom], references: [user_id])
-  toUser     User   @relation("ToUser", fields: [userIdTo], references: [user_id])
-
-  @@id([chatId, userIdFrom, userIdTo])
-}
-
 model Chat {
-  chatId       String         @id @default(uuid())
-  chat_Message Chat_Message[]
-  chat_user    Chat_User[]
+  chat_id       String         @id @default(uuid())
+  user_id_admin String
+  user_id_user   String
+  chat_message Chat_Message[]
+  create_at DateTime @default(now())
+  update_at DateTime @updatedAt
+  chat_admin User @relation("chat_admin", fields: [user_id_admin], references: [user_id])
+  chat_user User @relation("chat_user", fields: [user_id_user], references: [user_id])
 }
 
 model Chat_Message {
-  messageId String @id @default(uuid())
-  chatId    String
-  userId    String
+  message_id String @id @default(uuid())
+  chat_id    String
+  user_id    String
   content   String
-  chat      Chat   @relation(fields: [chatId], references: [chatId])
-  user      User   @relation(fields: [userId], references: [user_id])
+  create_at DateTime @default(now())
+  chat      Chat   @relation(fields: [chat_id], references: [chat_id])
+  user      User   @relation(fields: [user_id], references: [user_id])
 }
 
 model Inventory {
@@ -211,7 +220,7 @@ model Inventory {
   size                 Size                   @relation(fields: [size_id], references: [size_id])
   color                Color                  @relation(fields: [color_id], references: [color_id])
   stock_receipt_detail Stock_Receipt_Detail[]
-
+  @@unique([product_id, size_id, color_id])
   @@id([inventory_id, product_id, color_id, size_id])
 }
 

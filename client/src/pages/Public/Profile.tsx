@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { popStore, resetStore } from "@/slice/StoreSlice";
 import type { paymentAndStatus } from "@/type/types.frontend";
-import { auth, logout } from "@/slice/AuthSlice";
+import { auth, logout, sendVerifyMail } from "@/slice/AuthSlice";
 
 const Profile = () => {
   const [param, setParam] = useState<paymentAndStatus>({
@@ -22,7 +22,7 @@ const Profile = () => {
     status: "",
   });
   const router = useNavigate();
-  const { user } = useAppSelector((state) => state.AuthSlice);
+  const { user, loading } = useAppSelector((state) => state.AuthSlice);
   const [process, setProcess] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [localStore, setLocalStore] = useState<string | null>(null);
@@ -66,11 +66,16 @@ const Profile = () => {
     );
   };
 
-  const handleLogout = async () => {
-    console.log("logout now");
-    const { type } = await dispatch(logout());
+  const handleVerifySendMail = async () => {
+    // console.log("logout now");
+    if (!User || !User.user_id || User.user_id ==="") {
+      toast.error("Có lỗi xảy ra. Thiếu mã người dùng");
+      return;
+    }
+    const { type } = await dispatch(sendVerifyMail({user_id: User.user_id}));
     if (type.search("reject") == -1) {
-      router("/");
+      // router("/");
+      toast.success("Đã gửi");
     }
   };
 
@@ -130,6 +135,7 @@ const Profile = () => {
   return (
     <>
       {process && <Loading />}
+      {loading && <Loading />}
       {loadingOrder && <Loading />}
       {loadingUser && <Loading />}
       <Modal
@@ -143,16 +149,15 @@ const Profile = () => {
       {user && user?.user ? (
         <div className="container mx-auto">
           <div className="w-full pt-14 md:px-0 px-4">
-            {user &&
-            user.user.user_id !== "" &&
-            user.user.role === "regular" ? (
+            {User &&
+            User.isVerify === false ? (
               <div className="w-full flex justify-end">
                 <Button
                   type="button"
-                  onClick={handleLogout}
+                  onClick={handleVerifySendMail}
                   className="bg-gray-900 w-fit rounded-full text-white hover:bg-transparent hover:text-gray-800 uppercase font-semibold py-6 px-8 border-2 border-gray-900 cursor-pointer"
                 >
-                  Logout
+                  Xác thực tài khoản
                 </Button>
               </div>
             ) : (
@@ -160,6 +165,7 @@ const Profile = () => {
             )}
             {User === null ? (
               <UserInfo
+              isVerify={false}
                 address=""
                 user_id="123"
                 email="test@example.com"
@@ -168,6 +174,7 @@ const Profile = () => {
               />
             ) : (
               <UserInfo
+              isVerify={User.isVerify}
                 address={User.address}
                 user_id={User.user_id}
                 email={User.email}
@@ -177,7 +184,7 @@ const Profile = () => {
             )}
             {OrdersUser.length === 0 ? (
               <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <h1>No Order Yet.</h1>
+                <h1>Chưa có đơn hàng nào cả.</h1>
               </div>
             ) : (
               OrdersUser.map((item) => (

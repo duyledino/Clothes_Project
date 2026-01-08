@@ -1,24 +1,7 @@
+import type { ChatAdmin, ChatUser, Message } from "@/type/types.frontend";
 import React, { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-type Chat = {
-  chatId: string;
-  toUser: User;
-  fromUser: User;
-};
-type Message = {
-  messageId: string;
-  chatId: string;
-  //fromUserID
-  userId: string;
-  content: string;
-};
 
 const ChatSidebar = ({
   setCurrent,
@@ -27,14 +10,14 @@ const ChatSidebar = ({
   setSingleChat,
 }: {
   setCurrent: React.Dispatch<SetStateAction<Message[]>>;
-  chats: Chat[];
-  singleChat: Chat;
-  setSingleChat: Dispatch<SetStateAction<Chat>>;
+  chats: ChatUser[] ;
+  singleChat: ChatUser|null;
+  setSingleChat: Dispatch<SetStateAction<ChatUser|null>>;
 }) => {
   const [click, setClick] = useState<string>("");
   useEffect(() => {
     if (click !== "") {
-      const foundChat = chats.find((item) => item.chatId === click);
+      const foundChat = chats.find((item) => item.chat_id === click);
       if (foundChat) {
         setCurrent([]);
         setSingleChat(foundChat);
@@ -49,17 +32,17 @@ const ChatSidebar = ({
           {chats.length > 0
             ? chats.map((item) => (
                 <li
-                  onClick={() => setClick(item.chatId)}
-                  key={item.chatId}
+                  onClick={() => setClick(item.chat_id)}
+                  key={item.chat_id}
                   className={`cursor-pointer p-3 text-center overflow-hidden md:w-full sm:w-full md:text-[16px] text-[12px] ${
-                    singleChat.chatId === item.chatId
+                    singleChat?.chat_id === item.chat_id
                       ? "text-white bg-gray-900"
                       : "text-gray-400 bg-gray-100"
                   } `}
                 >
-                  {item.toUser.name === "" || item.toUser.name === null
-                    ? item.toUser.email
-                    : item.toUser.name}
+                  {item.chat_admin.name === null
+                    ? "Không có tên"
+                    : item.chat_admin.name}
                 </li>
               ))
             : ""}

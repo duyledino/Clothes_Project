@@ -10,11 +10,11 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import type { monthAndRevenue } from "@/type/types.frontend";
+import type { Revenue } from "@/type/types.frontend";
 
 
 type LineChartArr = {
-  revenue: monthAndRevenue[];
+  revenue: Revenue[];
 };
 
 ChartJS.register(
@@ -40,13 +40,13 @@ export const options = {
 };
 
 export function LineChart({ revenue }: LineChartArr) {
-  const labels = revenue.map((item) => item.month);
+  const labels = revenue.map((item) => item.label);
   const data = {
     labels,
     datasets: [
       {
         label: "Revenue",
-        data: revenue.map((item) => item.total),
+        data: revenue.map((item) => item.value),
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },

@@ -23,7 +23,7 @@ export const userService = {
     const response = await myAxios.put("/user/updateUser_admin", data);
     return response.data;
   },
-
+  
   // GET /user/getAUser?id=...
   getUserById: async (user_id: string) => {
     const response = await myAxios.get(`/user/getAUser?user_id=${user_id}`);
@@ -42,6 +42,14 @@ export const userService = {
 
   getAllUserIsShipperByRoleName:async()=>{
     const response = await myAxios.get(`/user/getAllUserIsShipperByRoleName?role_name=${"shipper"}`);
+    return response.data;
+  },
+  banUser: async (user_id: string) => {
+    const response = await myAxios.put(`/user/banUser?user_id=${user_id}`);
+    return response.data;
+  },
+  unbanUser: async (user_id: string) => {
+    const response = await myAxios.put(`/user/unbanUser?user_id=${user_id}`);
     return response.data;
   },
 

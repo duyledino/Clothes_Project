@@ -4,20 +4,44 @@ import type { Request, Response } from "express";
 const prisma = new PrismaClient();
 
 const getRevenue = async (req: Request, res: Response) => {
-  const getTotal:any[] = await prisma.$queryRaw`SELECT 
-  EXTRACT(MONTH FROM update_at) AS month,
-  EXTRACT(YEAR FROM update_at) AS year,
-  SUM(total) AS total
+  const {filter} = req.query;
+  if(!filter || filter== ""){
+    return res.status(400).json({Message:"Chưa chọn filter"});
+  }
+  let getTotal:any[]=[];
+  if(filter == "day"){
+    getTotal = await prisma.$queryRaw`SELECT 
+  TO_CHAR(update_at, 'YYYY-MM-DD') as label, 
+  SUM(total) as value
 FROM "Order"
-WHERE payment = 'done' and status = 'done'
-GROUP BY month, year
-ORDER BY year DESC, month DESC
-LIMIT 3;
+WHERE payment = 'done' AND status = 'done'
+  AND update_at >= NOW() - INTERVAL '7 days'
+GROUP BY label
+ORDER BY label ASC;`
+  }else if(filter == "month"){
+    getTotal = await prisma.$queryRaw`SELECT 
+  TO_CHAR(update_at, 'YYYY-MM-DD') as label, 
+  SUM(total) as value
+FROM "Order"
+WHERE payment = 'done' AND status = 'done'
+  AND update_at >= NOW() - INTERVAL '3 months'
+GROUP BY label
+ORDER BY label ASC;
 `;
+  }else if(filter == "week"){
+    getTotal = await prisma.$queryRaw`SELECT 
+  TO_CHAR(update_at, 'YYYY-MM-DD') as label, 
+  SUM(total) as value
+FROM "Order"
+WHERE payment = 'done' AND status = 'done'
+  AND update_at >= NOW() - INTERVAL '3 weeks'
+GROUP BY label
+ORDER BY label ASC;
+`;
+  }
   const fixGetTotal = getTotal.map((row) => ({
-    month: row.month, //number
-    year: row.year, ////number
-    total: Number(row.total),
+    label: row.label, //string
+    value: Number(row.value),
   }));
   console.log('fixGetTotal: ',fixGetTotal);
   return res.status(200).json({

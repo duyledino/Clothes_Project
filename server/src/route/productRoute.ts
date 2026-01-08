@@ -1,7 +1,7 @@
 import express from "express";
 import type { Application } from "express";
 import { asyncHandler } from "../middleware/asyncHandler.js";
-import { createAProduct, deleteProduct, findProduct, getAllProducts, getAllProductsAdmin, getBestSeller, getLastestProduct, getProductById, getTotalPageFilter, reviseProduct } from "../controller/product/controller.js";
+import { createAProduct, deleteProduct, findProduct, getAllProducts, getAllProductsAdmin, getBestSeller, getLastestProduct, getProductById, getProductByIdAdmin, getTotalPageFilter, reviseProduct, updateAProduct } from "../controller/product/controller.js";
 import { upload } from "../config/multer.js";
 import { authenticateAdmin, authenticateUser } from "../middleware/authentication.js";
 
@@ -18,9 +18,16 @@ const route = (app: Application) => {
     asyncHandler(getAllProductsAdmin)
   );
   router.post("/getTotalPage", asyncHandler(getTotalPageFilter));
+  router.get(
+    "/getProductByIdAdmin",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    asyncHandler(getProductByIdAdmin)
+  );
   router.post(
     "/createAProduct",
     asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
     upload.array("photos", 12),
     asyncHandler(createAProduct)
   );
@@ -35,6 +42,13 @@ const route = (app: Application) => {
     asyncHandler(authenticateUser),
     asyncHandler(authenticateAdmin),
     asyncHandler(deleteProduct)
+  );
+  router.put(
+    "/updateAProduct",
+    asyncHandler(authenticateUser),
+    asyncHandler(authenticateAdmin),
+    upload.fields([{name:"photos", maxCount: 12},{name:"tryon", maxCount: 1}]),
+    asyncHandler(updateAProduct)
   );
   router.get("/findProduct", asyncHandler(findProduct));
   router.get("/getProductById", asyncHandler(getProductById));

@@ -35,7 +35,7 @@ const UserOrder: React.FC<UserOrderProps> = ({
         Address: {OrderUser.user_create.address}
       </p>
       <p className="text-gray-700 text-base font-bold">
-        Total: {OrderUser.total} VND
+        Tổng cộng: {OrderUser.total} VND
       </p>
       <p className="text-gray-700 text-base font-bold">
         Tạo:{" "}

@@ -25,7 +25,6 @@ const getReviewByProduct = async (req: Request, res: Response) => {
   return res.status(200).json(reviews);
 };
 
-// 2. Create Review
 const createAReviewByUser = async (req: Request, res: Response) => {
   const { product_id, score, content } = req.body as {
     product_id: string;
@@ -39,7 +38,7 @@ const createAReviewByUser = async (req: Request, res: Response) => {
   if (!product_id || !user_id || !score) {
     return res
       .status(400)
-      .json({ Message: "Product ID, User ID, and Score are required" });
+      .json({ Message: "Thiếu thông tin" });
   }
 
   const review = await prisma.review.create({
@@ -51,7 +50,7 @@ const createAReviewByUser = async (req: Request, res: Response) => {
     },
   });
 
-  return res.status(201).json(review);
+  return res.status(201).json({Message:"Thêm review thành công"});
 };
 
 // 3. Update Review
@@ -67,7 +66,7 @@ const updateAReviewByUser = async (req: Request, res: Response) => {
   if (!product_id || !user_id || !score) {
     return res
       .status(400)
-      .json({ Message: "Product ID, User ID, and Score are required" });
+      .json({ Message: "Thiếu thông tin" });
   }
 
   const review = await prisma.review.update({
@@ -83,30 +82,29 @@ const updateAReviewByUser = async (req: Request, res: Response) => {
     },
   });
 
-  return res.status(200).json(review);
+  return res.status(200).json({Message:"Cập nhật review thành công"});
 };
 
 // 4. Delete Review
 const deleteAReviewByUser = async (req: Request, res: Response) => {
-  const { product_id } = req.query as { product_id: string };
-  const { userId } = req.query as { userId: string };
-
-  if (!product_id || !userId) {
+  const { product_id,user_id } = req.query as { product_id: string,user_id: string };
+  console.log("delete review, product_id: ",product_id,"user_id: ",user_id);
+  if (product_id === "" || user_id === "") {
     return res
       .status(400)
-      .json({ Message: "Product ID and User ID are required" });
+      .json({ Message: "Thiếu thông tin" });
   }
 
   await prisma.review.delete({
     where: {
       product_id_user_id: {
         product_id: product_id,
-        user_id: userId, 
+        user_id: user_id, 
       },
     },
   });
 
-  return res.status(204).send(); // Ends response successfully with no content
+  return res.status(200).json({Message:"Xóa review thành công"}); 
 };
 
 export {

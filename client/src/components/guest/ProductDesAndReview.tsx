@@ -15,6 +15,7 @@ import { ReceiptRussianRuble, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import Loading from "../ui/Loading";
 import type { Review } from "@/type/types.frontend";
+import { useNavigate } from "react-router-dom";
 
 const ProductDesAndReview = ({
   description,
@@ -31,7 +32,7 @@ const ProductDesAndReview = ({
   const { errorReview, loadingReview } = useAppSelector(
     (state) => state.ReviewSlice
   );
-  const {user} = useAppSelector(state=>state.AuthSlice);
+  const router = useNavigate();
   // const [localStore, setLocalStore] = useState(() => {
   //   const localStore = localStorage.getItem("user");
   //   // if (localStore === undefined || localStore === null) {
@@ -50,56 +51,65 @@ const ProductDesAndReview = ({
   const [activeTab, setActiveTab] = useState("description");
   const [star, setStar] = useState<number[]>([]);
   const [content, setContent] = useState<string>("");
+  const {user} = useAppSelector(state=>state.AuthSlice);
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
-  const deleteUserReview = () => {
+  const deleteUserReview =async () => {
     if (product_id === "" || !user || user.user.user_id === "") {
-      toast.error("Failed to Delete Your Review");
+      toast.error("Không thể xóa review");
       return;
     }
-    dispatch(
+    const {type} = await dispatch(
       deleteReview({
         product_id: product_id,
         user_id: user.user.user_id,
       })
     );
+    if(type.search("reject")==-1){
+      dispatch(fetchReviewsByProductId(product_id));
+    }
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (content === "" || star.length === 0) {
-      toast.error("Can't post your review");
+      toast.error("Không thể post review");
       return;
     }
     console.log("content,star: ", content, star.length);
-    const localStore = localStorage.getItem("user");
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
+    if(!user || !user.user || user.user.user_id === ""){
+      router("/login");
+      toast.error("Hãy đăng nhập để thực hiện thao tác này");
       return;
-    }
-    const { id } = JSON.parse(localStore);
+    }    
     if (
       reviews.find(
-        (item) => item.product_id === getValue?.product_id && item.user_id === id
+        (item) => item.product_id === getValue?.product_id && item.user_id === user.user.user_id
       )
     ) {
-      dispatch(
+      const {type} = await dispatch(
         updateReview({
-          content: content,
+        content: content,
           product_id: product_id,
           score: star.length,
-          user_id: id,
+          user_id: user.user.user_id,
         })
       );
+      if(type.search("reject")===-1){
+        dispatch(fetchReviewsByProductId(product_id));
+      }
     } else {
-      dispatch(
+      const {type} = await dispatch(
         createReview({
           content: content,
           product_id: product_id,
           score: star.length,
-          user_id: id,
+          user_id: user.user.user_id,
         })
       );
+      if(type.search("reject")===-1){
+        dispatch(fetchReviewsByProductId(product_id));
+      }
     }
     setStar([]);
     setContent("");
@@ -126,12 +136,6 @@ const ProductDesAndReview = ({
       );
     }
   }, [getValue]);
-  // console.log(
-  //   "userid, localstore.id,user mail: ",
-  //   reviews[0],
-  //   localStore?.id,
-  //   reviews[0].user?.email
-  // );
   console.log("user: ",user);
   return (
     <>

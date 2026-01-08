@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { genSalt, hash, compare } from "bcrypt";
 import { createToken } from "../../middleware/authentication.js";
+import { v4 as uuid } from "uuid";
 import type { Request, Response } from "express";
+import { sendMail } from "../../config/mailer.js";
 
 const prisma = new PrismaClient();
 
@@ -24,6 +26,9 @@ const loginUser = async (req: Request, res: Response) => {
   console.log(verify);
   if (!verify)
     return res.status(400).json({ Message: "Wrong email or password" });
+  if(exists.status ==false){
+    return res.status(400).json({ Message: "Tài khoản của bạn đã bị khóa" });
+  }
   const token = createToken({
     user_id: exists.user_id,
     email,
@@ -105,6 +110,7 @@ const getAUser_Admin = async (req: Request, res: Response) => {
       role: true,
       status: true,
       phone: true,
+      isVerify: true,
       order_user_create: {
         select: {
           order_id: true,
@@ -196,6 +202,7 @@ const getAUser = async (req: Request, res: Response) => {
       address: true,
       user_id: true,
       phone: true,
+      isVerify: true,
     },
     where: {
       user_id: user_id,
@@ -241,6 +248,21 @@ const createAUser = async (req: Request, res: Response) => {
       user_id: user.user_id,
     },
   });
+  const admin = await prisma.user.findFirst({
+    where: {
+      role: {
+        role_name: "admin",
+      },
+    },
+  });
+  if(!admin) return res.status(500).json({ Message: "Lỗi hệ thống: Không tìm thấy admin" });
+  await prisma.chat.create({
+    data: {
+      user_id_admin: admin.user_id,
+      user_id_user: user.user_id,
+    },
+  });
+
   return res.status(200).json({
     success: true,
     Message: "Create user successfully",
@@ -287,6 +309,20 @@ const createAUserAdmin = async (req: Request, res: Response) => {
     data: {
       user_id: user.user_id,
     },
+  });
+  const admin = await prisma.user.findFirst({
+    where: {
+      role: {
+        role_name: "admin",
+      },
+    },
+  });
+  if(!admin) return res.status(500).json({ Message: "Lỗi hệ thống: Không tìm thấy admin" });
+  await prisma.chat.create({
+    data:{
+      user_id_admin: admin!.user_id,
+      user_id_user: user.user_id,
+    }
   });
   return res.status(200).json({
     Message: "Tạo người dùng thành công",
@@ -391,22 +427,41 @@ const updateUser = async (req: Request, res: Response) => {
 
 const banUser = async (req: Request, res: Response) => {
   const { user_id } = req.query as { user_id: string };
-  const { status } = req.body as { status: boolean };
+  // const { status } = req.body as { status: boolean };
   const exists = await prisma.user.findFirst({
     where: {
       user_id: user_id,
     },
   });
-  if (!exists) return res.status(400).json({ Message: "User not found" });
+  if (!exists) return res.status(400).json({ Message: "User không tồn tại" });
   await prisma.user.update({
     where: {
       user_id: user_id,
     },
     data: {
-      status,
+      status: false,
     },
   });
-  return res.status(200).json({ Message: "Delete successfully" });
+  return res.status(200).json({ Message: "Đã ban thành công" });
+};
+
+const unbanUser = async (req: Request, res: Response) => {
+  const { user_id } = req.query as { user_id: string };
+  const exists = await prisma.user.findFirst({
+    where: {
+      user_id: user_id,
+    },
+  });
+  if (!exists) return res.status(400).json({ Message: "User không tồn tại" });
+  await prisma.user.update({
+    where: {
+      user_id: user_id,
+    },
+    data: {
+      status: true,
+    },
+  });
+  return res.status(200).json({ Message: "Đã gỡ ban thành công" });
 };
 
 const getAllUserIsShipperByRoleName = async (req: Request, res: Response) => {
@@ -434,6 +489,268 @@ const getAllUserIsShipperByRoleName = async (req: Request, res: Response) => {
   return res.status(200).json({ users: users });
 };
 
+const sendVerifyMail = async (req: Request, res: Response) => {
+  const { user_id } = req.query as { user_id: string };
+  const exists = await prisma.user.findFirst({
+    select:{
+      email:true,
+    },
+    where: {
+      user_id: user_id,
+    },
+  });
+  if (!exists) return res.status(400).json({ Message: "User không tồn tại" });
+  const token = uuid();
+  const expireVerifyAt = new Date();
+  expireVerifyAt.setMinutes(expireVerifyAt.getMinutes() + 5);
+  await prisma.user.update({
+    where: {
+      user_id: user_id,
+    },
+    data: {
+      verify_token: token,
+      expire_verify_at: expireVerifyAt,
+    },
+  });
+  const to = exists.email;
+  const subject = "Verify your email";
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+    <style>
+        /* Resets to ensure consistent rendering */
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        table { border-spacing: 0; width: 100%; }
+        td { padding: 0; }
+        img { border: 0; }
+        
+        /* Mobile styles */
+        @media screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .content { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                
+                <table role="presentation" class="container" width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+                    
+                    <tr>
+                        <td align="center" style="background-color: #007bff; padding: 30px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Welcome!</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="content" style="padding: 40px 30px; text-align: center;">
+                            <h2 style="color: #333333; margin-top: 0; font-size: 22px;">Verify your email address</h2>
+                            <p style="color: #666666; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
+                                Cảm ơn đã đăng ký tài khoản, hãy xác nhận email của bạn để có thể sử dụng tài khoản của bạn.
+                            </p>
+                            
+                            <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td align="center" style="border-radius: 4px;" bgcolor="#007bff">
+                                        <a href="http://localhost:5173/verify?token=${token}&user_id=${user_id}" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; border: 1px solid #007bff; display: inline-block; font-weight: bold;">
+                                            Verify Email Ngay
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #999999; font-size: 14px; margin-top: 30px;">
+                                Nếu nút không hoạt động, sao chép và dán liên kết này vào trình duyệt của bạn:<br>
+                                <a href="http://localhost:5173/verify?token=${token}&user_id=${user_id}" style="color: #007bff;">http://localhost:5173/verify?token=${token}&user_id=${user_id}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="background-color: #f8f9fa; padding: 20px; border-top: 1px solid #eeeeee;">
+                            <p style="color: #999999; font-size: 12px; margin: 0;">
+                                Nếu bạn không yêu cầu email này, bạn có thể an toàn bỏ qua nó.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>`;
+  await sendMail(to, subject, html);
+  return res.status(200).json({ Message: "Đã gửi mail cho bạn" });
+};
+
+const verifyUser = async (req: Request, res: Response) => {
+  const { user_id,token } = req.query as { user_id: string,token: string };
+  const exists = await prisma.user.findFirst({
+    select:{
+      expire_verify_at: true
+    },
+    where: {
+      verify_token: token,
+    },
+  });
+  if (!exists) return res.status(400).json({ Message: "Token không hợp lệ" });
+  if(exists.expire_verify_at && exists.expire_verify_at < new Date())
+    return res.status(400).json({ Message: "Token đã hết hạn" });
+  await prisma.user.update({
+    where: {
+      user_id: user_id,
+    },
+    data: {
+      isVerify: true,
+      verify_token: null,
+      expire_verify_at: null,
+    },
+  });
+  return res.status(200).json({ Message: "Đã xác thực tài khoản thành công" });
+};
+
+
+const sendVerifyForgetPasswordMail = async (req: Request, res: Response) => {
+  const { email } = req.query as { email: string };
+  const exists = await prisma.user.findFirst({
+    select: {
+      user_id: true,
+      name: true,
+      email: true,
+    },
+    where: {
+      email: email,
+    },
+  });
+  if (!exists) return res.status(400).json({ Message: "User không tồn tại" });
+  const token = uuid();
+  const expireVerifyAt = new Date();
+  expireVerifyAt.setMinutes(expireVerifyAt.getMinutes() + 5);
+  await prisma.user.update({
+    where: {
+      user_id: exists.user_id,
+      isVerify: true,
+    },
+    data: {
+      forget_password_token: token,
+      expire_forget_password_at: expireVerifyAt,
+    },
+  });
+  const to = exists.email;
+  const subject = "Hãy xác nhận email của bạn để reset mật khẩu";
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực email</title>
+    <style>
+        /* Resets to ensure consistent rendering */
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        table { border-spacing: 0; width: 100%; }
+        td { padding: 0; }
+        img { border: 0; }
+        
+        /* Mobile styles */
+        @media screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .content { padding: 20px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                
+                <table role="presentation" class="container" width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+                    
+                    <tr>
+                        <td align="center" style="background-color: #007bff; padding: 30px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Welcome!</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="content" style="padding: 40px 30px; text-align: center;">
+                            <h2 style="color: #333333; margin-top: 0; font-size: 22px;">Verify your email address</h2>
+                            <p style="color: #666666; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
+                                Xin chào ${exists.name} .Nhấn nút dưới đây để reset mật khẩu của bạn.
+                            </p>
+                            
+                            <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td align="center" style="border-radius: 4px;" bgcolor="#007bff">
+                                        <a href="http://localhost:5173/forgetPassword?token=${token}&user_id=${exists.user_id}" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; border: 1px solid #007bff; display: inline-block; font-weight: bold;">
+                                            Reset Password Ngay
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #999999; font-size: 14px; margin-top: 30px;">
+                                Nếu nút không hoạt động, hãy sao chép và dán liên kết này vào trình duyệt của bạn:<br>
+                                <a href="http://localhost:5173/forgetPassword?token=${token}&user_id=${exists.user_id}" style="color: #007bff;">http://localhost:5173/forgetPassword?token=${token}&user_id=${exists.user_id}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="background-color: #f8f9fa; padding: 20px; border-top: 1px solid #eeeeee;">
+                            <p style="color: #999999; font-size: 12px; margin: 0;">
+                                Nếu bạn không yêu cầu email này, bạn có thể an toàn bỏ qua nó.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>`;
+  await sendMail(to, subject, html);
+  return res.status(200).json({ Message: "Đã gửi mail cho bạn" });
+};
+const verifyForgetPassword = async (req: Request, res: Response) => {
+  const { user_id,token } = req.query as { user_id: string,token: string };
+  const {password} = req.body as {password:string}
+  const exists = await prisma.user.findFirst({
+    select:{
+      expire_forget_password_at: true
+    },
+    where: {
+      forget_password_token: token,
+    },
+  });
+  if (!exists) return res.status(400).json({ Message: "Token không hợp lệ" });
+  if(exists.expire_forget_password_at && exists.expire_forget_password_at < new Date()) 
+    return res.status(400).json({ Message: "Token đã hết hạn" });
+   const salt = await genSalt(5);
+  const hashPass = await hash(password, salt);
+  await prisma.user.update({
+    where: {
+      user_id: user_id,
+    },
+    data: {
+      password: hashPass,
+      forget_password_token: null,
+      expire_forget_password_at: null,
+    },
+  });
+  return res.status(200).json({ Message: "Đã reset mật khẩu thành công" });
+};
+
 export {
   createAUser,
   banUser,
@@ -446,4 +763,9 @@ export {
   getAUser_Admin,
   getAllUserIsShipperByRoleName,
   createAUserAdmin,
+  unbanUser,
+  sendVerifyMail,
+  verifyUser,
+  sendVerifyForgetPasswordMail,
+  verifyForgetPassword,
 };

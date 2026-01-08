@@ -9,7 +9,7 @@ import { fetchUpdateUser, fetchUserById, resetUserState } from "@/slice/UserSlic
 import Loading from "../ui/Loading";
 import type { user } from "@/type/types.frontend";
 
-const UserInfo = ({ user_id, email, name, address,phone }: user) => {
+const UserInfo = ({ user_id, email, name, address,phone,isVerify }: user) => {
   const dispatch = useAppDispatch();
   const { Message, errorUser, loadingUser } = useAppSelector(
     (state) => state.UserSlice

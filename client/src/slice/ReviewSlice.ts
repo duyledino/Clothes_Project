@@ -13,11 +13,6 @@ const initialState: ReviewState = {
   errorReview: null,
 };
 
-const baseUrl =
-  import.meta.env.VITE_NODE_ENV === "development"
-    ? import.meta.env.VITE_SERVER_API
-    : "/api";
-
 // Async thunk for fetching reviews by product ID
 export const fetchReviewsByProductId = createAsyncThunk(
   "reviews/fetchByProductId",
@@ -53,10 +48,12 @@ export const createReview = createAsyncThunk(
   ) => {
     try {
       const response =await reviewService.createReview(user_id,{product_id,content,score});
-      return response.data as Review;
+      toast.success(response.Message);
+      return response.Message;
     } catch (error: any) {
       const message =
         error.response?.data?.Message || "Failed to create review";
+        toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -81,10 +78,12 @@ export const updateReview = createAsyncThunk(
   ) => {
     try {
       const response = await reviewService.updateReview(user_id,product_id,{score,content})
-      return response as Review;
+      toast.success(response.Message);
+      return response.Message;
     } catch (error: any) {
       const message =
         error.response?.data?.Message || "Failed to update review";
+      toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -101,12 +100,15 @@ export const deleteReview = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("user_id,product_id: ",user_id,product_id);
       const response = await reviewService.deleteReview(user_id,product_id);
-      return { product_id, user_id }; // Return the deleted review's ID for updating the state
+      toast.success(response.Message);
+      return response.Message; 
     } catch (error: any) {
+      console.log(error);
       const message =
         error.response?.data?.Message || "Failed to delete review";
-        toast(message);
+        toast.error(message);
       return rejectWithValue(message);
     }
   }
@@ -125,7 +127,6 @@ const reviewSlice = createSlice({
     builder
       .addCase(fetchReviewsByProductId.pending, (state) => {
         state.loadingReview = true;
-        state.errorReview = null;
       })
       .addCase(fetchReviewsByProductId.fulfilled, (state, action) => {
         state.loadingReview = false;
@@ -133,11 +134,9 @@ const reviewSlice = createSlice({
       })
       .addCase(fetchReviewsByProductId.rejected, (state, action) => {
         state.loadingReview = false;
-        state.errorReview = action.payload as string;
       })
       .addCase(createReview.pending, (state) => {
         state.loadingReview = true;
-        state.errorReview = null;
       })
       .addCase(createReview.fulfilled, (state, action) => {
         state.loadingReview = false;
@@ -145,20 +144,12 @@ const reviewSlice = createSlice({
       })
       .addCase(createReview.rejected, (state, action) => {
         state.loadingReview = false;
-        state.errorReview = action.payload as string;
       })
       .addCase(updateReview.pending, (state) => {
         state.loadingReview = true;
-        state.errorReview = null;
       })
       .addCase(updateReview.fulfilled, (state, action) => {
         state.loadingReview = false;
-        state.Reviews = state.Reviews.map((review) =>
-          review.product_id === action.payload.product_id &&
-          review.user_id === action.payload.user_id
-            ? action.payload
-            : review
-        );
       })
       .addCase(updateReview.rejected, (state, action) => {
         state.loadingReview = false;
@@ -170,11 +161,6 @@ const reviewSlice = createSlice({
       })
       .addCase(deleteReview.fulfilled, (state, action) => {
         state.loadingReview = false;
-        state.Reviews = state.Reviews.filter(
-          (review) =>
-            review.product_id !== action.payload.product_id ||
-            review.user_id !== action.payload.user_id
-        );
       })
       .addCase(deleteReview.rejected, (state, action) => {
         state.loadingReview = false;

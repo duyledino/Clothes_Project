@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getStore, popStore, resetStore } from "@/slice/StoreSlice";
 import { resetUserState } from "@/slice/UserSlice";
+import { DoorOpen } from "lucide-react";
 
 const HeaderEmployee = () => {
   const router = useNavigate();
@@ -40,7 +41,7 @@ const HeaderEmployee = () => {
                 }}
                 className="bg-gray-900 w-fit rounded-full text-white hover:bg-transparent hover:text-gray-800 uppercase font-semibold py-6 px-8 border-2 border-gray-900 cursor-pointer"
             >
-                Logout
+                <DoorOpen size={20} strokeWidth={2.5} />
             </Button>
             ) : (
             ""

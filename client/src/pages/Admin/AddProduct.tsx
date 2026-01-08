@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Loading from "@/components/ui/Loading";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { createProductSchema } from "@/schema/authProduct";
 import { fetchCreateAProduct, resetStateProduct } from "@/slice/ProductSlice";
 import { X } from "lucide-react";
@@ -31,8 +24,6 @@ type ImageURL = {
   file: File;
 };
 
-// const sizes: string[] = ["S", "M", "L", "XL", "XXL"];
-
 function AddProduct() {
   const dispatch = useAppDispatch();
   const { error, loading, Message } = useAppSelector(
@@ -45,8 +36,7 @@ function AddProduct() {
   const [tryon, setTryon] = useState<ImageURL | null>(null);
   const [currentSize, setCurrentSize] = useState<SizeOrigin[]>([]);
   const [currentColor, setCurrentColor] = useState<ColorOrigin[]>([]);
-  const [currentCategory, setCurrentCategory] =
-    useState<CategoryOrigin | null>();
+  const [currentCategory, setCurrentCategory] = useState<CategoryOrigin[]>([]);
   const [images, setImages] = useState<ImageURL[]>([]);
   const [price, setPrice] = useState<number>(0);
   //save file upload
@@ -81,7 +71,7 @@ function AddProduct() {
       formData.append("product_name", productName);
       formData.append("description", description);
       formData.append("price", price?.toString());
-      formData.append("category", currentCategory!.category_id);
+      formData.append("category", currentCategory.map((item) => item.category_id).join(","));
       formData.append(
         "size",
         currentSize.map((item) => item.size_id).join(",")
@@ -91,6 +81,7 @@ function AddProduct() {
         currentColor.map((item) => item.color_id).join(",")
       );
       formData.append("photos", tryon.file);
+      console.log("formData: ", formData);
       const { type } = await dispatch(
         fetchCreateAProduct({ productCreate: formData })
       );
@@ -102,7 +93,7 @@ function AddProduct() {
         setPrice(0);
         setProductName("");
         setDescription("");
-        setCurrentCategory(null);
+        setCurrentCategory([]);
         setTryon(null);
         dispatch(resetStateProduct());
       }
@@ -311,31 +302,6 @@ function AddProduct() {
 
         <div className="mb-3 flex md:flex-row flex-col gap-4">
           <div>
-            <Label htmlFor="productCategory" className="text-gray-900">
-              Loại sản phẩm
-            </Label>
-            <Select
-              onValueChange={(e) => {
-                setCurrentCategory(categories.find((i) => i.category_id === e));
-              }}
-            >
-              <SelectTrigger className="mt-1 w-[180px]">
-                <SelectValue placeholder="Phân loại" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((item) => (
-                  <SelectItem
-                    key={item.category_id}
-                    value={`${item.category_id}`}
-                  >
-                    {item.category_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label htmlFor="productPrice" className="text-gray-900">
               Giá
             </Label>
@@ -353,11 +319,39 @@ function AddProduct() {
             />
           </div>
         </div>
-
+        <div className="mb-3">
+            <Label htmlFor="productCategory" className="text-gray-900">
+              Loại sản phẩm
+            </Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+                          {categories.map((item, index) => (
+              <button
+                className={`${
+                  currentCategory.find((i) => i.category_id === item.category_id) !==
+                  undefined
+                    ? "bg-gray-900 text-gray-200"
+                    : "bg-gray-200 text-gray-900"
+                } w-10 h-10 cursor-pointer`}
+                key={item.category_id}
+                onClick={() => {
+                  setCurrentCategory((prev) => {
+                    if (
+                      prev.find((i) => i.category_id === item.category_id) !== undefined
+                    )
+                      return prev.filter((i) => i.category_id !== item.category_id);
+                    return [...prev, item];
+                  });
+                }}
+              >
+                {item.category_name}
+              </button>
+            ))}
+            </div>
+          </div>
         <div className="mb-3">
           <Label className="text-gray-900">Size</Label>
           <div className="flex flex-wrap gap-2 mt-1">
-            {sizes.map((item, index) => (
+            {[...sizes].sort((a, b) => a.size_name.toLocaleLowerCase().localeCompare(b.size_name.toLocaleLowerCase())).map((item, index) => (
               <button
                 className={`${
                   currentSize.find((i) => i.size_id === item.size_id) !==

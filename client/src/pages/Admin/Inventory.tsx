@@ -13,10 +13,10 @@ import { toast } from "react-toastify";
 
 function getStatus(quantity: number, min_quantity: number) {
   if (quantity === 0)
-    return { text: "Hết hàng", cls: "bg-red-100 text-red-800" };
+    return { text: "Hết hàng", cls: "bg-red-100 text-red-800 w-max" };
   if (quantity <= min_quantity)
-    return { text: "SL thấp", cls: "bg-yellow-100 text-yellow-800" };
-  return { text: "Còn hàng", cls: "bg-green-100 text-green-800" };
+    return { text: "SL thấp", cls: "bg-yellow-100 text-yellow-800 w-max" };
+  return { text: "Còn hàng", cls: "bg-green-100 text-green-800 w-max" };
 }
 
 export default function Inventory() {
@@ -44,7 +44,7 @@ export default function Inventory() {
   } 
   useEffect(() => {
     dispatch(fetchGetAllInventory(page));
-  }, []);
+  }, [page]);
   useEffect(() => {
     if(selectInventory!=null){
       setIsOpenUpdateModal(true);
@@ -73,7 +73,7 @@ export default function Inventory() {
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-lg bg-white shadow">
+        <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -183,6 +183,69 @@ export default function Inventory() {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden grid gap-4">
+           {Inventories.map((item) => {
+                const st = getStatus(item.quantity, item.min_quantity);
+                return (
+                  <div key={
+                      item.inventory_id +
+                      item.product_id +
+                      item.color_id +
+                      item.size_id
+                    }
+                    className={`bg-white rounded-lg shadow-sm p-4 border border-gray-200 ${item.quantity<=item.min_quantity?"bg-yellow-50":item.quantity===0?"bg-red-50":""}`}
+                  >
+                     <div className="flex gap-4 mb-3">
+                        <img
+                          src={`${item.product.imageUrl}`}
+                          className="w-20 h-20 object-cover rounded-md border"
+                        />
+                        <div>
+                             <h3 className="font-medium text-gray-900 line-clamp-2">{item.product.product_name}</h3>
+                             <p className="text-xs text-gray-500 mt-1">
+                                {item.product.category.category_name} | {item.size_id}
+                             </p>
+                             <div className="flex items-center gap-1 mt-1">
+                                <span className="text-xs text-gray-500">Color:</span>
+                                <span
+                                  className="inline-block w-3 h-3 border border-gray-300"
+                                  style={{ backgroundColor: `${item.color_id}` }}
+                                ></span>
+                             </div>
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                         <div className="bg-gray-50 p-2 rounded">
+                            <span className="block text-xs text-gray-500">Hiện tại</span>
+                            <span className="font-bold">{item.quantity}</span>
+                         </div>
+                         <div className="bg-gray-50 p-2 rounded">
+                            <span className="block text-xs text-gray-500">Tối thiểu</span>
+                            <span className="font-bold">{item.min_quantity}</span>
+                         </div>
+                     </div>
+
+                     <div className="flex justify-between items-center pt-2 border-t mt-2">
+                        <span
+                          className={`inline-flex rounded-full px-2 text-xs font-semibold ${st.cls}`}
+                        >
+                          {st.text}
+                        </span>
+                        <button 
+                        onClick={()=>{
+                          setSelectInventory(item);
+                        }}
+                        className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-sm">
+                          Cập nhật
+                        </button>
+                     </div>
+                  </div>
+                )
+           })}
         </div>
         <Pagination page={page} setPage={setPage} total_page={total_page} />
       </div>

@@ -111,7 +111,8 @@ const Categories = () => {
           </div>
         </div>
 
-        <div className="rounded-[--radius] border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block rounded-[--radius] border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
           <table className="w-full text-sm text-left">
             <thead className="bg-muted/50 text-muted-foreground font-medium border-b border-border">
               <tr>
@@ -170,6 +171,48 @@ const Categories = () => {
                 ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden grid gap-4">
+          {categories && categories.length > 0 && categories.map((item) => (
+            <div key={item.category_id} className="bg-white p-4 rounded-lg shadow-sm border border-border">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-secondary rounded-lg">
+                    <FolderTree className="w-4 h-4 text-secondary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">{item.category_name}</h3>
+                    <p className="text-xs text-muted-foreground font-mono">{item.category_id}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                   <button 
+                         onClick={()=>{
+                          setSelectedCategory(item);
+                         }}
+                        className="p-2 hover:bg-secondary rounded-md text-muted-foreground hover:text-foreground transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDelete(item);
+                      }}
+                       className="p-2 hover:bg-destructive/10 rounded-md text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-dashed border-gray-200">
+                  <span className="text-sm text-gray-500">Linked Products</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent text-accent-foreground">
+                        {item.link_total} SP
+                  </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>

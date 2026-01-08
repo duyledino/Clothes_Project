@@ -80,57 +80,90 @@ const Products = () => {
           </li>
           {ProductsAdmin.map((item, index) => (
             <li
+              onClick={() => router(`${item.product_id}`)}
               key={item.product_id}
-              className={`p-2 list-none grid md:grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 grid-cols-2 md:place-items-center md:gap-0 gap-2 ${
-                item.status === "suspend" ? "bg-red-200" : ""
-              }`}
+              className={`
+                p-4 cursor-pointer list-none 
+                md:grid md:grid-cols-[64px_1fr_1fr_1fr_1fr_1fr_1fr_1fr] md:gap-x-3 md:items-center
+                flex flex-col gap-3 border rounded-lg shadow-sm bg-white mb-2 md:mb-0 md:border-none md:shadow-none md:rounded-none
+                ${item.status === "suspend" ? "bg-red-50" : ""}
+              `}
             >
-              <img
-                src={item.imageUrl[0]}
-                alt={item.imageUrl[0]}
-                width={390}
-                height={450}
-                className="w-16 h-auto"
-              />
-              <p className="text-gray-500 md:text-sm text-[12px] md:text-center">
-                {item.product_name}
-              </p>
-              <div className="text-gray-500 md:text-sm text-[12px]">
-                <p>{item.product_size.map((item) => item.size_id).join(",")}</p>
+              {/* Image & Name Section for Mobile */}
+              <div className="flex items-center gap-4 md:contents">
+                <img
+                  src={item.imageUrl[0]}
+                  alt={item.imageUrl[0]}
+                  width={390}
+                  height={450}
+                  className="w-16 h-16 object-cover rounded-md border"
+                />
+                <div className="md:contents">
+                   <p className="font-medium text-gray-900 md:text-sm md:text-center line-clamp-2 md:line-clamp-none">
+                    {item.product_name}
+                  </p>
+                  {/* Shows ID or extra info on mobile if needed, hidden on desktop if grid handles it */}
+                </div>
               </div>
-              <div className="flex gap-1">
-                {item.product_color.map((item) => (
-                  <span
-                    key={item.color_id + item.product_id}
-                    className="inline-block w-3.5 h-3.5"
-                    style={{ backgroundColor: `${item.color_id}` }}
-                  ></span>
-                ))}
+
+              {/* Mobile details grid */}
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-500 md:contents">
+                 <div className="md:contents">
+                    <span className="md:hidden font-medium text-gray-700">Size: </span>
+                    <span>{item.product_size.map((item) => item.size_id).join(", ")}</span>
+                 </div>
+
+                 <div className="md:contents">
+                     <span className="md:hidden font-medium text-gray-700 block mb-1">Color: </span>
+                     <div className="flex gap-1 items-center h-full">
+                      {item.product_color.map((item) => (
+                        <span
+                          key={item.color_id + item.product_id}
+                          className="inline-block w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: `${item.color_id}` }}
+                        ></span>
+                      ))}
+                    </div>
+                 </div>
+
+                 <div className="md:contents">
+                    <span className="md:hidden font-medium text-gray-700">Category: </span>
+                    <span>{item.product_category.map((item) => item.category_name).join(", ")}</span>
+                 </div>
+
+                 <div className="md:contents">
+                    <span className="md:hidden font-medium text-gray-700">Price: </span>
+                    <span className="font-semibold text-gray-900 md:text-gray-500 md:font-normal">
+                      {item.price.toLocaleString("vi-VN") + " VND"}
+                    </span>
+                 </div>
+
+                 <div className="md:contents">
+                    <span className="md:hidden font-medium text-gray-700">Sold: </span>
+                    <span>{item.count}</span>
+                 </div>
               </div>
-              <p className="text-gray-500 md:text-sm text-[12px]">
-                {item.category.category_name}
-              </p>
-              <p className="text-gray-500 md:text-sm text-[12px]">
-                {item.price.toLocaleString("vi-VN") + " VND"}
-              </p>
-              <p className="text-gray-500 md:text-sm text-[12px]">
-                {item.count}
-              </p>
-              <Button
-                onClick={() =>
-                  item.status === "suspend"
-                    ? handleClickRevise(item.product_id)
-                    : handleClickDel(item.product_id)
-                }
-                variant={"ghost"}
-                className="bg-gray-100 text-gray-600 hover:text-red-600 focus:outline-none md:col-span-1 col-span-2 cursor-pointer md:w-fit w-full"
-              >
-                {item.status === "suspend" ? (
-                  <RotateCcw className="w-6 h-6" />
-                ) : (
-                  <Trash className="w-6 h-6" />
-                )}
-              </Button>
+
+              {/* Actions */}
+              <div className="mt-2 md:mt-0 flex justify-end md:block">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    item.status === "suspend"
+                      ? handleClickRevise(item.product_id)
+                      : handleClickDel(item.product_id);
+                  }}
+                  variant={"ghost"}
+                  size="icon"
+                  className="bg-gray-100 text-gray-600 hover:text-red-600 hover:bg-red-50 focus:outline-none"
+                >
+                  {item.status === "suspend" ? (
+                    <RotateCcw className="w-5 h-5" />
+                  ) : (
+                    <Trash className="w-5 h-5" />
+                  )}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

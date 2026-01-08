@@ -12,9 +12,10 @@ import {
   Pencil,
   Home,
   type LucideIcon,
+  Check,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { fetchGetAllUser, fetchGetAUser_Admin, fetchUpdateUserAdmin } from "@/slice/UserSlice";
+import { fetchBanUserByAdmin, fetchGetAllUser, fetchGetAUser_Admin, fetchUnbanUserByAdmin, fetchUpdateUserAdmin } from "@/slice/UserSlice";
 import Loading from "@/components/ui/Loading";
 import { fetchGetAllRole } from "@/slice/RoleSlice";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +55,15 @@ export default function Users() {
   }, [selectedId]);
   console.log("AllUser: ", AllUser);
   console.log("User_Admin: ", User_Admin);
+  const [showDetailMobile, setShowDetailMobile] = useState(false);
+
+  useEffect(() => {
+    if (selectedId !== "") {
+      dispatch(fetchGetAUser_Admin(selectedId));
+      setShowDetailMobile(true);
+    }
+  }, [selectedId]);
+  
   if (!User_Admin) return null;
   const handleResetPass = async() => {
     if(User_Admin.user_info.user_id === null 
@@ -80,6 +90,31 @@ export default function Users() {
       dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
     }
   }
+
+  const handleBanUser=async(user_id:string)=>{
+    if(!user_id || user_id === ""){
+      toast.error("Không tìm thấy người dùng");
+      return;
+    } 
+    const {type} = await dispatch(fetchBanUserByAdmin(user_id));
+    if(type.search("reject") == -1){
+      dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
+      dispatch(fetchGetAUser_Admin(user_id));
+    }
+  }
+
+  const handleUnbanUser=async(user_id:string)=>{
+    if(!user_id || user_id === ""){
+      toast.error("Không tìm thấy người dùng");
+      return;
+    } 
+    const {type} = await dispatch(fetchUnbanUserByAdmin(user_id));
+    if(type.search("reject") == -1){
+      dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
+      dispatch(fetchGetAUser_Admin(user_id));
+    }
+  }
+
   return (
     <>
       <Confirm
@@ -146,26 +181,14 @@ export default function Users() {
                       {item.role_name.toUpperCase()}
                     </Chip>
                   ))}
-                {/* <Chip
-                  active={filter === "Manager"}
-                  onClick={() => setFilter("Manager")}
-                >
-                  Managers
-                </Chip>
-                <Chip
-                  active={filter === "Customer"}
-                  onClick={() => setFilter("Customer")}
-                >
-                  Customers
-                </Chip> */}
               </div>
             </div>
           </header>
 
           {/* Split view */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden relative">
             {/* Left panel: table */}
-            <div className="flex-1 overflow-auto bg-slate-50 p-6 pr-2">
+            <div className={`flex-1 overflow-auto bg-slate-50 p-6 pr-2 ${showDetailMobile ? 'hidden md:block' : 'block'}`}>
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-slate-50 text-slate-500">
@@ -249,19 +272,32 @@ export default function Users() {
             </div>
 
             {/* Right panel: detail */}
-            <div className="w-[450px] flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto flex flex-col shadow-xl">
+            <div className={`
+                ${showDetailMobile ? 'fixed inset-0 z-50 w-full' : 'hidden'}
+                md:relative md:block md:w-[450px] md:z-0
+                flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto flex flex-col shadow-xl
+            `}>
               {/* detail header */}
               <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 p-6 z-10">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-4">
+                    {/* Back Button for Mobile */}
+                    <button 
+                         className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-800"
+                         onClick={() => setShowDetailMobile(false)}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
                     {/* <div
                     className="size-16 rounded-full bg-cover bg-center ring-2 ring-[#135bec] ring-offset-2 ring-offset-white"
                     style={{ backgroundImage: `url('${selected.avatar}')` }}
                   /> */}
                     <div>
-                      <h3 className="text-xl font-bold">{User_Admin.user_info.name}</h3>
+                      <h3 className="text-xl font-bold">{User_Admin?.user_info.name}</h3>
                       <p className="text-sm text-slate-500">
-                        User ID: #{User_Admin.user_info.user_id}
+                        User ID: #{User_Admin?.user_info.user_id}
                       </p>
                     </div>
                   </div>
@@ -280,10 +316,25 @@ export default function Users() {
                     <RotateCcw size={16} />
                     Reset Pass
                   </button>
-                  <button className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                  {User_Admin ?
+                  User_Admin.user_info.status ?
+                  <button
+                  onClick={()=>{
+                    handleBanUser(User_Admin.user_info.user_id);
+                  }}
+                  className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
                     <Ban size={16} />
                     Ban User
                   </button>
+                  : <button
+                  onClick={()=>{
+                    handleUnbanUser(User_Admin.user_info.user_id);
+                  }}
+                  className="flex-1 bg-green-50 text-green-600 hover:bg-green-100 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                    <Check size={16} />
+                    Unban User
+                  </button>
+                  : ""}
                 </div>
               </div>
 

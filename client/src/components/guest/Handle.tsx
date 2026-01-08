@@ -7,11 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useNavigate } from "react-router-dom";
 import { getStore } from "@/slice/StoreSlice";
 import type { cartItem, Product } from "@/type/types.frontend";
-
-type saveUserInfo = {
-  token: string;
-  admin: boolean;
-};
+import { logout } from "@/slice/AuthSlice";
 
 const NavLink = [
   {
@@ -25,6 +21,10 @@ const NavLink = [
     logo: assets.cart_icon,
     link: "/Cart",
   },
+  {
+    logo: assets.logout_icon,
+    link: "Logout",
+  }
 ];
 // type Product = {
 //   id: string;
@@ -49,6 +49,11 @@ const Handle = ({ carts }: { carts: cartItem[] }) => {
     } else {
       if (!user) {
         router("/Login");
+        return;
+      }
+      if(link === "Logout"){
+        dispatch(logout())
+        router("/");
         return;
       }
       router("/Profile");
@@ -77,6 +82,17 @@ const Handle = ({ carts }: { carts: cartItem[] }) => {
                   className="cursor-pointer"
                 >
                   <img src={item.logo} alt="util" className="w-5 h-auto" />
+                </div>
+              </li>
+            );
+          }else if(item.link === "Logout"){
+            return (
+              <li className="sm:block hidden" key={index}>
+                <div
+                  onClick={() => handleClick(item.link)}
+                  className="cursor-pointer "
+                >
+                  <img src={item.logo} alt="util" className="w-6 h-auto" />
                 </div>
               </li>
             );

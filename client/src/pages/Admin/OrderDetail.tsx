@@ -1,12 +1,7 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 // Import Lucide icons
 import {
-  Package,
-  Search,
-  Bell,
-  ChevronRight,
-  CheckCircle,
   Printer,
   Receipt,
   Pencil,
@@ -15,6 +10,7 @@ import {
   CreditCard,
   type LucideIcon,
   Truck,
+  CheckCircle,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
@@ -61,9 +57,9 @@ export default function OrderDetail() {
   }, [pathname]);
   useEffect(() => {
     if (OrderUserAdmin != null) {
-      setOrderHistory((prev: orderHistory[]) => {
+      setOrderHistory(() => {
         if (OrderUserAdmin.status == "canceled") {
-          return (prev = [
+          return [
             {
               title: "Đã Hủy",
               detail:
@@ -76,7 +72,7 @@ export default function OrderDetail() {
                   .replace("Z", ""),
               dot: "canceled",
             },
-          ]);
+          ];
         }
         const created = OrderUserAdmin.create_at;
         const updated =
@@ -87,7 +83,7 @@ export default function OrderDetail() {
           OrderUserAdmin.delivered_date == null
             ? "Chưa giao"
             : OrderUserAdmin.delivered_date;
-        return (prev = [
+        return [
           {
             title: "Đã giao",
             detail:
@@ -124,7 +120,7 @@ export default function OrderDetail() {
               .replace("Z", ""),
             dot: "muted",
           },
-        ]);
+        ];
       });
       if (OrderUserAdmin.status !== "done") {
         dispatch(fetchUserIsShipperByName());
@@ -216,7 +212,7 @@ export default function OrderDetail() {
                       </span>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="hidden md:block overflow-x-auto">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-[#f6f6f8] text-[#616f89] border-b border-[#e5e7eb]">
                           <tr>
@@ -286,6 +282,43 @@ export default function OrderDetail() {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="md:hidden grid gap-4 p-4">
+                      {OrderUserAdmin.order_detail.map((it) => (
+                        <div
+                          key={`${it.product_id}.${it.product_size?.size_id}.${it.product_color?.color_id}`}
+                          className="flex gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100"
+                        >
+                          <div
+                            className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 border border-[#e5e7eb] bg-cover bg-center"
+                            style={{
+                              backgroundImage: `url('${it.imageUrl}')`,
+                            }}
+                          />
+                          <div className="flex-1">
+                             <div className="flex justify-between items-start">
+                                 <h4 className="font-bold text-sm text-[#111318] line-clamp-2 mb-1">{it.product_name}</h4>
+                             </div>
+                             <div className="text-xs text-[#616f89] mb-2 flex flex-wrap gap-2">
+                                <span className="bg-white px-1.5 py-0.5 border rounded">Size: {it.product_size?.size_id}</span>
+                                <span className="flex items-center gap-1 bg-white px-1.5 py-0.5 border rounded">
+                                   Color: <span className="w-3 h-3 rounded-full border" style={{backgroundColor: it.product_color?.color_id}}></span>
+                                </span>
+                             </div>
+                             
+                             <div className="flex justify-between items-end mt-2">
+                                <div className="text-xs text-[#616f89]">
+                                   {it.quantity} x {(it.subtotal / it.quantity).toLocaleString("vi-VN")}
+                                </div>
+                                <div className="font-bold text-[#111318]">
+                                   {it.subtotal.toLocaleString("vi-VN")} VND
+                                </div>
+                             </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     <div className="flex flex-col items-end border-t border-[#e5e7eb] bg-[#f6f6f8]/30 px-6 py-6">

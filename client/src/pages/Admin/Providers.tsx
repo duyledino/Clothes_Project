@@ -109,7 +109,8 @@ const Providers = () => {
         </div>
 
         {/* Custom Table using Tailwind */}
-        <div className="rounded-[--radius] border border-border bg-card overflow-hidden shadow-sm">
+        {/* Custom Table using Tailwind */}
+        <div className="hidden md:block rounded-[--radius] border border-border bg-card overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-muted/50 text-muted-foreground font-medium border-b border-border">
@@ -178,6 +179,53 @@ const Providers = () => {
               Total Providers: {total_provider}
             </p>
           </div>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden grid gap-4 mb-4">
+            {providers && providers.length > 0 && providers.map((item) => (
+                <div key={item.provider_id} className="bg-white p-4 rounded-lg shadow-sm border border-border">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-secondary rounded-lg">
+                        <Building2 className="w-4 h-4 text-secondary-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground">{item.provider_name}</h3>
+                        <p className="text-xs text-muted-foreground font-mono">{item.provider_id}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                           <Button
+                            onClick={() => {
+                              setSelectedProvider(item);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              handleDelete(item);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                    </div>
+                  </div>
+                </div>
+            ))}
+             {/* Mobile Footer info */}
+            <div className="px-4 py-2 bg-muted/20 rounded-lg">
+                <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-medium text-center">
+                Total Providers: {total_provider}
+                </p>
+            </div>
         </div>
       </div>
     </>

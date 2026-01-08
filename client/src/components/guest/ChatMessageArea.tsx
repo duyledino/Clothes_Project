@@ -2,118 +2,147 @@ import React, { useEffect, useRef, useState } from "react";
 import type { SetStateAction } from "react";
 import InputMessage from "./InputMessage";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getAllMessageFromChat } from "@/slice/ChatSlice";
-import { toast } from "react-toastify";
+import { FetchGetAllMessageFromChatId } from "@/slice/ChatSlice";
 import Loading from "../ui/Loading";
+import type { Message } from "@/type/types.frontend";
+import dompurify from "dompurify";
+import { socket } from "@/config/socket";
 
-type Message = {
-  messageId: string;
-  chatId: string;
-  userId: string;
-  content: string;
+const Dompurify = ({
+  rawHtml,
+  className,
+}: {
+  rawHtml: string;
+  className: string;
+}) => {
+  const cleanHtml = dompurify.sanitize(rawHtml);
+  return (
+    <div
+      className={`${className}`}
+      dangerouslySetInnerHTML={{ __html: cleanHtml }}
+    />
+  );
 };
 
 const ChatMessageArea = ({
-  socketRef,
-  chatId,
-  fromId,
-  toId,
+  chat_id,
   current,
   setCurrent,
-  localStore,
 }: {
-  localStore: string | null;
   setCurrent: React.Dispatch<SetStateAction<Message[]>>;
-  socketRef: React.RefObject<WebSocket | null>;
-  fromId: string;
-  toId: string;
-  chatId: string;
+  chat_id: string;
   current: Message[];
 }) => {
-  const firstRef = useRef(0);
+  const [isTyping, setIsTyping] = useState(false);
   const messageRef = useRef<HTMLParagraphElement>(null);
   const dispatch = useAppDispatch();
   const { messages, loadingChat } = useAppSelector((state) => state.ChatSlice);
-
+  const { user } = useAppSelector((state) => state.AuthSlice);
+  console.log("Chat_ID: ", chat_id);
   useEffect(() => {
-    if (chatId !== "default" && toId !== "123") {
-      const localStore = localStorage.getItem("user");
-      if (localStore === undefined || localStore === null) {
-        toast.error("No token");
-        return;
-      }
-      const token = JSON.parse(localStore).token;
-      dispatch(getAllMessageFromChat({ token, chatId: chatId }));
+    if (chat_id !== "default") {
+      dispatch(FetchGetAllMessageFromChatId({ chat_id: chat_id }));
     }
-  }, [chatId]);
+  }, [chat_id]);
   useEffect(() => {
-    if (messageRef.current && localStore) {
-      if (firstRef.current === 0) {
-        firstRef.current = firstRef.current + 1;
-        messageRef.current.scrollIntoView({
-          behavior: "smooth",
-        });
-      } else if (
-        current.length > 0 &&
-        current[current.length - 1].userId === JSON.parse(localStore).id
-      ) {
-        messageRef.current.scrollIntoView({
-          behavior: "smooth",
-        });
-      }
+    if (messageRef.current) {
+      messageRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
     }
-  }, [messages, current]);
-  console.log(
-    "message, from id, localStorage: ",
-    chatId,
-    fromId,
-    localStore === null ? "undefined" : JSON.parse(localStore).id
-  );
+  }, [messages, current,isTyping]);
+  useEffect(() => {
+    socket.on("typing", (data) => {
+      if (data || data !== undefined) {
+        const { chat_id, user_id, isTyping } = JSON.parse(data);
+        // if(chat_id && user_id!==user?.user.user_id){
+        //   setIsTyping(isTyping);
+        // }
+        setIsTyping(isTyping);
+      }
+    });
+    return () => {
+      socket.off("typing");
+    };
+  }, []);
+  console.log("message[]", messages);
+  console.log("user.user: ", user?.user.user_id);
   return (
     <>
-      {(loadingChat || localStore === null) && <Loading />}
+      {loadingChat && <Loading />}
       <div className="flex-1 p-4 flex flex-col">
         <div className="text-lg font-semibold mb-2">Chat</div>
         <div className="overflow-y-scroll flex-1 flex flex-col items-start gap-3 px-2">
-          {messages && messages.length > 0
-            ? messages.map((item) => (
-                <p
-                  ref={messageRef}
-                  className={`rounded-3xl md:text-[18px] text-[12px] ${
-                    localStore !== null &&
-                    JSON.parse(localStore).id === item.userId
-                      ? "self-end p-3 max-w-xs bg-gray-900 text-white"
-                      : "p-3 max-w-xs bg-gray-300 text-gray-900"
-                  }`}
-                  key={item.messageId}
-                >
-                  {item.content}
-                </p>
-              ))
+          {messages && messages.length > 0 && user
+            ? messages.map((item) =>
+                item.message.search("<div") !== -1 ? (
+                  <Dompurify
+                    className={`rounded-3xl md:text-[18px] text-[12px] 
+    ${
+      user.user.role === "admin"
+        ? "self-end p-3 max-w-xl bg-gray-900 text-white"
+        : "p-3 max-w-xl bg-gray-300 text-gray-900"
+    }`}
+                    key={item.message_id}
+                    rawHtml={item.message}
+                  />
+                ) : (
+                  <p
+                    ref={messageRef}
+                    className={`rounded-3xl md:text-[18px] text-[12px] ${
+                      item.user_id === user.user.user_id
+                        ? "self-end p-3 max-w-xl bg-gray-900 text-white"
+                        : "p-3 max-w-xl bg-gray-300 text-gray-900"
+                    }`}
+                    key={item.message_id}
+                  >
+                    {item.message}
+                  </p>
+                )
+              )
             : ""}
-          {current && current.length > 0
-            ? current.map((item) => (
-                <p
-                  className={`rounded-3xl md:text-[18px] text-[12px] ${
-                    localStore !== null &&
-                    JSON.parse(localStore).id === item.userId
-                      ? "self-end p-3 max-w-xs bg-gray-900 text-white"
-                      : "p-3 max-w-xs bg-gray-300 text-gray-900"
-                  }`}
-                  key={item.messageId}
-                >
-                  {item.content}
-                </p>
-              ))
+          {current && current.length > 0 && user
+            ? current.map((item) =>
+                item.user_id !== "AI" ? (
+                  <p
+                    ref={messageRef}
+                    className={`rounded-3xl md:text-[18px] text-[12px] ${
+                      item.user_id === user.user.user_id
+                        ? "self-end p-3 max-w-xs bg-gray-900 text-white"
+                        : "p-3 max-w-xs bg-gray-300 text-gray-900"
+                    }`}
+                    key={item.message_id}
+                  >
+                    {item.message}
+                  </p>
+                ) : (
+                  <Dompurify
+                    className={`
+                      rounded-3xl md:text-[18px] text-[12px] 
+    ${
+      user.user.role === "admin"
+        ? "self-end p-3 max-w-xs bg-gray-900 text-white"
+        : "p-3 max-w-xl bg-gray-300 text-gray-900"
+    }`}
+                    key={item.message_id}
+                    rawHtml={item.message}
+                  />
+                )
+              )
             : ""}
+          {isTyping && (
+            <>
+              <p 
+              key={"Tin nhắn đang soạn"}
+              ref={messageRef}
+              className="rounded-3xl md:text-[18px] text-[12px] p-3 max-w-xl bg-gray-300 text-gray-900">
+                Đang soạn tin nhắn
+              </p>
+            </>
+          )}
         </div>
-        <InputMessage
-          setCurrent={setCurrent}
-          socketRef={socketRef}
-          chatId={chatId}
-          fromId={fromId}
-          toId={toId}
-        />
+
+        <InputMessage setCurrent={setCurrent} chat_id={chat_id} />
       </div>
     </>
   );

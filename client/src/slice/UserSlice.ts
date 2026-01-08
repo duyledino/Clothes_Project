@@ -208,6 +208,40 @@ export const fetchCreateAUserAdmin = createAsyncThunk(
   }
 );
 
+export const fetchBanUserByAdmin = createAsyncThunk(
+  "user/banUserByAdmin/put",
+  async (user_id: string, { rejectWithValue }) => {
+    try {
+      const response = await userService.banUser(user_id);
+      console.log("response.data in banUserByAdmin: ", response.Message);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.error("error in banUserByAdmin: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchUnbanUserByAdmin = createAsyncThunk(
+  "user/unbanUserByAdmin/put",
+  async (user_id: string, { rejectWithValue }) => {
+    try {
+      const response = await userService.unbanUser(user_id);
+      console.log("response.data in unbanUserByAdmin: ", response.Message);
+      toast.success(response.Message);
+      return response.Message;
+    } catch (error: any) {
+      console.error("error in unbanUserByAdmin: ", error);
+      const message = error.response?.data?.Message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user Slice",
   initialState,

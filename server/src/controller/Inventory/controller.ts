@@ -9,9 +9,14 @@ const getAllInventory = async (req: Request, res: Response) => {
     select: {
       product: {
         select: {
-          category: true,
+          Product_Category:{
+            select:{
+              category:true,
+            }
+          },
           imageUrl: true,
           product_name: true,
+
         },
       },
       product_id: true,
@@ -29,11 +34,14 @@ const getAllInventory = async (req: Request, res: Response) => {
       quantity: "asc",
     },
   });
-  const total_page = Math.ceil((await prisma.inventory.findMany()).length / 15);
+  const number_of_row = await prisma.inventory.count();
+  const total_page = Math.ceil(number_of_row / 15);
+  console.log("number_of_row",number_of_row);
+  console.log("total_page",total_page);
   const format_inventories = inventories.map((item) => ({
     ...item,
     product: {
-      category: item.product.category,
+      category: item.product.Product_Category.map((item) => item.category),
       imageUrl: item.product.imageUrl[0],
       product_name: item.product.product_name,
     },

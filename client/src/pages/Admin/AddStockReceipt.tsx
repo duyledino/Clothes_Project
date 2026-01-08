@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2, Save, ArrowLeft, PackagePlus } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { fetchGetAllProvider } from "@/slice/ProviderSlice";
-import { fetchProductFromApiAdmin } from "@/slice/ProductSlice";
 import ProductSearchModalForAddStock from "@/components/admin/ProductSearchModalForAddStock";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { StockReceipt, StockReceiptDetail } from "@/type/types.frontend";
+import type { StockReceiptDetail } from "@/type/types.frontend";
 import { toast } from "react-toastify";
 import {
   fetchCreateStockReceipt,
@@ -65,7 +63,7 @@ const AddStockReceipt = () => {
         provider_id: providerId,
         user_id: user.user.user_id,
         stock_receipt_detail: stockDetail,
-      })
+      } as any)
     );
     if (type.search("reject") == -1) {
       toast.success("Đã thêm phiếu nhập thành công");
@@ -225,7 +223,7 @@ const AddStockReceipt = () => {
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-muted/50 text-muted-foreground font-medium">
                     <tr>
@@ -283,10 +281,6 @@ const AddStockReceipt = () => {
                           <td className="px-4 py-4">
                             <input
                               onChange={(e) => {
-                                console.log(
-                                  "Chagen quenaity: ",
-                                  e.target.value
-                                );
                                 setStockDetail((prev) =>
                                   prev.map((itemInc) => {
                                     if (
@@ -321,6 +315,75 @@ const AddStockReceipt = () => {
                       ))}
                   </tbody>
                 </table>
+              </div>
+
+               {/* Mobile Cards */}
+              <div className="md:hidden grid gap-3 p-3">
+                 {stockDetail && stockDetail.length > 0 && stockDetail.map((item)=>(
+                     <div key={item.inventory_id} className="bg-white border rounded p-3 shadow-sm">
+                         <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-bold text-sm text-gray-900 line-clamp-2">{item.product_name}</h3>
+                              <button
+                                onClick={() => {
+                                  handleDelete(item);
+                                }}
+                                className="text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                         </div>
+                         <div className="flex gap-2 mb-3">
+                             <span className="text-xs bg-gray-100 px-2 py-1 rounded">Size: {item.size_id}</span>
+                             <span className="w-6 h-6 rounded border" style={{backgroundColor: item.color_id}}></span>
+                         </div>
+                         
+                         <div className="grid grid-cols-3 gap-2 text-xs">
+                             <div className="flex flex-col">
+                                 <span className="text-gray-500">Hiện có</span>
+                                 <input
+                                      type="number"
+                                      disabled
+                                      value={item.quantity}
+                                      className="w-full bg-gray-50 border rounded px-1 py-1 mt-1 font-bold"
+                                    />
+                             </div>
+                             <div className="flex flex-col">
+                                 <span className="text-gray-500">Tối thiểu</span>
+                                 <input
+                                      type="number"
+                                      disabled
+                                      value={item.min_quantity}
+                                      className="w-full bg-gray-50 border rounded px-1 py-1 mt-1 font-bold"
+                                    />
+                             </div>
+                             <div className="flex flex-col">
+                                 <span className="text-blue-600 font-bold">Thêm *</span>
+                                  <input
+                                      onChange={(e) => {
+                                        setStockDetail((prev) =>
+                                          prev.map((itemInc) => {
+                                            if (
+                                              itemInc.inventory_id === item.inventory_id
+                                            ) {
+                                              return {
+                                                ...itemInc,
+                                                quantity_add: Number(e.target.value),
+                                              };
+                                            }
+                                            return itemInc;
+                                          })
+                                        );
+                                      }}
+                                      type="number"
+                                      min="1"
+                                      value={item.quantity_add}
+                                      className="w-full bg-white border border-blue-300 rounded px-1 py-1 mt-1 font-bold text-blue-700"
+                                    />
+                             </div>
+                         </div>
+                     </div>
+                 ))}
+                 {stockDetail.length === 0 && <p className="text-center text-gray-400 text-sm py-4">Chưa có sản phẩm nào</p>}
               </div>
 
               <div className="p-4 border-t border-border bg-muted/20">

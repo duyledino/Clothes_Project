@@ -3,134 +3,124 @@ import ChatSidebar from "@/components/guest/ChatSidebar";
 import ChatMessageArea from "@/components/guest/ChatMessageArea";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "react-toastify";
-import { fetchChatsByUserId } from "@/slice/ChatSlice";
+import { fetchChatByUserAdmin } from "@/slice/ChatSlice";
 import { useNavigate } from "react-router-dom";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-type Chat = {
-  chatId: string;
-  toUser: User;
-  fromUser: User;
-};
-
-type Message = {
-  messageId: string;
-  chatId: string;
-  //fromUserID
-  userId: string;
-  content: string;
-};
+import type { ChatAdmin, Message } from "@/type/types.frontend";
+import ChatSidebarAdmin from "@/components/admin/ChatSidebarAdmin";
+import Loading from "@/components/ui/Loading";
+import { socket } from "@/config/socket";
 
 function ChatAdminPage() {
-  const router = useNavigate();
-  const socketRef = useRef<WebSocket | null>(null);
   const dispatch = useAppDispatch();
-  const { chats } = useAppSelector((state) => state.ChatSlice);
-  const [localStore, setLocalStore] = useState<string | null>(null);
-
+  const { chatAdmin, loadingChat } = useAppSelector((state) => state.ChatSlice);
+  const { user } = useAppSelector((state) => state.AuthSlice);
   const [current, setCurrent] = useState<Message[]>([]);
-  const [singleChat, setSingleChat] = useState<Chat>(() => {
-    if (chats && chats?.length > 0) return chats[0];
-    return {
-      chatId: "default",
-      toUser: {
-        email: "temp@gmail.com",
-        id: "123",
-        name: "temp",
-      },
-      fromUser: {
-        email: "temp@gmail.com",
-        id: "123",
-        name: "temp",
-      },
-    };
-  });
+  const [singleChat, setSingleChat] = useState<ChatAdmin | null>(null);
   console.log("single Chat: ", singleChat);
   useEffect(() => {
-    if (localStore) {
-      //   if (!JSON.parse(localStore).admin) {
-      //     router("/");
-      //     return;
-      //   }
-      const { token, id } = JSON.parse(localStore);
-      dispatch(fetchChatsByUserId({ token, userId: id }));
+    if (user && user.user !== null) {
+      dispatch(fetchChatByUserAdmin({ user_id: user.user.user_id }));
     }
-  }, [localStore]);
+  }, []);
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      setLocalStore(storedUser);
-    }
-    socketRef.current = new WebSocket(`${import.meta.env.VITE_SOCKET}`);
-    socketRef.current.onopen = () => {
-      console.log("✅Client websocket is connected");
-    };
-    socketRef.current.onmessage = (e) => {
-      console.log("received from server: ", e.data);
-      const { messageId, message, fromId, chatId } = JSON.parse(e.data);
+    socket.on("message", (data) => {
+      console.log("received from server: ", data);
+      const { message_id, message, from_id, chat_id, isAdmin } = JSON.parse(data);
       setCurrent((prev) => [
         ...prev,
-        { messageId: messageId, content: message, userId: fromId, chatId },
+        {
+          message_id: message_id,
+          message: message,
+          user_id: from_id,
+          chat_id: chat_id,
+          isAdmin: isAdmin
+        },
       ]);
-    };
-    socketRef.current.onclose = (e) => {
-      console.log("Websocket is closed");
-    };
-    socketRef.current.onerror = (e) => {
-      console.error("websocket error: ", e);
-    };
+    });
     return () => {
-      if (socketRef.current) socketRef.current.close();
+      socket.off("message");
     };
   }, []);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedUser = localStorage.getItem("user");
+  //     setLocalStore(storedUser);
+  //   }
+  //   socketRef.current = new WebSocket(`${import.meta.env.VITE_SOCKET}`);
+  //   socketRef.current.onopen = () => {
+  //     console.log("✅Client websocket is connected");
+  //   };
+  //   socketRef.current.onmessage = (e) => {
+  //     console.log("received from server: ", e.data);
+  //     const { messageId, message, fromId, chatId } = JSON.parse(e.data);
+  //     setCurrent((prev) => [
+  //       ...prev,
+  //       { messageId, content: message, userId: fromId, chatId },
+  //     ]);
+  //   };
+  //   socketRef.current.onclose = (e) => {
+  //     console.log("Websocket is closed");
+  //   };
+  //   socketRef.current.onerror = (e) => {
+  //     console.error("websocket error: ", e);
+  //   };
+  //   return () => {
+  //     if (socketRef.current) socketRef.current.close();
+  //   };
+  // }, []);
 
   useEffect(() => {
-    if (chats) {
-      setSingleChat(chats[0]);
+    if (chatAdmin) {
+      setSingleChat(chatAdmin[0]);
     }
-  }, [chats]);
+  }, [chatAdmin]);
   useEffect(() => {
-    if (singleChat && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current?.send(
-        JSON.stringify({ type: "register", fromId: singleChat.fromUser.id })
+    if (singleChat) {
+      socket.emit(
+        "register",
+        JSON.stringify({
+          from_id: singleChat.user_id_admin,
+          chat_id: singleChat.chat_id,
+          to_id: singleChat.user_id_user,
+        })
       );
+      socket.on("register", (data) => {
+        console.log("✅Client websocket is connected");
+      });
+      return () => {
+        socket.off("register");
+      };
     }
-  }, [singleChat, socketRef.current?.OPEN]);
+  }, [singleChat]);
+  console.log("chatAdmin", chatAdmin);
+  console.log("message", current);
   return (
-    <div className="flex flex-1 h-[81.5vh] bg-white text-gray-900 border-b-2">
-      <ChatSidebar
-        setCurrent={setCurrent}
-        chats={chats || []}
-        setSingleChat={setSingleChat}
-        singleChat={singleChat}
-      />
-      {singleChat.chatId !== "default" && localStore ? (
-        <ChatMessageArea
-          localStore={localStore}
+    <>
+      {loadingChat && <Loading />}
+      <div className="flex flex-1 h-[81.5vh] bg-white text-gray-900 border-b-2">
+        <ChatSidebarAdmin
           setCurrent={setCurrent}
-          current={current}
-          socketRef={socketRef}
-          fromId={singleChat ? singleChat.fromUser.id : "123"}
-          toId={singleChat ? singleChat.toUser.id : "123"}
-          chatId={singleChat.chatId}
+          chats={chatAdmin || []}
+          setSingleChat={setSingleChat}
+          singleChat={singleChat}
         />
-      ) : (
-        <ChatMessageArea
-          localStore={localStore}
-          setCurrent={setCurrent}
-          current={[]}
-          socketRef={socketRef}
-          fromId={singleChat.fromUser.id}
-          toId={singleChat.toUser.id}
-          chatId={singleChat.chatId}
-        />
-      )}
-    </div>
+        {singleChat && singleChat?.chat_id !== "default" ? (
+          <ChatMessageArea
+            current={current}
+            setCurrent={setCurrent}
+            chat_id={singleChat.chat_id}
+          />
+        ) : (
+          // <ChatMessageArea
+          // current={current}
+          //   setCurrent={setCurrent}
+          //   socketRef={socketRef}
+          //   chat_id={singleChat.chat_id}
+          // />
+          ""
+        )}
+      </div>
+    </>
   );
 }
 

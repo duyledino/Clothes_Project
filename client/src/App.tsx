@@ -53,6 +53,10 @@ import StockReceipts from "./pages/Admin/StockReceipts";
 import StockReceiptDetail from "./pages/Admin/StockReceiptDetail";
 import NotFound from "./pages/Public/NotFound";
 import ProtectRouteEmployee from "./auth/ProtectRouteEmployee";
+import AdminProductDetail from "./pages/Admin/ProductDetail";
+import UpdateProduct from "./pages/Admin/UpdateProduct";
+import ForgetPassword from "./pages/Public/ForgetPassword";
+import Verify from "./pages/Public/Verify";
 
 function App() {
   const location = useLocation();
@@ -101,6 +105,8 @@ function App() {
           <Route path="Collection" element={<Collection />} />
           <Route path="Collection/:id" element={<ProductDetail />} />
           {/* <Route path="Payment" element={<Payment />} /> */}
+          <Route path="ForgetPassword" element={<ForgetPassword />} />
+          <Route path="Verify" element={<Verify />} />
         </Route>
         {/* User Route */}
         <Route element={<ProtectRouteUser />}>
@@ -137,6 +143,8 @@ function App() {
             <Route path="Provider" element={<Providers />} />
             <Route path="Receipt" element={<StockReceipts />} />
             <Route path="Receipt/:receipt_id" element={<StockReceiptDetail />} />
+            <Route path="Products/:product_id" element={<AdminProductDetail />} />
+            <Route path="Products/UpdateProduct/:product_id" element={<UpdateProduct />} />
           </Route>
         </Route>
         <Route element={<ProtectRouteEmployee />}>

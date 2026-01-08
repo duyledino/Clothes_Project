@@ -23,7 +23,7 @@ const ProductInfo = ({
   Reviews,
   inventories,
 }: Product_Review) => {
-  console.log(product_size);
+  console.log("Reviews: ", Reviews);
   if (
     inventories === undefined ||
     product_color === undefined ||
@@ -100,6 +100,9 @@ const ProductInfo = ({
       setLockSizeId([]);
     }
   }, [sizeProduct, colorProduct, inventories]);
+
+  console.log("lockColorId: ", lockColorId);
+  console.log("lockSizeId: ", lockSizeId);
   return (
     <>
       <div className="w-full flex md:flex-row flex-col md:px-0 px-3 gap-8">

@@ -79,14 +79,26 @@ const nav = [
   },
 ];
 
-const Sidebar = () => {
+interface SidebarProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}
+
+const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const location = useLocation();
   const pathname = location.pathname;
   return (
-    <div className="h-[90vh] md:w-2xs w-20 pt-4 pl-9 border-r-2">
+    <div 
+        className={`
+          z-[101]
+            fixed inset-y-0 left-0 z-40 w-64 bg-white transform transition-transform duration-300 ease-in-out border-r-2 pt-4 pl-9
+            md:relative md:translate-x-0 cursor-pointer 
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+    >
       <div className="w-full flex flex-col gap-3">
         {nav.map((item) => (
-          <Link to={item.link} key={item.link}>
+          <Link to={item.link} key={item.link} onClick={() => setSidebarOpen(false)}>
             <div
               className={`flex items-center gap-7 p-2 transition-all hover:ring-2 hover:ring-gray-900 border-1 ${
                 pathname === item.link ? "bg-gray-900" : ""
@@ -96,7 +108,7 @@ const Sidebar = () => {
                 `${pathname === item.link ? "text-white" : "text-black"}`
               )}
               <h1
-                className={`md:block hidden ${
+                className={`block ${
                   pathname === item.link ? "text-white" : "text-black"
                 }`}
               >

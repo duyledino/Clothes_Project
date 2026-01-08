@@ -2,8 +2,8 @@ import { myAxios } from "@/config/axios";
 
 export const trackService = {
   // GET /track/revenue
-  getRevenue: async () => {
-    const response = await myAxios.get("/track/revenue");
+  getRevenue: async (filter:string) => {
+    const response = await myAxios.get("/track/revenue?filter="+filter);
     return response.data;
   },
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { assets } from "@/assets/frontend_assets/assets";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sheet,
   SheetClose,
@@ -13,10 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { toast } from "react-toastify";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { DoorOpen } from "lucide-react";
+import { logout } from "@/slice/AuthSlice";
 
 const navLinks = [
   { name: "home", link: "/" },
@@ -26,18 +25,19 @@ const navLinks = [
 ];
 
 const MobileNav = () => {
-  const [localStore, setLocalStore] = useState<string | null>(null);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setLocalStore(localStorage.getItem("user"));
-    }
-  }, []);
+  const dispatch = useAppDispatch();
+  const router = useNavigate();
+  const {user} = useAppSelector((state) => state.AuthSlice);
+  const handleClickLogout = () => {
+    dispatch(logout());
+    router("/");
+  };
   const [open, setOpen] = useState<boolean | undefined>(false);
   const location = useLocation();
   const path = location.pathname;
   return (
     <>
-      {localStore ? (
+      {user && user.user && user.user.user_id !== "" ? (
         <>
           <div
             className="md:hidden block cursor-pointer"
@@ -52,7 +52,8 @@ const MobileNav = () => {
                   <img src={assets.logo} alt="logo" className="w-36" />
                 </SheetTitle>
               </SheetHeader>
-              <div className="grid flex-1 auto-rows-min gap-6 px-4">
+              <div className="flex flex-col justify-between h-full">
+                <div className="grid flex-1 auto-rows-min gap-6 px-4">
                 {navLinks.map((item) => (
                   <div className="grid gap-3">
                     <Link
@@ -69,9 +70,9 @@ const MobileNav = () => {
                     </Link>
                   </div>
                 ))}
-                {localStore &&
-                  JSON.parse(localStore).id !== "" &&
-                  !JSON.parse(localStore).admin && (
+                {user && user.user &&
+                  user.user.user_id !== "" &&
+                  user.user.role !== "admin" && (
                     <div className="grid gap-3">
                       <Link
                         onClick={() => setOpen((prev) => (prev = false))}
@@ -82,13 +83,13 @@ const MobileNav = () => {
                             : ""
                         } hover:bg-foreground hover:text-background transition-all`}
                       >
-                        Admin
+                        Chat
                       </Link>
                     </div>
                   )}
-                {localStore &&
-                  JSON.parse(localStore).id !== "" &&
-                  JSON.parse(localStore).admin && (
+                {user && user.user &&
+                  user.user.user_id !== "" &&
+                  user.user.role === "admin" && (
                     <div className="grid gap-3">
                       <Link
                         onClick={() => setOpen((prev) => (prev = false))}
@@ -101,6 +102,39 @@ const MobileNav = () => {
                       >
                         Admin
                       </Link>
+                    </div>
+                  )}
+                  {user && user.user &&
+                  user.user.user_id !== "" &&
+                  user.user.role === "shipper" && (
+                    <div className="grid gap-3">
+                      <Link
+                        onClick={() => setOpen((prev) => (prev = false))}
+                        to="/Employee"
+                        className={`uppercase w-full h-full ring-1 ring-black/30 px-5 py-2 rounded-[10px] text-center ${
+                          path === "/Employee"
+                            ? "bg-foreground text-background"
+                            : ""
+                        } hover:bg-foreground hover:text-background transition-all`}
+                      >
+                        Shipper
+                      </Link>
+                    </div>
+                  )}
+              </div>
+              {user && user.user &&
+                  user.user.user_id !== "" && (
+                    <div className="mt-auto mb-5 w-[90%] mx-auto">
+                      <div
+                        onClick={() => {handleClickLogout()}}
+                        className={`uppercase cursor-pointer w-full flex items-center justify-center gap-2 h-full ring-1 ring-black/30 px-5 py-2 rounded-[10px] text-center ${
+                          path === "/Logout"
+                            ? "bg-foreground text-background"
+                            : ""
+                        } hover:bg-foreground hover:text-background transition-all`}
+                      >
+                        Logout <DoorOpen className="w-5 h-auto" />
+                      </div>
                     </div>
                   )}
               </div>

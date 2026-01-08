@@ -2,56 +2,41 @@ import React, { useState } from "react";
 import type { FormEvent, SetStateAction } from "react";
 import { Input } from "../ui/input";
 import { toast } from "react-toastify";
-
-type Message = {
-  messageId: string;
-  chatId: string;
-  userId: string;
-  content: string;
-};
+import { socket } from "@/config/socket";
+import type { Message } from "@/type/types.frontend";
+import { useAppSelector } from "@/hooks/hooks";
 
 const InputMessage = ({
-  socketRef,
-  chatId,
-  fromId,
-  toId,
+  chat_id,
   setCurrent,
 }: {
   setCurrent: React.Dispatch<SetStateAction<Message[]>>;
-  socketRef: React.RefObject<WebSocket | null>;
-  fromId: string;
-  toId: string;
-  chatId: string;
+  chat_id: string;
 }) => {
-  if (socketRef === null) return;
+  const {user} = useAppSelector((state) => state.AuthSlice);
   const [message, setMessage] = useState("");
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("message, userId, chatId: ", message, fromId, chatId);
-    // if (message === "" || userId === "123" || chatId === "default") {
-    //   toast.error("Type something...");
-    //   return;
-    // }
-    // testing purpose
+    console.log("message, chatId: ", message, chat_id);
     if (message === "") {
       toast.error("Type something...");
       return;
     }
-    socketRef.current?.send(
-      JSON.stringify({
+    const message_id = Date.now().toString() + "123".slice(0, 5);
+    socket.emit("message", JSON.stringify({
+      message_id: message_id,
         message: message,
-        chatId: chatId,
-        fromId: fromId,
-        toId: toId,
-      })
-    );
+        chat_id: chat_id,
+        from_id: user!.user.user_id,
+      }));
     setCurrent((prev) => [
       ...prev,
       {
-        chatId: chatId,
-        content: message,
-        messageId: Date.now().toString() + fromId.slice(0, 5),
-        userId: fromId,
+        chat_id: chat_id,
+        message_id: message_id,
+        user_id: user!.user.user_id,
+        message: message,
+        isAdmin: false
       },
     ]);
     setMessage("");

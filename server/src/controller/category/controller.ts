@@ -9,14 +9,14 @@ const getAllCategory = async (req: Request, res: Response) => {
       category_id: true,
       category_name: true,
       _count: {
-        select: { product: true }, // Đếm số lượng quan hệ 'product'
+        select: { Product_Category: true }, // Đếm số lượng quan hệ 'product'
       },
     },
   });
   const format_categories = categories.map((item) => ({
     category_id: item.category_id,
     category_name: item.category_name,
-    link_total: item._count.product,
+    link_total: item._count.Product_Category,
   }));
   console.log("categories: ", categories);
   console.log("format_categories: ", format_categories);
@@ -118,18 +118,22 @@ const deleteACategory = async (req: Request, res: Response) => {
     return res.status(404).json({ Message: "Không tìm thấy phân loại này" });
   }
 
-  const existsProductInCategory = await prisma.product.findFirst({
+  const existsProductInCategory = await prisma.product_Category.findMany({
     select: {
-      product_name: true,
+      product:{
+        select:{
+          product_name:true
+        }
+      },
     },
     where: {
       category_id: category_id,
     },
   });
 
-  if (existsProductInCategory) {
+  if (existsProductInCategory.length > 0) {
     return res.status(400).json({
-      Message: `Không thể xóa: phân loại '${exists.category_name}' vẫn còn chứa sản phẩm (VD: ${existsProductInCategory.product_name})`,
+      Message: `Không thể xóa: phân loại '${exists.category_name}' vẫn còn chứa sản phẩm (VD: ${existsProductInCategory.map((item: any) => item.product.product_name).join(", ")})`,
     });
   }
 
