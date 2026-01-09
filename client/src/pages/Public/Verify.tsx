@@ -4,7 +4,7 @@ import Loading from "@/components/ui/Loading";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { verify } from "@/slice/AuthSlice";
+import { auth, login, verify } from "@/slice/AuthSlice";
 
 const Verify = () => {
   const dispatch = useAppDispatch();
@@ -22,9 +22,11 @@ const Verify = () => {
     }
     const {type} = await dispatch(verify({token: params.get("token")!,user_id: params.get("user_id")!}));
     if(type.search("reject")===-1){
-        router("/");
+        // dispatch(auth())
+        // router("/");
         setResult("Xác thực tài khoản thành công");
-        // toast.success("Xác thực tài khoản thành công");
+        toast.success("Xác thực tài khoản thành công.");
+        toast.info("Hãy đăng nhập lại để tiếp tục");
     }else{
         setResult("Xác thực tài khoản thất bại");
         // toast.error("Xác thực tài khoản thất bại");
@@ -43,7 +45,6 @@ const Verify = () => {
           </h2>
             {result === "" ? <p className="text-center mt-6 text-xl font-semibold text-gray-900">Đang xác thực tài khoản...</p> : 
                       <p className="text-center mt-6 text-xl font-semibold text-gray-900">{result}</p>
-
             }
           <p className="text-center mt-6 text-gray-600">
             <Link to="/Login" className="text-gray-900 underline">

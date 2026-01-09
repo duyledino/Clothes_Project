@@ -20,7 +20,7 @@ GROUP BY label
 ORDER BY label ASC;`
   }else if(filter == "month"){
     getTotal = await prisma.$queryRaw`SELECT 
-  TO_CHAR(update_at, 'YYYY-MM-DD') as label, 
+  TO_CHAR(DATE_TRUNC('month', update_at), 'YYYY-MM') as label, 
   SUM(total) as value
 FROM "Order"
 WHERE payment = 'done' AND status = 'done'
@@ -30,13 +30,13 @@ ORDER BY label ASC;
 `;
   }else if(filter == "week"){
     getTotal = await prisma.$queryRaw`SELECT 
-  TO_CHAR(update_at, 'YYYY-MM-DD') as label, 
+  TO_CHAR(DATE_TRUNC('week', update_at), 'YYYY-MM') as label, 
   SUM(total) as value
 FROM "Order"
 WHERE payment = 'done' AND status = 'done'
   AND update_at >= NOW() - INTERVAL '3 weeks'
 GROUP BY label
-ORDER BY label ASC;
+ORDER BY label ASC; 
 `;
   }
   const fixGetTotal = getTotal.map((row) => ({

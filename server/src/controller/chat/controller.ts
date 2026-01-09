@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const getChatByUserId = async (req: Request, res: Response) => {
   const { user_id } = req.query as { user_id: string };
-  console.log("getChatByuser_id: ", user_id);
+  console.log("getChatByuser_id: >>>>>", user_id);
   const exists = await prisma.user.findFirst({
     where: {
       user_id: user_id,
@@ -29,6 +29,7 @@ const getChatByUserId = async (req: Request, res: Response) => {
       user_id_user: user_id,
     },
   });
+  console.log(">>>>>>>chat: ",chats);
   return res.status(200).json({
     chats: chats,
   });
@@ -144,6 +145,9 @@ const getAllMessageFromChatId= async (req:Request,res:Response)=>{
     },
     orderBy: {
       create_at: "asc"
+    },
+    where:{
+      chat_id: chat_id
     }
   });
   const format_message= messages.map(item=>({
@@ -265,6 +269,7 @@ const responseAI = async (message: string) => {
     const response = await puter.ai.chat(`Bạn là nhân viên tư vấn cho 
       shop quần ào "Forever." khi admin vắng mặt, 
       chỉ thực hiện các tools được cung cấp (dịch ra ngôn ngữ tự nhiên các tools)
+      khi người dùng yêu cầu !
       , tin nhắn của người dùng:\n ${message}`,
       {tools});
     console.log("response: ",response);

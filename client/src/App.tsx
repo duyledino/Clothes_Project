@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+// import reactLogo from "./assets/react.svg";
+// import viteLogo from "/vite.svg";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Public/Home";
 import About from "./pages/Public/About";

@@ -212,8 +212,9 @@ const slice = createSlice({
       .addCase(verify.pending, (state) => {
         state.loading = true;
       })
-      .addCase(verify.fulfilled, (state) => {
+      .addCase(verify.fulfilled, (state,action) => {
         state.loading = false;
+        state.user = action.payload as AuthUser;
       })
       .addCase(verify.rejected, (state) => {
         state.loading = false;

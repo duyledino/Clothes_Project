@@ -1,0 +1,56 @@
+# docker-compose.yml
+
+# version: '3.8'
+
+services:
+  db_service:
+    build: ./database
+    image: duyledino/clothes-p-db:1.0.0
+    container_name: clothes-db
+    environment: 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Mwg01223744773
+      POSTGRES_DB: Clothes_Ecommerce
+    ports: 
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/data_con_voi.sql:/docker-entrypoint-initdb.d/data_con_voi.sql
+    networks:
+      - clothes-network
+
+  backend_service:
+    build: ./server
+    image: duyledino/clothes-p-server:1.0.0
+    container_name: clothes-backend
+    restart: always
+    ports: 
+      - "3500:3500"
+      - "3501:3501"
+    depends_on:
+      - db_service
+    env_file:
+      - ./server/.env
+    environment:
+      DATABASE_URL_LOCAL: "postgresql://postgres:Mwg01223744773@db_service:5432/Clothes_Ecommerce?schema=public"
+    networks:
+      - clothes-network
+
+  frontend_service:
+    build: ./client
+    image: duyledino/clothes-p-client:1.0.0
+    container_name: clothes_frontend
+    restart: always
+    ports: 
+      - "5173:80"  
+    depends_on:
+      - backend_service
+    networks:
+      - clothes-network
+
+networks:
+  clothes-network: 
+    driver: bridge
+
+volumes:
+  postgres_data:

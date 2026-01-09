@@ -597,6 +597,14 @@ const verifyUser = async (req: Request, res: Response) => {
   const { user_id,token } = req.query as { user_id: string,token: string };
   const exists = await prisma.user.findFirst({
     select:{
+      role:{
+        select:{
+          role_name:true
+        }
+      },
+      email:true,
+      user_id:true,
+      isVerify:true,
       expire_verify_at: true
     },
     where: {
@@ -616,7 +624,12 @@ const verifyUser = async (req: Request, res: Response) => {
       expire_verify_at: null,
     },
   });
-  return res.status(200).json({ Message: "Đã xác thực tài khoản thành công" });
+  return res.status(200).json({ Message: "Đã xác thực tài khoản thành công",
+     user:{role: exists.role.role_name,
+      email: exists.email,
+      user_id: exists.user_id,
+      isVerify:exists.isVerify,}
+   });
 };
 
 
