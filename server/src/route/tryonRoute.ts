@@ -1,12 +1,13 @@
-import express, { type Application } from 'express'
+import express, { type Express } from 'express'
 import { asyncHandler } from '../middleware/asyncHandler.js';
-import { getTryOn, getTryOnUsingImage } from '../controller/tryon/controller.js';
+import { getTryOnUsingImage } from '../controller/tryon/controller.js';
 import { upload } from '../config/multer.js';
+import { authenticateUser } from '../middleware/authentication.js';
 
 const router = express.Router();
 
-const init = (app:Application)=>{
-    router.post('/uploadCLothes',upload.array("photos",12),asyncHandler(getTryOnUsingImage));
+const init = (app:Express)=>{
+    router.post('/uploadCLothes',asyncHandler(authenticateUser),upload.array("photos",12),asyncHandler(getTryOnUsingImage));
     return app.use("/api/v1/tryon",router);
 }
 

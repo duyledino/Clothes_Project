@@ -14,24 +14,12 @@ import {
 import type { CategoryOrigin, ProductData } from "@/type/types.frontend";
 
 
-// type product = {
-//   _id: string;
-//   name: string;
-//   description: string;
-//   price: number;
-//   image: StaticImageData[];
-//   category: string;
-//   subCategory: string;
-//   sizes: string[];
-//   date: number;
-//   bestseller: boolean;
-// };
-
 type cateAndType = {
   currentCategories: string[];
   query: string;
   page: number;
   setPage: React.Dispatch<SetStateAction<number>>;
+  setCurrentCategories: React.Dispatch<SetStateAction<string[]>>;
   SearchProduct: ProductData[];
 };
 
@@ -40,6 +28,7 @@ const Collections = ({
   currentCategories,
   query,
   setPage,
+  setCurrentCategories,
   SearchProduct,
 }: cateAndType) => {
   const { Products, error, loading } = useAppSelector(
@@ -72,7 +61,7 @@ const Collections = ({
   //   });
   // }, [sort, categories, type]);
   // trigger when one of these change [sort, categories, subcategory]
-  console.log("sort,categories,subcategory: ", sort, currentCategories,SearchProduct);
+  console.log("sort,categories,subcategory: ", currentCategories);
   useEffect(() => {
     setPage(1);
     console.log("fetch page: ", page); // not trigger when page change
@@ -89,6 +78,8 @@ const Collections = ({
       dispatch(resetSearchProduct());
     } else {
       dispatch(fetchApiSearchProduct({ query }));
+      setCurrentCategories([]);
+      
     }
   }, [query]);
   useEffect(() => {

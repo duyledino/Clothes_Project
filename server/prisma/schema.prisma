@@ -96,8 +96,6 @@ model Product_Size {
   @@id([product_id, size_id])
 }
 
-//FIXME: fix the logic product's color will have different color 
-
 model Color {
   color_id             String                 @id @default(uuid())
   color_name           String

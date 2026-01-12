@@ -107,9 +107,9 @@ export default function Color() {
           </header>
 
           {/* Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden p-4">
             {/* Desktop Table */}
-            <div className="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="hidden md:block w-full bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-slate-50 text-slate-500">
                     <tr>
@@ -177,7 +177,7 @@ export default function Color() {
               </div>
 
             {/* Mobile Cards */}
-            <div className="md:hidden grid gap-4">
+            <div className="md:hidden flex flex-col w-full gap-4">
               {colors.map((item) => (
                 <div key={item.color_id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-3">

@@ -23,6 +23,7 @@ const VirtualTryOn = ({
   tryon: string;
 }) => {
   const dispatch = useAppDispatch();
+  const {user} = useAppSelector((state) => state.AuthSlice);
   const { error, loading, url } = useAppSelector((state) => state.TryonSlice);
   const [image, setImage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -41,17 +42,16 @@ const VirtualTryOn = ({
     setImage(imageUrl);
     setFile(files[0]);
   };
-  const handleClick = () => {
+  const handleClick = async () => {
     const check = tryAuth.safeParse({ image, file });
     console.log("file,image>>>>>>>>>>>>:",file,image);
-    // go through zod check but typescript still needs check condition ??? weird !
     if (!check.success) {
       const issuse = check.error.issues[0];
       toast.error(issuse.message);
       return;
     }
     if (image === null || file === null) {
-      toast.error("No file selected.");
+      toast.error("Chưa chọn hình");
       return;
     }
     console.log("imageProduct: ", image);
@@ -59,24 +59,11 @@ const VirtualTryOn = ({
     const formData = new FormData();
     formData.append("imageProduct", tryon);
     formData.append("photos", file);
-    const localStore = localStorage.getItem("user");
-    if (localStore === undefined || localStore === null) {
-      toast.error("No token");
-      return;
+    const {type} = await dispatch(fetchApiTryon({ formData: formData}));
+    if(type.search("reject")==-1){
+      toast.success("Tạo hình thử đồ thành công");
     }
-    const token = JSON.parse(localStore).token;
-    dispatch(fetchApiTryon({ formData: formData, token: token }));
   };
-  useEffect(() => {
-    if (!error && url !== null) {
-      console.log(url);
-      toast.success("Generate successfully");
-    }
-    if (error) {
-      toast.error(error);
-      resetTryonState();
-    }
-  }, [error]);
   if (!click) return null;
 
   return (

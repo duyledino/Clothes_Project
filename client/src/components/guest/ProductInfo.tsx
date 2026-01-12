@@ -236,7 +236,7 @@ const ProductInfo = ({
               }}
               inventories={inventories}
             />
-            <TryOnButton tryon={tryon} />
+            {tryon !== undefined && <TryOnButton tryon={tryon} />}
           </div>
           <Guarantee />
         </div>

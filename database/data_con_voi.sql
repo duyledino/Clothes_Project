@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- \restrict ZhHcQ5Y8troXQmeDweWAnDuepZwMKRvpmPwcfMo37RJ8pMacK6PoXZNb98V7L4L
+-- \restrict MaEXSGNdotY7A4b6zxkH50HQf2XNhbNRSIC5Mf6GOOite55VQ6CwdkPdRI4hl1A
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
 
--- Started on 2026-01-09 11:44:29
+-- Started on 2026-01-11 07:46:53
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -394,8 +394,9 @@ ALTER TABLE public._prisma_migrations OWNER TO postgres;
 --
 
 INSERT INTO public."Cart" (cart_id, user_id, create_at, update_at) VALUES ('8a8bf1c0-2d21-4d8c-8acd-455c5c35d1d5', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '2026-01-03 07:30:28.393', '2026-01-03 07:30:28.393');
-INSERT INTO public."Cart" (cart_id, user_id, create_at, update_at) VALUES ('eb86ab74-d570-42da-b864-f07611512b20', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '2025-12-31 03:22:48.499', '2026-01-05 08:56:25.017');
 INSERT INTO public."Cart" (cart_id, user_id, create_at, update_at) VALUES ('120d0f8f-6473-4100-b595-11539510340d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '2026-01-08 14:41:32.773', '2026-01-08 14:44:00.822');
+INSERT INTO public."Cart" (cart_id, user_id, create_at, update_at) VALUES ('08a65ba5-0bd8-4caf-87e5-14ec219a9d2b', 'e2fa8da1-2f41-4864-9515-bd041675a382', '2026-01-09 06:58:19.213', '2026-01-09 06:58:19.213');
+INSERT INTO public."Cart" (cart_id, user_id, create_at, update_at) VALUES ('eb86ab74-d570-42da-b864-f07611512b20', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '2025-12-31 03:22:48.499', '2026-01-09 08:25:49.699');
 
 
 --
@@ -425,6 +426,7 @@ INSERT INTO public."Category" (category_id, category_name) VALUES ('5d5eb64a-43a
 
 INSERT INTO public."Chat" (chat_id, create_at, update_at, user_id_admin, user_id_user) VALUES ('1af01da2-656e-4260-9da3-9d27469d400c', '2026-01-03 07:30:28.681', '2026-01-03 07:30:28.681', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50');
 INSERT INTO public."Chat" (chat_id, create_at, update_at, user_id_admin, user_id_user) VALUES ('afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-08 14:41:32.783', '2026-01-08 14:41:32.783', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d');
+INSERT INTO public."Chat" (chat_id, create_at, update_at, user_id_admin, user_id_user) VALUES ('e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 06:58:19.278', '2026-01-09 06:58:19.278', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', 'e2fa8da1-2f41-4864-9515-bd041675a382');
 
 
 --
@@ -567,6 +569,8 @@ Bạn muốn tôi lấy danh sách sản phẩm Forever ngay bây giờ không? 
 
 Khi bạn gửi yêu cầu, tôi sẽ dùng công cụ getAllProduct để trả lời.', '1af01da2-656e-4260-9da3-9d27469d400c', '2026-01-05 01:06:36.659', 'd0303ba5-3d56-4a2a-ad68-ffd896034345', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
 INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('bạn làm được gì', '1af01da2-656e-4260-9da3-9d27469d400c', '2026-01-05 01:07:54.166', 'c64354c7-7ff7-4294-8fbb-3c68803fae9c', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('chao admin', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:06:27.131', 'ca2bb0a1-9e42-4e1e-a553-8016a0a69ef6', '5e3b2238-bdc9-4147-b722-18ffe18a754d');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('chào anh amdin', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:18:17.604', 'ca611016-41dc-4c98-bedd-4456a1a74d63', 'e2fa8da1-2f41-4864-9515-bd041675a382');
 INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('Hiểu vai trò của bạn: là tư vấn viên Forever khi admin vắng mặt, và chỉ làm việc dựa trên các công cụ được cấp. Dựa trên yêu cầu, bạn có thể làm được những việc sau:
 
 - Lấy danh sách sản phẩm Forever từ cơ sở dữ liệu bằng công cụ getAllProduct.
@@ -785,6 +789,269 @@ INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user
     </div>
   </div>
 </div>', '1af01da2-656e-4260-9da3-9d27469d400c', '2026-01-05 01:15:05.329', '233a9cc1-bd6f-42c7-be1b-33e5d317e05b', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('chao anh admin', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:17:07.692', '3793d2e5-e074-45ba-8ba3-fa6ca922b174', 'e2fa8da1-2f41-4864-9515-bd041675a382');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('<div class="p-4 space-y-6">
+  <!-- Sản phẩm PDT-2be0b43a -->
+  <div class="bg-white rounded-lg shadow p-4 flex items-start">
+    <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767709652/b9gyvovvfwhm9nzu3tgq.png" alt="áo thun cổ dài" class="w-32 h-auto rounded" />
+    <div class="ml-4">
+      <a href="/Collection/PDT-2be0b43a" class="text-xl font-semibold text-gray-800 hover:underline">áo thun cổ dài</a>
+      <p class="mt-1 text-sm text-gray-600">áo thun cổ dài hiphop phong cách BRay</p>
+      <p class="mt-2 font-semibold text-gray-800">Giá: 200000 đ</p>
+      <p class="mt-1 text-sm text-gray-600">Mô tả: áo thun cổ dài hiphop phong cách BRay</p>
+
+      <div class="mt-2">
+        <span class="text-sm font-semibold">Kích thước:</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">XXL</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">XL</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">L</span>
+      </div>
+
+      <div class="mt-2">
+        <span class="text-sm font-semibold">Màu sắc:</span>
+        <span class="inline-flex items-center ml-2">
+          <span class="w-3 h-3 rounded-full" style="background:#252222"></span>
+          <span class="ml-2 text-sm">Đen huyền bí</span>
+        </span>
+      </div>
+
+      <div class="mt-2 text-sm text-gray-600">Danh mục: Nam, Áo</div>
+    </div>
+  </div>
+
+  <!-- Sản phẩm PDT-d9f305fb -->
+  <div class="bg-white rounded-lg shadow p-4 flex items-start">
+    <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767605986/hz88grrd7qncmbbh1sh7.png" alt="Áo phôn" class="w-32 h-auto rounded" />
+    <div class="ml-4">
+      <a href="/Collection/PDT-d9f305fb" class="text-xl font-semibold text-gray-800 hover:underline">Áo phôn</a>
+      <p class="mt-1 text-sm text-gray-600">Aó phôn thời thượng, phong cách</p>
+      <p class="mt-2 font-semibold text-gray-800">Giá: 500000 đ</p>
+      <p class="mt-1 text-sm text-gray-600">Mô tả: Aó phôn thời thượng, phong cách</p>
+
+      <div class="mt-2">
+        <span class="text-sm font-semibold">Kích thước:</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">L</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">M</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">XL</span>
+        <span class="inline-block ml-2 px-2 py-1 text-xs bg-gray-100 rounded">XXL</span>
+      </div>
+
+      <div class="mt-2">
+        <span class="text-sm font-semibold">Màu sắc:</span>
+        <span class="inline-flex items-center ml-2 mr-3">
+          <span class="w-3 h-3 rounded-full" style="background:#252222"></span>
+          <span class="ml-2 text-sm">Đen huyền bí</span>
+        </span>
+        <span class="inline-flex items-center mr-3">
+          <span class="w-3 h-3 rounded-full" style="background:#ce0d0d"></span>
+          <span class="ml-2 text-sm">Đỏ</span>
+        </span>
+        <span class="inline-flex items-center">
+          <span class="w-3 h-3 rounded-full" style="background:#c4e665"></span>
+          <span class="ml-2 text-sm">Chuối</span>
+        </span>
+      </div>
+
+      <div class="mt-2 text-sm text-gray-600">
+        Tồn kho theo màu:
+        <ul class="list-disc pl-5 mt-1">
+          <li>Đen huyền bí - XXL: 15</li>
+          <li>Đen huyền bí - L: 0</li>
+          <li>Đen huyền bí - M: 0</li>
+          <li>Đen huyền bí - XL: 0</li>
+          <li>Đỏ - XXL: 15</li>
+          <li>Đỏ - L: 0</li>
+          <li>Đỏ - M: 0</li>
+          <li>Đỏ - XL: 0</li>
+          <li>Đỏ - XXL: 15</li>
+          <li>Chuối - XXL: 10</li>
+          <li>Chuối - L: 0</li>
+          <li>Chuối - M: 0</li>
+          <li>Chuối - XL: 0</li>
+        </ul>
+      </div>
+
+      <div class="mt-2 text-sm text-gray-600">Danh mục: Áo, Nữ</div>
+    </div>
+  </div>
+</div>', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:06:27.46', '19c871c0-499e-45a3-b95e-b95e39158fcb', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('chào bạn', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:07:20.919', '1d66b397-b6c1-4691-90a4-3f35fa94c250', '5e3b2238-bdc9-4147-b722-18ffe18a754d');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('Chào bạn! Mình là tư vấn viên Forever, đang hỗ trợ khi admin vắng mặt. Mình có thể giúp bạn:
+- Xem danh sách sản phẩm Forever
+- Tìm nhanh theo kích thước, màu sắc, giá
+- Gợi ý sản phẩm phù hợp với nhu cầu
+- Kiểm tra ưu đãi và chương trình khuyến mãi
+
+Mình có thể lấy danh sách sản phẩm từ hệ thống và trình bày cho bạn bằng ngôn ngữ tự nhiên. Bạn muốn xem danh sách sản phẩm ngay không, hay có cần lọc theo kích thước/màu/giá cụ thể nào không?', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:07:20.922', '852f2991-e9ba-4d4b-9575-c9f15637a070', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('tìm sản phẩm', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:08:49.065', '379488c5-a099-4873-9fa6-a2b0037942b4', '5e3b2238-bdc9-4147-b722-18ffe18a754d');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('<div class="p-4 bg-gray-100">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Sản phẩm PDT-2be0b43a -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767709652/b9gyvovvfwhm9nzu3tgq.png" alt="áo thun cổ dài" class="w-32 h-auto rounded" />
+      <h3 class="text-xl font-semibold mt-2">áo thun cổ dài</h3>
+      <p class="text-sm text-gray-600 mt-1">áo thun cổ dài hiphop phong cách BRay</p>
+      <p class="mt-2 font-semibold text-lg">Đơn giá: 200,000 đ</p>
+      <a href="/Collection/PDT-2be0b43a" class="mt-2 inline-block text-blue-600 hover:underline">Xem chi tiết</a>
+
+      <div class="mt-3">
+        <span class="font-semibold">Kích thước:</span>
+        <div class="flex flex-wrap gap-2 mt-1">
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm">L</span>
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm">XL</span>
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm">XXL</span>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">L: còn 15, XL: còn 15, XXL: hết hàng</p>
+      </div>
+
+      <div class="mt-3">
+        <span class="font-semibold">Màu sắc:</span>
+        <div class="flex items-center mt-1">
+          <span class="w-5 h-5 rounded-full" style="background:#252222" title="Đen huyền bí"></span>
+          <span class="ml-2 text-sm text-gray-700">Đen huyền bí</span>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <span class="font-semibold">Danh mục:</span>
+        <span class="ml-2 text-sm text-gray-700">Nam, Áo</span>
+      </div>
+    </div>
+
+    <!-- Sản phẩm PDT-d9f305fb -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767605986/hz88grrd7qncmbbh1sh7.png" alt="Áo phôn" class="w-32 h-auto rounded" />
+      <h3 class="text-xl font-semibold mt-2">Áo phôn</h3>
+      <p class="text-sm text-gray-600 mt-1">Aó phôn thời thượng, phong cách</p>
+      <p class="mt-2 font-semibold text-lg">Đơn giá: 500,000 đ</p>
+      <a href="/Collection/PDT-d9f305fb" class="mt-2 inline-block text-blue-600 hover:underline">Xem chi tiết</a>
+
+      <div class="mt-3">
+        <span class="font-semibold">Kích thước:</span>
+        <div class="mt-1">
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm mr-2">L (0)</span>
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm mr-2">M (0)</span>
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm mr-2">XL (0)</span>
+          <span class="px-2 py-1 bg-gray-100 rounded text-sm">XXL (Có 3 màu: Đen huyền bí 15, Đỏ 15, Chuối 15)</span>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <span class="font-semibold">Màu sắc:</span>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="w-5 h-5 rounded-full" style="background:#252222" title="Đen huyền bí"></span>
+          <span class="w-5 h-5 rounded-full" style="background:#ce0d0d" title="Đỏ"></span>
+          <span class="w-5 h-5 rounded-full" style="background:#c4e665" title="Chuối"></span>
+          <span class="text-sm text-gray-700 ml-2">(Đen huyền bí, Đỏ, Chuối)</span>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <span class="font-semibold">Danh mục:</span>
+        <span class="ml-2 text-sm text-gray-700">Áo, Nữ</span>
+      </div>
+    </div>
+  </div>
+</div>', 'afa21dce-4f68-4e26-b211-6da80a64e48a', '2026-01-09 07:08:49.158', '6abba0ab-93f8-4c79-95ca-7a11274b7852', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('<div class="p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+  <h2 class="text-2xl font-semibold mb-4">Forever. - Gợi ý sản phẩm</h2>
+
+  <!-- Sản phẩm 1 -->
+  <div class="flex items-start space-x-4 mb-6">
+    <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767709652/b9gyvovvfwhm9nzu3tgq.png" alt="áo thun cổ dài" class="w-32 h-auto rounded" />
+    <div class="flex-1">
+      <h3 class="text-xl font-semibold mb-1">
+        <a href="/Collection/PDT-2be0b43a" class="text-blue-600 hover:underline">áo thun cổ dài</a>
+      </h3>
+      <p class="text-sm text-gray-600 mb-1">áo thun cổ dài hiphop phong cách BRay</p>
+      <p class="text-xl font-semibold text-gray-800 mb-2">200,000 ₫</p>
+
+      <div class="flex items-center flex-wrap gap-3 mb-2">
+        <span class="text-sm text-gray-600">Kích thước:</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">XXL</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">XL</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">L</span>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-3 mb-2">
+        <span class="text-sm text-gray-600">Màu sắc:</span>
+        <span class="w-5 h-5 rounded-full border border-gray-300" style="background:#252222" title="Đen huyền bí"></span>
+      </div>
+
+      <p class="text-sm text-gray-600">
+        Tồn kho: L 15, XL 15
+      </p>
+
+      <p class="text-sm text-gray-500 mt-2">
+        Phân loại: Nam, Áo
+      </p>
+    </div>
+  </div>
+
+  <!-- Sản phẩm 2 -->
+  <div class="flex items-start space-x-4 mb-6">
+    <img src="https://res.cloudinary.com/dacofgr3w/image/upload/v1767605986/hz88grrd7qncmbbh1sh7.png" alt="Áo phôn" class="w-32 h-auto rounded" />
+    <div class="flex-1">
+      <h3 class="text-xl font-semibold mb-1">
+        <a href="/Collection/PDT-d9f305fb" class="text-blue-600 hover:underline">Áo phôn</a>
+      </h3>
+      <p class="text-sm text-gray-600 mb-1">Aó phôn thời thượng, phong cách</p>
+      <p class="text-xl font-semibold text-gray-800 mb-2">500,000 ₫</p>
+
+      <div class="flex items-center flex-wrap gap-3 mb-2">
+        <span class="text-sm text-gray-600">Kích thước:</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">L</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">M</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">XL</span>
+        <span class="px-2 py-1 bg-gray-100 rounded text-sm">XXL</span>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-3 mb-2">
+        <span class="text-sm text-gray-600">Màu sắc:</span>
+        <span class="w-5 h-5 rounded-full border border-gray-300" style="background:#252222" title="Đen huyền bí"></span>
+        <span class="w-5 h-5 rounded-full border border-gray-300" style="background:#ce0d0d" title="Đỏ"></span>
+        <span class="w-5 h-5 rounded-full border border-gray-300" style="background:#c4e665" title="Chuối"></span>
+      </div>
+
+      <p class="text-sm text-gray-600">
+        Tồn kho: XXL - Đen huyền bí 15, Đỏ 15, Chuối 10
+      </p>
+
+      <p class="text-sm text-gray-500 mt-2">
+        Phân loại: Áo, Nữ
+      </p>
+    </div>
+  </div>
+</div>', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:17:08.093', 'ae9c152c-9ab1-45d0-ab43-d228ebc1842d', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('Chào bạn! Mình là tư vấn viên Forever, đang hỗ trợ khi admin vắng mặt. Bạn cần mình giúp gì hôm nay?
+
+Bạn có thể lựa chọn:
+- Xem tất cả sản phẩm
+- Lọc theo loại (áo, quần, phụ kiện)
+- Tìm theo size (S/M/L/XL) hoặc theo màu
+- Tìm theo mức giá hoặc đang có khuyến mãi
+- Gợi ý theo phong cách (thoải mái/ăn mặc đi làm/đi chơi, thể thao, trẻ trung)
+- Tư vấn chọn size hoặc cách mix đồ
+- Đặt hàng hoặc hỏi về đổi trả/how ship
+
+Bạn cho mình biết bạn muốn xem cái gì hoặc cho mình ít thông tin về size/màu/ngân sách để mình đề xuất nhé.', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:18:17.698', '6f193064-a52b-4f06-9ef6-14e6e669c6d8', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('bạn làm được gì cho của hàng này', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:18:52.375', 'e304dcb0-6d4c-4c42-b46d-6474a06bbcb6', 'e2fa8da1-2f41-4864-9515-bd041675a382');
+INSERT INTO public."Chat_Message" (content, chat_id, create_at, message_id, user_id) VALUES ('Dưới đây là những gì tôi có thể làm cho cửa hàng Forever khi quản trị viên vắng mặt. Nếu bạn muốn tôi thực hiện bất kỳ thao tác nào với danh mục sản phẩm, tôi sẽ dùng công cụ để lấy dữ liệu và trả lời cụ thể bằng ngôn ngữ tự nhiên.
+
+Khả năng tôi có thể hỗ trợ:
+- Tra cứu và giới thiệu sản phẩm: xem danh sách sản phẩm Forever, mô tả nhanh, chất liệu, màu sắc và giá (khi bạn yêu cầu tôi sẽ lấy từ catalog bằng công cụ).
+- Tư vấn kích thước và chọn món hàng: giải thích bảng size, gợi ý size phù hợp dựa trên số đo người mua và kiểu dáng sản phẩm.
+- Gợi ý phối đồ và phong cách: đề xuất outfit dựa trên loại áo/quần bạn quan tâm (ví dụ: công sở, đi chơi, dạo phố).
+- Hướng dẫn bảo quản và chăm sóc: cách giặt, phơi và bảo quản để sản phẩm bền lâu.
+- Thông tin chương trình khuyến mãi: cập nhật mã giảm giá, chương trình khuyến mãi hiện tại.
+- Hỗ trợ đặt hàng và thanh toán: hướng dẫn các bước đặt hàng, các phương thức thanh toán có thể, và lựa chọn vận chuyển.
+- Theo dõi đơn hàng (nói chung): cập nhật trạng thái đơn hàng khi bạn cung cấp mã đơn hoặc thông tin liên quan.
+- Đổi trả và bảo hành (nếu có): giải đáp điều kiện đổi/trả sản phẩm.
+
+Bạn muốn tôi làm gì ngay bây giờ?
+- Xem danh sách sản phẩm toàn bộ?
+- Hoặc lọc theo kích thước, màu sắc, giá, thể loại (áo, quần, phụ kiện)?
+Nói cho tôi biết tiêu chí, tôi sẽ lấy dữ liệu và trả lời cụ thể cho bạn.', 'e8e5250c-575c-4caf-bafd-6f690703e461', '2026-01-09 07:18:52.378', '4eead164-87ef-4e32-80ad-f5f70f3c15bf', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca');
 
 
 --
@@ -814,11 +1081,11 @@ INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, qua
 INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('164480dc-4d7e-4d1e-9b97-52775fd9927e', 'PDT-d9f305fb', 'XL', '#ce0d0d', 0, '2026-01-05 09:40:01.564', '2026-01-05 09:40:01.571', 0);
 INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('e4e5aafe-c08d-46b2-b614-231c380b2166', 'PDT-d9f305fb', 'XL', '#c4e665', 0, '2026-01-05 09:40:01.564', '2026-01-05 09:40:01.571', 0);
 INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('3152397c-39d4-4e5f-8db1-3d9bc39303e0', 'PDT-2be0b43a', 'XXL', '#252222', 0, '2026-01-06 14:27:35.662', '2026-01-06 14:27:35.686', 0);
-INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('784172a4-484c-4b9c-a4c9-f3d0954f0d5b', 'PDT-d9f305fb', 'XXL', '#c4e665', 10, '2026-01-05 09:41:35.068', '2026-01-08 14:44:06.78', 10);
-INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('b3e3ebc3-cb1f-4430-9912-2e05452b9218', 'PDT-d9f305fb', 'XXL', '#252222', 15, '2026-01-05 09:41:35.068', '2026-01-06 14:28:54.996', 10);
+INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('784172a4-484c-4b9c-a4c9-f3d0954f0d5b', 'PDT-d9f305fb', 'XXL', '#c4e665', 9, '2026-01-05 09:41:35.068', '2026-01-09 08:25:26.388', 10);
+INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('d25f7cf9-b172-405f-a96c-3eaa44a6a4bb', 'PDT-2be0b43a', 'XL', '#252222', 14, '2026-01-06 14:27:35.662', '2026-01-09 08:25:34.701', 10);
+INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('2c48b1ed-c207-4a06-852d-adf8458cc5d7', 'PDT-d9f305fb', 'XXL', '#ce0d0d', 14, '2026-01-05 09:41:35.068', '2026-01-09 08:25:45.534', 10);
+INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('b3e3ebc3-cb1f-4430-9912-2e05452b9218', 'PDT-d9f305fb', 'XXL', '#252222', 14, '2026-01-05 09:41:35.068', '2026-01-09 08:25:52.797', 10);
 INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('64865aff-12dc-49d1-982f-fd86a54c8a67', 'PDT-2be0b43a', 'L', '#252222', 15, '2026-01-06 14:27:35.662', '2026-01-06 14:29:00.376', 10);
-INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('2c48b1ed-c207-4a06-852d-adf8458cc5d7', 'PDT-d9f305fb', 'XXL', '#ce0d0d', 15, '2026-01-05 09:41:35.068', '2026-01-06 14:29:03.277', 10);
-INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, quantity, create_at, update_at, min_quantity) VALUES ('d25f7cf9-b172-405f-a96c-3eaa44a6a4bb', 'PDT-2be0b43a', 'XL', '#252222', 15, '2026-01-06 14:27:35.662', '2026-01-06 14:29:06.993', 10);
 
 
 --
@@ -827,7 +1094,31 @@ INSERT INTO public."Inventory" (inventory_id, product_id, size_id, color_id, qua
 -- Data for Name: Order; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('dbb01009-a70d-4c4c-9c5f-898a683ca3e2', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 2500000, '2026-01-08 14:44:06.621', '2026-01-08 14:44:28.533', 'COD', 'done', 'done', '2026-01-08 14:44:28.532');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('d596d6d3-56e4-46f5-86f6-c8ea03bc1d86', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 400000, '2025-12-22 15:50:54.515', '2025-12-22 15:50:54.515', 'Banking', 'done', 'done', '2025-12-22 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('23d97a62-1aa3-49bc-b510-b194474de129', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 1500000, '2025-12-18 15:50:54.515', '2025-12-18 15:50:54.515', 'COD', 'done', 'done', '2025-12-18 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('341be39c-aac2-4cda-9627-3d7151615929', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 200000, '2025-12-12 15:50:54.515', '2025-12-12 15:50:54.515', 'Banking', 'done', 'done', '2025-12-12 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('328e73a3-cb69-4590-82f0-4fef8801841c', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 2500000, '2025-12-05 15:50:54.515', '2025-12-05 15:50:54.515', 'COD', 'done', 'done', '2025-12-05 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('debeb26e-4a9c-4d1a-ab19-6a69c0b8e171', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 600000, '2025-11-25 15:50:54.515', '2025-11-25 15:50:54.515', 'Banking', 'done', 'done', '2025-11-25 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('31cd6972-8c2f-4279-8b59-bbe1b4b2705d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 500000, '2025-11-05 15:50:54.515', '2025-11-05 15:50:54.515', 'COD', 'done', 'done', '2025-11-05 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('73b4ec1b-79bc-45e2-a742-27b896fd75be', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 1000000, '2025-10-26 15:50:54.515', '2025-10-26 15:50:54.515', 'Banking', 'done', 'done', '2025-10-26 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('43f280aa-0fb4-474c-9b84-390630ec94ab', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 400000, '2025-10-06 15:50:54.515', '2025-10-06 15:50:54.515', 'COD', 'done', 'done', '2025-10-06 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('1cd38b94-ae34-44f5-9f2b-df1329220e8f', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 2000000, '2025-09-06 15:50:54.515', '2025-09-06 15:50:54.515', 'Banking', 'done', 'done', '2025-09-06 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('839f3a35-7a56-44e0-bbfa-dd668ab2251e', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 500000, '2025-08-07 15:50:54.515', '2025-08-07 15:50:54.515', 'COD', 'done', 'done', '2025-08-07 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('a5b15d97-bd8b-41aa-aee0-c6187911c09e', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 800000, '2025-07-08 15:50:54.515', '2025-07-08 15:50:54.515', 'Banking', 'done', 'done', '2025-07-08 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('bcddf4c3-cb12-4ca6-8a41-02ee0c72653e', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', NULL, 500000, '2026-01-09 08:25:52.791', '2026-01-02 00:00:00', 'COD', 'done', 'done', NULL);
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('7722110d-49d3-44f8-ab9f-5ddd3510fc51', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', NULL, 500000, '2026-01-09 08:25:45.526', '2026-01-02 00:00:00', 'COD', 'done', 'done', NULL);
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('5af46bd3-ba2a-4c4b-a5a4-152b67144e43', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', NULL, 500000, '2026-01-09 08:25:26.258', '2026-01-02 00:00:00', 'COD', 'done', 'done', NULL);
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('dbb01009-a70d-4c4c-9c5f-898a683ca3e2', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 2500000, '2026-01-08 14:44:06.621', '2026-01-09 00:00:00', 'COD', 'done', 'done', '2026-01-08 14:44:28.532');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('3c4a6bbd-bf0a-4c41-a054-6c99bdc4156b', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', NULL, 200000, '2026-01-09 08:25:34.694', '2025-12-09 00:00:00', 'COD', 'done', 'done', NULL);
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('e03c285c-6c3b-45a1-83bf-022d5308d9ab', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 1000000, '2026-01-09 15:50:54.515', '2026-01-09 15:50:54.515', 'Banking', 'done', 'done', '2026-01-09 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('4b887282-0767-479e-900d-6d8fe89b2260', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 400000, '2026-01-08 15:50:54.515', '2026-01-08 15:50:54.515', 'COD', 'done', 'done', '2026-01-08 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('7c918c32-227c-4d87-8829-7c2c7e0aa38a', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 200000, '2026-01-07 15:50:54.515', '2026-01-07 15:50:54.515', 'COD', 'done', 'done', '2026-01-07 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('138d001a-0252-45d1-bda4-02560df8ebc6', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 1500000, '2026-01-05 15:50:54.515', '2026-01-05 15:50:54.515', 'Banking', 'done', 'done', '2026-01-05 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('5e778085-b92b-4c3c-924e-2768d177f60d', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 500000, '2026-01-04 15:50:54.515', '2026-01-04 15:50:54.515', 'COD', 'done', 'done', '2026-01-04 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('0131744e-f850-4880-b192-991cc57aed74', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 700000, '2026-01-03 15:50:54.515', '2026-01-03 15:50:54.515', 'Banking', 'done', 'done', '2026-01-03 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('48520f24-a74c-491f-aeb7-061624d9175e', '055be9bc-feae-4cd4-bb9e-a18cd0f65b50', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 200000, '2025-12-30 15:50:54.515', '2025-12-30 15:50:54.515', 'COD', 'done', 'done', '2025-12-30 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('f1a4d58b-6bc8-4130-ac6b-49fdd89dfb7c', 'b8a88f7b-140f-40cc-ad79-82ea6cc043ca', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 1000000, '2025-12-28 15:50:54.515', '2025-12-28 15:50:54.515', 'Banking', 'done', 'done', '2025-12-28 15:50:54.515');
+INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, update_at, method, payment, status, delivered_date) VALUES ('a23574da-677b-417c-9d63-a1c2b920ea5e', '5e3b2238-bdc9-4147-b722-18ffe18a754d', '5e3b2238-bdc9-4147-b722-18ffe18a754d', 500000, '2025-12-25 15:50:54.515', '2025-12-25 15:50:54.515', 'COD', 'done', 'done', '2025-12-25 15:50:54.515');
 
 
 --
@@ -837,6 +1128,31 @@ INSERT INTO public."Order" (order_id, user_id, shipper_id, total, create_at, upd
 --
 
 INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('dbb01009-a70d-4c4c-9c5f-898a683ca3e2', 'PDT-d9f305fb', 'XXL', '#c4e665', 5, 500000, 2500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('5af46bd3-ba2a-4c4b-a5a4-152b67144e43', 'PDT-d9f305fb', 'XXL', '#c4e665', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('3c4a6bbd-bf0a-4c41-a054-6c99bdc4156b', 'PDT-2be0b43a', 'XL', '#252222', 1, 200000, 200000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('7722110d-49d3-44f8-ab9f-5ddd3510fc51', 'PDT-d9f305fb', 'XXL', '#ce0d0d', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('bcddf4c3-cb12-4ca6-8a41-02ee0c72653e', 'PDT-d9f305fb', 'XXL', '#252222', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('e03c285c-6c3b-45a1-83bf-022d5308d9ab', 'PDT-d9f305fb', 'L', '#252222', 2, 500000, 1000000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('4b887282-0767-479e-900d-6d8fe89b2260', 'PDT-2be0b43a', 'M', '#252222', 2, 200000, 400000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('7c918c32-227c-4d87-8829-7c2c7e0aa38a', 'PDT-2be0b43a', 'XL', '#252222', 1, 200000, 200000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('138d001a-0252-45d1-bda4-02560df8ebc6', 'PDT-d9f305fb', 'M', '#ce0d0d', 3, 500000, 1500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('5e778085-b92b-4c3c-924e-2768d177f60d', 'PDT-d9f305fb', 'XL', '#c4e665', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('0131744e-f850-4880-b192-991cc57aed74', 'PDT-d9f305fb', 'L', '#252222', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('0131744e-f850-4880-b192-991cc57aed74', 'PDT-2be0b43a', 'L', '#252222', 1, 200000, 200000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('48520f24-a74c-491f-aeb7-061624d9175e', 'PDT-2be0b43a', 'XXL', '#252222', 1, 200000, 200000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('f1a4d58b-6bc8-4130-ac6b-49fdd89dfb7c', 'PDT-d9f305fb', 'L', '#252222', 2, 500000, 1000000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('a23574da-677b-417c-9d63-a1c2b920ea5e', 'PDT-d9f305fb', 'XXL', '#ce0d0d', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('d596d6d3-56e4-46f5-86f6-c8ea03bc1d86', 'PDT-2be0b43a', 'M', '#252222', 2, 200000, 400000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('23d97a62-1aa3-49bc-b510-b194474de129', 'PDT-d9f305fb', 'L', '#c4e665', 3, 500000, 1500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('341be39c-aac2-4cda-9627-3d7151615929', 'PDT-2be0b43a', 'L', '#252222', 1, 200000, 200000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('328e73a3-cb69-4590-82f0-4fef8801841c', 'PDT-d9f305fb', 'M', '#c4e665', 5, 500000, 2500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('debeb26e-4a9c-4d1a-ab19-6a69c0b8e171', 'PDT-2be0b43a', 'XL', '#252222', 3, 200000, 600000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('31cd6972-8c2f-4279-8b59-bbe1b4b2705d', 'PDT-d9f305fb', 'L', '#252222', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('73b4ec1b-79bc-45e2-a742-27b896fd75be', 'PDT-d9f305fb', 'XL', '#ce0d0d', 2, 500000, 1000000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('43f280aa-0fb4-474c-9b84-390630ec94ab', 'PDT-2be0b43a', 'L', '#252222', 2, 200000, 400000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('1cd38b94-ae34-44f5-9f2b-df1329220e8f', 'PDT-d9f305fb', 'XXL', '#252222', 4, 500000, 2000000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('839f3a35-7a56-44e0-bbfa-dd668ab2251e', 'PDT-d9f305fb', 'M', '#ce0d0d', 1, 500000, 500000);
+INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quantity, price, subtotal) VALUES ('a5b15d97-bd8b-41aa-aee0-c6187911c09e', 'PDT-2be0b43a', 'XXL', '#252222', 4, 200000, 800000);
 
 
 --
@@ -845,8 +1161,8 @@ INSERT INTO public."Order_Detail" (order_id, product_id, size_id, color_id, quan
 -- Data for Name: Product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public."Product" (product_id, product_name, price, description, create_at, update_at, "imageUrl", tryon, status, count) VALUES ('PDT-d9f305fb', 'Áo phôn', 500000, 'Aó phôn thời thượng, phong cách', '2026-01-05 09:40:01.552', '2026-01-05 09:41:35.061', '{https://res.cloudinary.com/dacofgr3w/image/upload/v1767605986/hz88grrd7qncmbbh1sh7.png,https://res.cloudinary.com/dacofgr3w/image/upload/v1767605995/vn9otmed4b6t5knvi5of.png}', 'https://res.cloudinary.com/dacofgr3w/image/upload/v1767606058/hzi26emdguzndjdvchrm.png', 'active', 5);
-INSERT INTO public."Product" (product_id, product_name, price, description, create_at, update_at, "imageUrl", tryon, status, count) VALUES ('PDT-2be0b43a', 'áo thun cổ dài', 200000, 'áo thun cổ dài hiphop phong cách BRay', '2026-01-06 14:27:34.844', '2026-01-06 14:27:34.844', '{https://res.cloudinary.com/dacofgr3w/image/upload/v1767709652/b9gyvovvfwhm9nzu3tgq.png}', 'https://res.cloudinary.com/dacofgr3w/image/upload/v1767709653/pbncxtjzlzu8zz6gfv3m.png', 'active', 0);
+INSERT INTO public."Product" (product_id, product_name, price, description, create_at, update_at, "imageUrl", tryon, status, count) VALUES ('PDT-2be0b43a', 'áo thun cổ dài', 200000, 'áo thun cổ dài hiphop phong cách BRay', '2026-01-06 14:27:34.844', '2026-01-06 14:27:34.844', '{https://res.cloudinary.com/dacofgr3w/image/upload/v1767709652/b9gyvovvfwhm9nzu3tgq.png}', 'https://res.cloudinary.com/dacofgr3w/image/upload/v1767709653/pbncxtjzlzu8zz6gfv3m.png', 'active', 1);
+INSERT INTO public."Product" (product_id, product_name, price, description, create_at, update_at, "imageUrl", tryon, status, count) VALUES ('PDT-d9f305fb', 'Áo phôn', 499000, 'Aó phôn thời thượng, phong cách', '2026-01-05 09:40:01.552', '2026-01-10 15:16:28.588', '{https://res.cloudinary.com/dacofgr3w/image/upload/v1767605986/hz88grrd7qncmbbh1sh7.png,https://res.cloudinary.com/dacofgr3w/image/upload/v1767605995/vn9otmed4b6t5knvi5of.png}', 'https://res.cloudinary.com/dacofgr3w/image/upload/v1767606058/hzi26emdguzndjdvchrm.png', 'active', 8);
 
 
 --
@@ -957,9 +1273,10 @@ INSERT INTO public."Stock_Receipt_Detail" (receipt_id, product_id, size_id, colo
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public."User" (user_id, email, password, name, address, create_at, update_at, role_id, status, phone, forget_password_token, "isVerify", verify_token, expire_forget_password_at, expire_verify_at) VALUES ('055be9bc-feae-4cd4-bb9e-a18cd0f65b50', 'leduy1@gmail.com', '$2b$05$cC.TJiIGgzlczt3bWBq5iu2x2WwKxsXOM68k215VhLJTaLHfkKXwO', 'leduy1', 'khu pho 4, bien hoa, dong nai', '2026-01-03 07:30:28.384', '2026-01-08 04:03:09.26', '680ac91a-f665-4c6b-af45-25987be7c26a', false, '0123456789', NULL, false, '63a6a30b-aa1c-4b01-8fd7-3480f350edf5', NULL, '2026-01-08 04:08:09.259');
 INSERT INTO public."User" (user_id, email, password, name, address, create_at, update_at, role_id, status, phone, forget_password_token, "isVerify", verify_token, expire_forget_password_at, expire_verify_at) VALUES ('b8a88f7b-140f-40cc-ad79-82ea6cc043ca', 'duyledino@gmail.com', '$2b$05$TH0lZvMeIYgFqPNt8Jua/e7JDWvH7RTOqtuJ9vM/c1k1m80.a/EC2', 'duy Admin', '123 khu phố biên hòa, tỉnh đồng nai  ', '2025-12-31 03:22:47.987', '2026-01-08 04:09:27.77', '77f7f007-c810-40f7-8d75-32128651a9ee', true, '0123456789', NULL, true, NULL, NULL, NULL);
 INSERT INTO public."User" (user_id, email, password, name, address, create_at, update_at, role_id, status, phone, forget_password_token, "isVerify", verify_token, expire_forget_password_at, expire_verify_at) VALUES ('5e3b2238-bdc9-4147-b722-18ffe18a754d', 'lekhanhduy.bh@gmail.com', '$2b$05$bKSSA6tsrBWtNKbU01yf7Of2hfPCQKypt0MT6iu2FxemshT1MEY6i', 'duy test', '123 khu phố Hòa Bình ,biên hòa, đồng nai', '2026-01-08 14:41:32.438', '2026-01-08 14:42:26.477', '680ac91a-f665-4c6b-af45-25987be7c26a', true, '0123456789', NULL, true, NULL, NULL, NULL);
+INSERT INTO public."User" (user_id, email, password, name, address, create_at, update_at, role_id, status, phone, forget_password_token, "isVerify", verify_token, expire_forget_password_at, expire_verify_at) VALUES ('e2fa8da1-2f41-4864-9515-bd041675a382', 'duykhanhle.bh@gmail.com', '$2b$05$05O8HdCbPfRdRISIMr48au9I20HzwINF1Iw0yloD91A85UQtYpewO', 'duy fake', '', '2026-01-09 06:58:18.701', '2026-01-09 06:59:02.679', '3c3efca6-38ea-4610-90aa-d550f17b1d20', true, '0987654321', NULL, true, NULL, NULL, NULL);
+INSERT INTO public."User" (user_id, email, password, name, address, create_at, update_at, role_id, status, phone, forget_password_token, "isVerify", verify_token, expire_forget_password_at, expire_verify_at) VALUES ('055be9bc-feae-4cd4-bb9e-a18cd0f65b50', 'leduy1@gmail.com', '$2b$05$cC.TJiIGgzlczt3bWBq5iu2x2WwKxsXOM68k215VhLJTaLHfkKXwO', 'leduy1', 'khu pho 4, bien hoa, dong nai', '2026-01-03 07:30:28.384', '2026-01-10 15:12:42.735', '3c3efca6-38ea-4610-90aa-d550f17b1d20', true, '0123456789', NULL, false, '63a6a30b-aa1c-4b01-8fd7-3480f350edf5', NULL, '2026-01-08 04:08:09.259');
 
 
 --
@@ -1534,11 +1851,11 @@ ALTER TABLE ONLY public."User"
 REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 
 
--- Completed on 2026-01-09 11:44:31
+-- Completed on 2026-01-11 07:46:54
 
 --
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict ZhHcQ5Y8troXQmeDweWAnDuepZwMKRvpmPwcfMo37RJ8pMacK6PoXZNb98V7L4L
+-- \unrestrict MaEXSGNdotY7A4b6zxkH50HQf2XNhbNRSIC5Mf6GOOite55VQ6CwdkPdRI4hl1A
 

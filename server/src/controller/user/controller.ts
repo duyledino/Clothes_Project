@@ -86,7 +86,13 @@ const getAllUser = async (req: Request, res: Response) => {
     },
     take: Number(page) * 10,
   });
-  return res.status(200).json({ users: users });
+  const total = await prisma.user.count({
+    where: {
+      role_id: role_id === "" ? {} : role_id,
+    },
+  });
+  const format_total = Math.ceil(total / 10);
+  return res.status(200).json({ users: users, total: format_total });
 };
 
 const getAUser_Admin = async (req: Request, res: Response) => {
@@ -338,7 +344,7 @@ const updateUser_admin = async (req: Request, res: Response) => {
     name: string;
     role_id: string;
     status: boolean;
-    password: string;
+    password: string|null|undefined;
   };
 
   const exists = await prisma.user.findUnique({
@@ -384,7 +390,7 @@ if (password === "" || password == null) {
   console.log("updated: ", updated);
 
   return res.status(200).json({
-    Message: "Cập nhật thành công",
+    Message: "Cập nhật thông tin người dùng thành công",
     data: updated,
   });
 };

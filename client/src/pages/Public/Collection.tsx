@@ -46,6 +46,7 @@ const Collection = () => {
             setCurrentCategories={setCurrentCategories}
           />
           <Collections
+            setCurrentCategories={setCurrentCategories}
             SearchProduct={SearchProduct}
             currentCategories={currentCategories}
             query={query}

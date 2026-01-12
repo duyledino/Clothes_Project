@@ -17,6 +17,13 @@ const getAllProducts = async (req: Request, res: Response) => {
   const { category, sort } = req.body;
   console.log("category, subcategory, sort: ", category, sort);
   const Category = category.map((item: any) => item.toLowerCase());
+  const categoryConditions = Category.map((catId: string) => ({
+    Product_Category: {
+      some: {
+        category_id: catId, 
+      },
+    },
+  }));
   const products = await prisma.product.findMany({
     select: {
       product_id: true,
@@ -35,7 +42,7 @@ const getAllProducts = async (req: Request, res: Response) => {
         equals: "active",
       },
       AND:[
-        Category.length > 0 ? { Product_Category: { some: { category_id: { in: Category } } } } : {},
+        ...categoryConditions
       ]
     },
     orderBy:
@@ -453,7 +460,11 @@ const findProduct = async (req: Request, res: Response) => {
     },
     where: {
       product_name: {
-        startsWith: `${query.toLowerCase()}`,
+        startsWith: `${query}`,
+        mode: "insensitive",
+      },
+      status: {
+        equals: "active",
       },
     },
   });

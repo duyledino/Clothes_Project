@@ -14,6 +14,7 @@ import { tr } from "zod/v4/locales";
 const initialState: {
   loadingUser: boolean;
   data: userData | null;
+  total: number;
   errorUser: string | null;
   Message: string | null;
   User: user | null;
@@ -25,6 +26,7 @@ const initialState: {
   loadingUser: false,
   data: null,
   errorUser: null,
+  total: 0,
   Message: null,
   User: null,
   AllUser: [],
@@ -77,7 +79,7 @@ export const fetchUpdateUserAdmin = createAsyncThunk(
       role_id,
     }: {
       user_id: string;
-      password: string;
+      password: string | null;
       address: string;
       name: string;
       status: boolean;
@@ -134,7 +136,7 @@ export const fetchGetAllUser = createAsyncThunk(
     try {
       const response = await userService.getAllUser(page, role_id);
       console.log("response.data in userSlice: ", response.users);
-      return response.users;
+      return response;
     } catch (error: any) {
       console.error("error in fetchGetAllUser: ", error);
       const message = error.response?.data?.Message || "Something went wrong";
@@ -283,7 +285,8 @@ const userSlice = createSlice({
       })
       .addCase(fetchGetAllUser.fulfilled, (state, action) => {
         state.loadingUser = false;
-        state.AllUser = action.payload! as userInAdminPanel[];
+        state.AllUser = action.payload.users as userInAdminPanel[];
+        state.total = action.payload.total;
       })
       .addCase(fetchGetAllUser.rejected, (state, action) => {
         state.loadingUser = false;

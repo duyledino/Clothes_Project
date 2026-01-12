@@ -3,7 +3,7 @@ import fs from "fs";
 import vton from "../../config/vton.js";
 import type { Request, Response } from "express";
 import { client } from "@gradio/client";
-
+import "dotenv/config"
 import dns from "node:dns";
 // 👇 ADD THIS LINE IMMEDIATELY.
 // It forces Node to use IPv4 (like 1.1.1.1) instead of IPv6 (like 64:ff9b...)
@@ -80,10 +80,10 @@ const getTryOn = async (req: Request, res: Response) => {
 
 //real
 const getTryOnUsingImage = async (req: Request, res: Response) => {
-  // receive user image and product image (must be in order)
-  const files = req.files as Express.Multer.File[];
-  console.log("files>>>>>>>>>>:", files);
+  const files = req.files as  Express.Multer.File[];
+  console.log("tmp_files>>>>>>>>>>:", files);
   const { imageProduct } = req.body;
+  console.log("files>>>>>>>>>>:", files);
   if (!files || !files[0])
     return res
       .status(400)
@@ -121,21 +121,32 @@ const getTryOnUsingImage = async (req: Request, res: Response) => {
     //   //   0, // random seed
     //   // ]);
     console.log("🚀 Connecting to IDM-VTON (IPv4 Forced)...");
-    const vtonApp = await client("https://yisol-idm-vton.hf.space/", {
-      hf_token: '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',
+    console.log("HuggingFaceToken: ",process.env.HuggingFaceToken);
+    const vtonApp = await client("jallenjia/Change-Clothes-AI", {
+      hf_token: process.env.HuggingFaceToken,
     });
-    console.log("vtonapp: ",vtonApp);
+    // console.log("vtonapp: ",vtonApp);
     console.log("🔮 Generating image...");
 
-    result = await vtonApp.predict("/tryon", [
-      inputHuman,
-      productBlob,
-      "virtual try-on", // 🔄 better than ""
-      true,
-      true,
-      30,
-      0, // random seed
-    ]);
+    result = await vtonApp.predict("/tryon",{
+      dict:inputHuman, 
+				garm_img: productBlob, 		
+		garment_des: "", 		
+		is_checked: true, 		
+		is_checked_crop: true, 		
+		denoise_steps: 20, 		
+		seed: 3, 		
+		category: "dresses",
+    });
+    // , [
+    //   inputHuman,
+    //   productBlob,
+    //   "virtual try-on", // 🔄 better than ""
+    //   true,
+    //   true,
+    //   30,
+    //   0, // random seed
+    // ]);
     console.log("✅ Generated successfully...");
   } catch (error) {
     console.log("failed: ", error);

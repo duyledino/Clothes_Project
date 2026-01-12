@@ -7,18 +7,21 @@ import { Input } from "../ui/input";
 import { useAppDispatch } from "@/hooks/hooks";
 import { setShow } from "@/slice/SearchBarSlice";
 
-const Search = ({setQuery}:{setQuery: React.Dispatch<SetStateAction<string>>}) => {
+const Search = ({setQuery}:{setQuery: React.Dispatch<SetStateAction<string>>
+}) => {
   const dispatch = useAppDispatch();
   const [input, setInput] = useState<string>("");
   useEffect(() => {
-    const handleSearch = () => setQuery(input);
+    const handleSearch = () => {
+      setQuery(input);
+    }
     const idTimeOut = setTimeout(handleSearch, 500);
     return () => clearTimeout(idTimeOut);
   }, [input]);
   // debounce: only call api when user stop typing for 1s
   const handleSubmit = (e: React.FormEvent)=>{
     e.preventDefault();
-    
+    setQuery(input);
   }
   return (
     <form action="" onSubmit={handleSubmit}>
@@ -100,7 +103,10 @@ const Search = ({setQuery}:{setQuery: React.Dispatch<SetStateAction<string>>}) =
         </div>
         <X
           className="text-gray-400 cursor-pointer w-14 h-auto"
-          onClick={() => dispatch(setShow(false))}
+          onClick={() => {
+            setQuery("");
+            dispatch(setShow(false));
+          }}
         />
       </StyledWrapper>
     </form>

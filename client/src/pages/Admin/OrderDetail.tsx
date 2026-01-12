@@ -11,8 +11,9 @@ import {
   type LucideIcon,
   Truck,
   CheckCircle,
+  ArrowLeft,
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Loading from "@/components/ui/Loading";
 import {
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { fetchUserIsShipperByName } from "@/slice/UserSlice";
 import { toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 
 interface orderHistory {
   title: string;
@@ -38,6 +40,7 @@ interface orderHistory {
 
 export default function OrderDetail() {
   const { pathname } = useLocation();
+  const router = useNavigate();
   const dispatch = useAppDispatch();
   const [orderHistory, setOrderHistory] = useState<orderHistory[]>([]);
   const { AllUserShipper, loadingUser } = useAppSelector(
@@ -155,6 +158,12 @@ export default function OrderDetail() {
       {OrderUserAdmin && (
         <div className="min-h-screen bg-[#f6f6f8] text-[#111318]">
           {/* Content */}
+          <Button 
+                  onClick={() => router(-1)}
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
           <main className="p-4 md:p-8 lg:px-12 xl:px-20">
             <div className="mx-auto max-w-7xl space-y-6">
               {/* Title + actions */}

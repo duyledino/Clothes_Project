@@ -16,7 +16,7 @@ export const userService = {
     user_id: string;
     name: string;
     address: string;
-    password: string;
+    password: string | null;
     status: boolean;
     role_id: string;
   }) => {

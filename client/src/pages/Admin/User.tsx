@@ -18,9 +18,11 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { fetchBanUserByAdmin, fetchGetAllUser, fetchGetAUser_Admin, fetchUnbanUserByAdmin, fetchUpdateUserAdmin } from "@/slice/UserSlice";
 import Loading from "@/components/ui/Loading";
 import { fetchGetAllRole } from "@/slice/RoleSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Confirm from "@/components/general/Confirm";
+import { Button } from "@/components/ui/button";
+import Pagination from "@/components/general/Pagination";
 
 function badgeStatus(status: boolean) {
   if (status) return "bg-green-100 text-green-800";
@@ -28,7 +30,7 @@ function badgeStatus(status: boolean) {
 }
 
 export default function Users() {
-  const { AllUser, User_Admin, loadingUser } = useAppSelector(
+  const { AllUser, User_Admin, loadingUser, total } = useAppSelector(
     (state) => state.UserSlice
   );
   const router = useNavigate();
@@ -38,21 +40,18 @@ export default function Users() {
   const [query, setQuery] = useState("");
   const [filterRoleId, setFilterRoleId] = useState<string>("");
   const [selectedId, setSelectedId] = useState<string>("");
+  const [roleUserChange, setRoleUserChange] = useState<string>("");
+  const [page, setPage] = useState(1);
   console.log("roles: ",roles);
   useEffect(() => {
     dispatch(fetchGetAllRole());
-    dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
-  }, [filterRoleId]);
+    dispatch(fetchGetAllUser({page: page,role_id:filterRoleId}));
+  }, [filterRoleId,page]);
   useEffect(() => {
     if (AllUser.length > 0) {
       setSelectedId(AllUser[0].user_id);
     }
   }, [AllUser]);
-  useEffect(() => {
-    if (selectedId !== "") {
-      dispatch(fetchGetAUser_Admin(selectedId));
-    }
-  }, [selectedId]);
   console.log("AllUser: ", AllUser);
   console.log("User_Admin: ", User_Admin);
   const [showDetailMobile, setShowDetailMobile] = useState(false);
@@ -62,9 +61,15 @@ export default function Users() {
       dispatch(fetchGetAUser_Admin(selectedId));
       setShowDetailMobile(true);
     }
+
   }, [selectedId]);
-  
+  useEffect(() => {
+    if (User_Admin) {
+      setRoleUserChange(User_Admin.user_info.role.role_id);
+    }
+  }, [User_Admin]);
   if (!User_Admin) return null;
+
   const handleResetPass = async() => {
     if(User_Admin.user_info.user_id === null 
       || User_Admin.user_info.name === null 
@@ -112,6 +117,25 @@ export default function Users() {
     if(type.search("reject") == -1){
       dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
       dispatch(fetchGetAUser_Admin(user_id));
+    }
+  }
+
+  const saveChange=async()=>{
+    if(!User_Admin){
+      toast.error("Không tìm thấy người dùng");
+      return;
+    }
+    const {type} = await dispatch(fetchUpdateUserAdmin({
+      user_id: User_Admin.user_info.user_id,
+      name: User_Admin.user_info.name,
+      address: User_Admin.user_info.address,
+      password: null,
+      status: User_Admin.user_info.status,
+      role_id: roleUserChange,
+    }));
+    if(type.search("reject") == -1){
+      // toast.success("Cập nhật thông tin người dùng thành công");
+      dispatch(fetchGetAllUser({page: 1,role_id:filterRoleId}));
     }
   }
 
@@ -269,6 +293,7 @@ export default function Users() {
                   </tbody>
                 </table>
               </div>
+              <Pagination page={page} setPage={setPage} total_page={total} />
             </div>
 
             {/* Right panel: detail */}
@@ -377,7 +402,9 @@ export default function Users() {
                       </label>
                       <select
                         className="block w-full rounded-lg border-slate-300 bg-white text-slate-900 py-2 pl-3 pr-8 text-sm focus:border-[#135bec] focus:ring-[#135bec] shadow-sm"
-                        defaultValue={User_Admin.user_info.role.role_id}
+                        // defaultValue={User_Admin.user_info.role.role_id}
+                        onChange={(e) => {setRoleUserChange(e.target.value)}}
+                        value={roleUserChange}
                       >
                         {roles.map((role) => (
                           <option key={role.role_id} value={role.role_id}>
@@ -469,9 +496,11 @@ export default function Users() {
                 </section>
 
                 <div className="pt-4">
-                  <button className="w-full bg-[#135bec] hover:bg-[#135bec]/90 text-white py-3 rounded-lg font-bold text-sm shadow-md transition-all">
+                  <Button 
+                  onClick={saveChange}
+                  className="w-full bg-[#135bec] hover:bg-[#135bec]/90 text-white py-3 rounded-lg font-bold text-sm shadow-md transition-all">
                     Save Changes
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -529,6 +558,7 @@ function OrderCard({
       : "bg-blue-100 text-blue-800";
 
   return (
+    <Link to={`/admin/Orders/${order_id}`}>
     <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
       <div className="flex flex-col">
         <span className="text-sm font-bold text-slate-900">
@@ -554,6 +584,7 @@ function OrderCard({
         </span>
       </div>
     </div>
+    </Link>
   );
 }
 
